@@ -1,0 +1,398 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Gamepad2, 
+  Monitor, 
+  Utensils, 
+  ShoppingCart, 
+  Trash2,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
+
+const Toast = ({ message, type = 'success', onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-down w-[90%] max-w-sm">
+      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.8)] text-sm font-bold border ${
+        type === 'success' 
+          ? 'bg-[#1A1025] text-[#FFD700] border-[#7B2CBF] shadow-[#7B2CBF]/30' 
+          : 'bg-red-950 text-white border-red-500 shadow-red-500/30'
+      }`}>
+        {type === 'success' ? <CheckCircle2 size={20} className="text-[#7B2CBF]" /> : <AlertCircle size={20} className="text-red-400" />}
+        {message}
+      </div>
+    </div>
+  );
+};
+
+export default function ArcadeZoneApp() {
+  const [activeTab, setActiveTab] = useState('menu');
+  const [cart, setCart] = useState([]);
+  const [tokens, setTokens] = useState(0);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (msg, type = 'success') => {
+    setToastMessage({ msg, type });
+  };
+
+  const MenuTab = () => {
+    const menuItems = [
+      { id: 1, name: "Combo Power Up", desc: "Burguer Duplo + Fritas + Refri", price: 35.90, icon: "🍔" },
+      { id: 2, name: "Mascote Box", desc: "Acompanha o Mascote de Cristal Roxo exclusivo!", price: 49.90, icon: "👾", highlight: true },
+      { id: 3, name: "Neon Fries", desc: "Batatas rústicas com cheddar e bacon", price: 18.90, icon: "🍟" },
+    ];
+
+    const handleAddToCart = (item) => {
+      setCart([...cart, { ...item, cartId: Date.now() + Math.random() }]);
+      showToast(`${item.name} adicionado ao carrinho!`);
+    };
+
+    return (
+      <div className="space-y-4 pb-24 animate-fade-in-up">
+        <h2 className="text-[#FFD700] text-2xl font-black italic tracking-wide mb-6 drop-shadow-[0_0_8px_rgba(255,215,0,0.4)]">
+          DESTRAVE SEU SABOR
+        </h2>
+        
+        <div className="space-y-4">
+          {menuItems.map((item) => (
+            <div key={item.id} className={`p-4 rounded-2xl flex items-center justify-between transition-all ${
+              item.highlight 
+                ? 'bg-[#1A1025] border-2 border-[#7B2CBF] shadow-[0_0_15px_rgba(123,44,191,0.4)]' 
+                : 'bg-[#1A1025] border border-[#7B2CBF]/30'
+            }`}>
+              <div className="flex items-center gap-4">
+                <div className={`text-4xl p-3 rounded-xl bg-[#0A0A0A] border border-[#7B2CBF]/50 ${item.highlight ? 'animate-pulse' : ''}`}>
+                  {item.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-lg">{item.name}</h3>
+                  <p className="text-gray-400 text-xs mt-1 max-w-[180px]">{item.desc}</p>
+                  <div className="text-[#FFD700] font-black mt-2">
+                    R$ {item.price.toFixed(2).replace('.', ',')}
+                  </div>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => handleAddToCart(item)}
+                className="bg-[#7B2CBF] hover:bg-[#5a1e8e] text-white p-3 rounded-xl font-black transition-colors shadow-[0_4px_10px_rgba(123,44,191,0.5)] active:scale-95"
+              >
+                +
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const LanHouseTab = () => {
+    const pcs = ['PC 01 Pro', 'PC 02 Pro', 'PC 03 Standard', 'PC 04 Standard'];
+    const times = ['14:00', '15:00', '16:00', '18:00', '20:00'];
+    
+    const [selectedPC, setSelectedPC] = useState(null);
+    const [selectedTime, setSelectedTime] = useState(null);
+
+    const handleReserve = () => {
+      if (!selectedPC || !selectedTime) {
+        showToast('Selecione uma máquina e um horário!', 'error');
+        return;
+      }
+      showToast(`Reserva confirmada: ${selectedPC} às ${selectedTime}!`);
+      setSelectedPC(null);
+      setSelectedTime(null);
+    };
+
+    return (
+      <div className="space-y-6 pb-24 animate-fade-in-up">
+        <div>
+          <h2 className="text-[#FFD700] text-2xl font-black italic tracking-wide drop-shadow-[0_0_8px_rgba(255,215,0,0.4)]">
+            LAN HOUSE
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">Escolha seu setup e domine o jogo.</p>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-white font-bold uppercase tracking-wider text-sm">1. Selecione a Máquina</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {pcs.map((pc) => (
+              <button
+                key={pc}
+                onClick={() => setSelectedPC(pc)}
+                className={`p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-all border-2 ${
+                  selectedPC === pc 
+                    ? 'bg-[#7B2CBF]/20 border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.3)] text-[#FFD700]' 
+                    : 'bg-[#1A1025] border-[#7B2CBF]/30 text-gray-300 hover:border-[#7B2CBF]'
+                }`}
+              >
+                <Monitor size={32} className={selectedPC === pc ? 'text-[#FFD700]' : 'text-[#7B2CBF]'} />
+                <span className="text-sm font-bold">{pc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-white font-bold uppercase tracking-wider text-sm">2. Selecione o Horário</h3>
+          <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar">
+            {times.map((time) => (
+              <button
+                key={time}
+                onClick={() => setSelectedTime(time)}
+                className={`px-6 py-3 rounded-full font-bold whitespace-nowrap transition-all border ${
+                  selectedTime === time
+                    ? 'bg-[#FFD700] text-[#0A0A0A] border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.5)]'
+                    : 'bg-[#1A1025] text-gray-300 border-[#7B2CBF] hover:bg-[#7B2CBF]/20'
+                }`}
+              >
+                {time}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button 
+          onClick={handleReserve}
+          className="w-full bg-gradient-to-r from-[#7B2CBF] to-[#5a1e8e] text-white font-black text-lg py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(123,44,191,0.6)] active:scale-95 transition-transform"
+        >
+          Confirmar Reserva
+        </button>
+      </div>
+    );
+  };
+
+  const ArcadeTab = () => {
+    const packages = [
+      { qty: 10, price: 15.00, bonus: 0 },
+      { qty: 25, price: 30.00, bonus: 2 },
+      { qty: 50, price: 50.00, bonus: 10, highlight: true },
+    ];
+
+    const handleBuyTokens = (pkg) => {
+      const totalGained = pkg.qty + pkg.bonus;
+      setTokens(prev => prev + totalGained);
+      showToast(`+${totalGained} fichas adicionadas à sua conta!`);
+    };
+
+    return (
+      <div className="space-y-6 pb-24 animate-fade-in-up">
+        <div className="bg-gradient-to-br from-[#1A1025] to-[#7B2CBF]/40 p-8 rounded-3xl border border-[#7B2CBF] text-center shadow-[0_0_30px_rgba(123,44,191,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <Gamepad2 size={100} />
+          </div>
+          <h2 className="text-gray-300 font-bold uppercase tracking-widest text-sm mb-2 relative z-10">Saldo de Fichas</h2>
+          <div className="text-6xl font-black text-[#FFD700] drop-shadow-[0_0_15px_rgba(255,215,0,0.6)] relative z-10">
+            {tokens}
+          </div>
+          <p className="text-gray-400 text-xs mt-2 relative z-10">Pronto para jogar</p>
+        </div>
+
+        <div>
+          <h3 className="text-white font-bold uppercase tracking-wider text-sm mb-4">Recarregar Fichas</h3>
+          <div className="space-y-3">
+            {packages.map((pkg, idx) => (
+              <div key={idx} className={`flex items-center justify-between p-4 rounded-xl border ${
+                pkg.highlight ? 'bg-[#1A1025] border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.15)]' : 'bg-[#1A1025] border-[#7B2CBF]/30'
+              }`}>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-black text-white">{pkg.qty}</span>
+                    <span className="text-gray-400">Fichas</span>
+                  </div>
+                  {pkg.bonus > 0 && (
+                    <div className="text-[#FFD700] text-xs font-bold mt-1 uppercase">
+                      + {pkg.bonus} Fichas Grátis!
+                    </div>
+                  )}
+                </div>
+                <button 
+                  onClick={() => handleBuyTokens(pkg)}
+                  className={`px-5 py-2 rounded-lg font-black transition-all active:scale-95 ${
+                    pkg.highlight 
+                      ? 'bg-[#FFD700] text-[#0A0A0A] hover:bg-[#e5c100]' 
+                      : 'bg-transparent border-2 border-[#7B2CBF] text-[#7B2CBF] hover:bg-[#7B2CBF]/20'
+                  }`}
+                >
+                  R$ {pkg.price.toFixed(2).replace('.', ',')}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const CartTab = () => {
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+    const removeFromCart = (idToRemove) => {
+      setCart(cart.filter(item => item.cartId !== idToRemove));
+    };
+
+    const handleCheckout = () => {
+      if (cart.length === 0) return;
+      showToast('Pedido finalizado com sucesso! Preparando seus itens...');
+      setCart([]);
+    };
+
+    return (
+      <div className="space-y-6 pb-24 animate-fade-in-up">
+        <h2 className="text-[#FFD700] text-2xl font-black italic tracking-wide drop-shadow-[0_0_8px_rgba(255,215,0,0.4)]">
+          CARRINHO
+        </h2>
+
+        {cart.length === 0 ? (
+          <div className="bg-[#1A1025] border border-[#7B2CBF]/30 rounded-2xl p-10 text-center flex flex-col items-center gap-4">
+            <ShoppingCart size={48} className="text-gray-600" />
+            <p className="text-gray-400 font-medium">Seu carrinho está vazio.</p>
+            <button 
+              onClick={() => setActiveTab('menu')}
+              className="text-[#7B2CBF] font-bold underline mt-2"
+            >
+              Ir para o Menu
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {cart.map((item) => (
+                <div key={item.cartId} className="bg-[#1A1025] border border-[#7B2CBF]/30 p-4 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{item.icon}</span>
+                    <div>
+                      <h4 className="font-bold text-white text-sm">{item.name}</h4>
+                      <div className="text-[#FFD700] font-bold text-xs mt-1">R$ {item.price.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => removeFromCart(item.cartId)}
+                    className="text-red-400 hover:text-red-300 p-2 bg-red-400/10 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-[#1A1025] border-t-2 border-[#7B2CBF] p-4 rounded-xl mt-6">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-300 uppercase tracking-widest text-sm font-bold">Total</span>
+                <span className="text-2xl font-black text-[#FFD700]">R$ {total.toFixed(2).replace('.', ',')}</span>
+              </div>
+              <button 
+                onClick={handleCheckout}
+                className="w-full bg-[#FFD700] text-[#0A0A0A] font-black text-lg py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(255,215,0,0.4)] active:scale-95 transition-transform"
+              >
+                Finalizar Pedido
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-sans selection:bg-[#7B2CBF]/40 max-w-md mx-auto relative overflow-hidden shadow-2xl">
+      
+      {toastMessage && (
+        <Toast message={toastMessage.msg} type={toastMessage.type} onClose={() => setToastMessage(null)} />
+      )}
+
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-[#1A1025]/90 backdrop-blur-md border-b-2 border-[#7B2CBF] p-4 flex justify-between items-center shadow-[0_4px_20px_rgba(123,44,191,0.2)]">
+        <h1 className="m-0 text-xl font-black italic tracking-wider flex items-center gap-1">
+          <span className="text-[#7B2CBF] drop-shadow-[0_0_5px_rgba(123,44,191,0.8)]">A</span>
+          <span className="text-[#FFD700] drop-shadow-[0_0_5px_rgba(255,215,0,0.8)]">Z</span>
+          <span className="ml-1 text-white">ARCADE ZONE</span>
+        </h1>
+        <div className="bg-[#0A0A0A] border border-[#7B2CBF] px-3 py-1.5 rounded-full flex items-center gap-2 shadow-[0_0_10px_rgba(123,44,191,0.3)] cursor-pointer" onClick={() => setActiveTab('arcade')}>
+          <span className="text-sm">👾</span>
+          <span className="font-black text-[#FFD700] text-sm">{tokens}</span>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="p-4 min-h-[calc(100vh-140px)]">
+        {activeTab === 'menu' && <MenuTab />}
+        {activeTab === 'lanhouse' && <LanHouseTab />}
+        {activeTab === 'arcade' && <ArcadeTab />}
+        {activeTab === 'cart' && <CartTab />}
+      </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 w-full max-w-md bg-[#1A1025] border-t border-[#7B2CBF]/50 flex justify-around items-center p-3 z-40 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] pb-safe">
+        {[
+          { id: 'menu', label: 'Menu', icon: Utensils },
+          { id: 'lanhouse', label: 'Lan House', icon: Monitor },
+          { id: 'arcade', label: 'Arcade', icon: Gamepad2 },
+          { id: 'cart', label: 'Carrinho', icon: ShoppingCart, badge: cart.length }
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className="relative flex flex-col items-center justify-center w-16 h-12 transition-all"
+            >
+              <div className={`${isActive ? 'text-[#FFD700] -translate-y-1' : 'text-gray-500'} transition-all duration-300 relative`}>
+                <tab.icon size={22} className={isActive ? 'drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]' : ''} />
+                
+                {/* Badge para o carrinho */}
+                {tab.badge > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg border border-[#1A1025]">
+                    {tab.badge}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[10px] font-bold transition-all duration-300 ${
+                isActive ? 'text-[#FFD700] opacity-100' : 'text-gray-500 opacity-0 absolute bottom-0 translate-y-4'
+              }`}>
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Estilos Globais Auxiliares */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fade-in-up {
+          0% { opacity: 0; transform: translateY(15px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-in-down {
+          0% { opacity: 0; transform: translate(-50%, -20px); }
+          100% { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-fade-in-down {
+          animation: fade-in-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .pb-safe {
+          padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #0A0A0A;
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #7B2CBF;
+          border-radius: 4px;
+        }
+      `}} />
+    </div>
+  );
+}
