@@ -18,14 +18,8 @@
         .toast.show { transform: translateX(0); }
         .wheel-spin { transition: transform 4s cubic-bezier(0.15, 0.9, 0.15, 1); }
         
-        /* Animação e estilo para botões clicáveis */
-        button, a, .clickable {
-            transition: transform 0.1s ease, filter 0.1s ease;
-        }
-        button:active, a:active, .clickable:active {
-            transform: scale(0.93) !important;
-            filter: brightness(1.2);
-        }
+        button, a, .clickable { transition: transform 0.1s ease, filter 0.1s ease; }
+        button:active, a:active, .clickable:active { transform: scale(0.93) !important; filter: brightness(1.2); }
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden pb-24">
@@ -41,17 +35,18 @@
         <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative">
             <button onclick="closeRouletteModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase tracking-wider">🎰 ROLETA DA SORTE</h3>
-            <p class="text-xs text-zinc-400">Gire a roleta e ganhe um bônus para utilizar no seu pedido!</p>
+            <p class="text-xs text-zinc-400">Gire a roleta e tente a sorte para ganhar prêmios!</p>
             
-            <div class="relative w-48 h-48 mx-auto my-4 flex items-center justify-center">
-                <div class="absolute -top-2 z-10 text-yellow-400 text-2xl font-bold">▼</div>
-                <div id="roulette-wheel" class="w-full h-full rounded-full border-4 border-yellow-500/50 bg-gradient-to-tr from-purple-900 via-indigo-900 to-zinc-900 flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(234,179,8,0.2)]">
-                    🎁
+            <div class="relative w-52 h-52 mx-auto my-3 flex items-center justify-center">
+                <div class="absolute -top-3 z-20 text-yellow-400 text-3xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">▼</div>
+                <div id="roulette-wheel" class="w-full h-full rounded-full border-4 border-yellow-500/60 bg-gradient-to-tr from-purple-950 via-indigo-900 to-zinc-950 flex flex-col items-center justify-center text-center p-4 shadow-[0_0_35px_rgba(234,179,8,0.25)] transition-transform">
+                    <span id="wheel-display-icon" class="text-5xl mb-1">🎰</span>
+                    <span id="wheel-display-text" class="text-xs font-black text-yellow-300 uppercase tracking-wider">Clique para Girar!</span>
                 </div>
             </div>
 
-            <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black py-3 rounded-xl uppercase text-xs tracking-wider">
-                GIRAR AGORA!
+            <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black py-3.5 rounded-xl uppercase text-xs tracking-wider shadow-lg">
+                GIRAR A ROLETA!
             </button>
         </div>
     </div>
@@ -88,7 +83,7 @@
             </div>
 
             <div class="text-left bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-[11px] text-zinc-400">
-                💡 Faça o Pix do valor exato e apresente o comprovante no balcão para libertar o seu pedido!
+                💡 Faça o Pix do valor exato e apresente o comprovante no balcão para retirar seus itens/brindes!
             </div>
 
             <button onclick="confirmPaymentAndClear()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-black py-3.5 rounded-xl uppercase tracking-wider text-xs">
@@ -106,14 +101,12 @@
             </div>
             
             <div class="flex items-center gap-2">
-                <!-- Botão Instagram -->
-                <a href="https://www.instagram.com/arcade_zoneoficial" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/40 text-pink-400 hover:text-white p-2 rounded-full transition-all shadow-[0_0_10px_rgba(236,72,153,0.2)] flex items-center justify-center">
+                <a href="https://www.instagram.com/arcade_zoneoficial" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/40 text-pink-400 hover:text-white p-2 rounded-full transition-all flex items-center justify-center">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                     </svg>
                 </a>
 
-                <!-- Botão Roleta -->
                 <button onclick="openRouletteModal()" class="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/40 text-yellow-400 px-2.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1 shadow-[0_0_10px_rgba(234,179,8,0.2)]">
                     <span>🎰</span>
                     <span class="hidden sm:inline">Roleta</span>
@@ -134,17 +127,17 @@
                 <span class="text-lg">🍔</span>
                 <span class="text-[10px] font-bold">Lanches</span>
             </button>
-            <button onclick="changeTab('custom')" id="nav-custom" class="nav-btn flex flex-col items-center p-2 rounded-xl transition-all opacity-50 text-pink-400">
-                <span class="text-lg">🛠️</span>
-                <span class="text-[10px] font-bold">Monte o Seu</span>
-            </button>
             <button onclick="changeTab('lan')" id="nav-lan" class="nav-btn flex flex-col items-center p-2 rounded-xl transition-all opacity-50 text-purple-400">
                 <span class="text-lg">🖥️</span>
-                <span class="text-[10px] font-bold">Lan House</span>
+                <span class="text-[10px] font-bold">Lan</span>
             </button>
             <button onclick="changeTab('arcade')" id="nav-arcade" class="nav-btn flex flex-col items-center p-2 rounded-xl transition-all opacity-50 text-yellow-400">
                 <span class="text-lg">🕹️</span>
                 <span class="text-[10px] font-bold">Fichas</span>
+            </button>
+            <button onclick="changeTab('games')" id="nav-games" class="nav-btn flex flex-col items-center p-2 rounded-xl transition-all opacity-50 text-pink-400">
+                <span class="text-lg">🎮</span>
+                <span class="text-[10px] font-bold">Games</span>
             </button>
             <button onclick="changeTab('cart')" id="nav-cart" class="nav-btn flex flex-col items-center p-2 rounded-xl transition-all opacity-50 text-emerald-400 relative">
                 <span class="text-lg">🛒</span>
@@ -161,7 +154,7 @@
         <div id="tpl-menu" class="space-y-4">
             <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar text-xs font-bold" id="menu-categories">
                 <button onclick="filterMenu('all')" class="cat-btn active bg-cyan-500 text-black px-4 py-2 rounded-xl transition-all flex-shrink-0">Todos</button>
-                <button onclick="filterMenu('combos')" class="cat-btn bg-zinc-900 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-xl transition-all flex-shrink-0">🔥 Combos</button>
+                <button onclick="filterMenu('combos')" class="cat-btn bg-zinc-900 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-xl transition-all flex-shrink-0">🔥 Combos & Brindes</button>
                 <button onclick="filterMenu('burgers')" class="cat-btn bg-zinc-900 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-xl transition-all flex-shrink-0">🍔 Burgers</button>
                 <button onclick="filterMenu('sides')" class="cat-btn bg-zinc-900 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-xl transition-all flex-shrink-0">🍟 Porções</button>
                 <button onclick="filterMenu('drinks')" class="cat-btn bg-zinc-900 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-xl transition-all flex-shrink-0">🥤 Bebidas</button>
@@ -169,69 +162,35 @@
             <div id="menu-list" class="space-y-3"></div>
         </div>
 
-        <!-- Aba Monte o Seu Burguer -->
-        <div id="tpl-custom" class="space-y-5">
-            <div class="bg-gradient-to-r from-pink-950/40 to-purple-950/30 p-4 rounded-2xl border border-pink-500/30">
-                <h2 class="text-lg font-black text-pink-400">🛠️ MONTE SEU BURGUER GAMER</h2>
-                <p class="text-xs text-zinc-400">Crie o seu combo exclusivo com os ingredientes que mais gosta!</p>
+        <!-- Aba Minigames estilo Pou -->
+        <div id="tpl-games" class="space-y-4">
+            <div class="bg-gradient-to-r from-purple-950/50 to-pink-950/40 p-4 rounded-2xl border border-purple-500/30 text-center">
+                <h2 class="text-base font-black text-purple-300">🎮 DESAFIE O MASCOTE DE CRISTAL</h2>
+                <p class="text-[11px] text-zinc-400 mt-0.5">Use o Teclado no PC (Setas/A-D/Espaço) ou Botões no Telemóvel!</p>
             </div>
 
-            <div class="space-y-3 text-xs font-bold">
-                <div>
-                    <label class="block text-zinc-400 mb-1">1. Escolha o Pão:</label>
-                    <select id="custom-bread" onchange="calcCustomPrice()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200">
-                        <option value="6.00">Pão Brioche Tradicional (R$ 6,00)</option>
-                        <option value="8.00">Pão Australiano Tostado na Manteiga (R$ 8,00)</option>
-                        <option value="7.00">Pão de Gergelim Retro (R$ 7,00)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-zinc-400 mb-1">2. Carne / Blend:</label>
-                    <select id="custom-meat" onchange="calcCustomPrice()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200">
-                        <option value="12.00">1x Blend Bovino 160g (R$ 12,00)</option>
-                        <option value="20.00">2x Smash Burger 90g (R$ 20,00)</option>
-                        <option value="14.00">1x Hambúrguer de Frango Empanado (R$ 14,00)</option>
-                        <option value="12.00">1x Blend Veggie Cogumelos (R$ 12,00)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-zinc-400 mb-1">3. Queijo Base:</label>
-                    <select id="custom-cheese" onchange="calcCustomPrice()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200">
-                        <option value="5.00">Cheddar Cremoso Fatiado (R$ 5,00)</option>
-                        <option value="5.00">Queijo Prato Derretido (R$ 5,00)</option>
-                        <option value="7.00">Double Mozzarella (R$ 7,00)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-zinc-400 mb-1">4. Adicionais Exclusivos:</label>
-                    <div class="grid grid-cols-2 gap-2 text-zinc-300">
-                        <label class="flex items-center gap-2 bg-zinc-900 p-2 rounded-xl border border-zinc-800">
-                            <input type="checkbox" value="4.00" onchange="calcCustomPrice()" class="custom-extra"> Bacon Crocante (+R$4)
-                        </label>
-                        <label class="flex items-center gap-2 bg-zinc-900 p-2 rounded-xl border border-zinc-800">
-                            <input type="checkbox" value="3.00" onchange="calcCustomPrice()" class="custom-extra"> Cebola Caramelizada (+R$3)
-                        </label>
-                        <label class="flex items-center gap-2 bg-zinc-900 p-2 rounded-xl border border-zinc-800">
-                            <input type="checkbox" value="2.50" onchange="calcCustomPrice()" class="custom-extra"> Salada Verde + Tomate (+R$2.50)
-                        </label>
-                        <label class="flex items-center gap-2 bg-zinc-900 p-2 rounded-xl border border-zinc-800">
-                            <input type="checkbox" value="3.00" onchange="calcCustomPrice()" class="custom-extra"> Maionese Verde (+R$3)
-                        </label>
-                    </div>
+            <div class="bg-zinc-900 border border-zinc-800 p-2.5 rounded-2xl flex items-center justify-between">
+                <span class="text-xs font-bold text-zinc-400">Dificuldade:</span>
+                <div class="flex gap-1">
+                    <button onclick="setDifficulty('easy')" id="diff-easy" class="diff-btn bg-green-500/20 border border-green-500 text-green-400 px-3 py-1 rounded-xl text-xs font-bold">Fácil</button>
+                    <button onclick="setDifficulty('normal')" id="diff-normal" class="diff-btn bg-zinc-800 border border-zinc-700 text-zinc-400 px-3 py-1 rounded-xl text-xs font-bold">Normal</button>
+                    <button onclick="setDifficulty('hard')" id="diff-hard" class="diff-btn bg-zinc-800 border border-zinc-700 text-zinc-400 px-3 py-1 rounded-xl text-xs font-bold">Difícil</button>
                 </div>
             </div>
 
-            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex items-center justify-between">
-                <div>
-                    <span class="text-[10px] text-zinc-500 uppercase font-bold block">Preço Total do Burguer</span>
-                    <span id="custom-total" class="text-xl font-black text-pink-400">R$ 23,00</span>
-                </div>
-                <button onclick="addCustomToCart()" class="bg-pink-500 hover:bg-pink-400 text-black font-black text-xs px-4 py-3 rounded-xl uppercase">
-                    Adicionar ao Pedido
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="initVolleyGame()" class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl font-bold text-xs text-purple-300 hover:border-purple-500 flex flex-col items-center gap-1">
+                    <span class="text-2xl">🏐</span>
+                    <span>Pou Vôlei Arcade</span>
                 </button>
+                <button onclick="initPenaltyGame()" class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl font-bold text-xs text-pink-300 hover:border-pink-500 flex flex-col items-center gap-1">
+                    <span class="text-2xl">⚽</span>
+                    <span>Pênalti do Mascote</span>
+                </button>
+            </div>
+
+            <div id="game-arena" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 text-center min-h-[250px] flex flex-col items-center justify-center relative overflow-hidden">
+                <p class="text-xs text-zinc-500">Escolha um jogo acima para desafiar o Mascote Roxo!</p>
             </div>
         </div>
 
@@ -239,27 +198,42 @@
         <div id="tpl-lan" class="space-y-5">
             <div class="bg-gradient-to-r from-purple-950/40 to-indigo-950/30 p-4 rounded-2xl border border-purple-500/30">
                 <h2 class="text-lg font-black text-purple-300">🖥️ MAPA DA ARENA GAMER</h2>
-                <p class="text-xs text-purple-200/70">Escolha a sua estação e garanta o seu lugar!</p>
+                <p class="text-xs text-purple-200/70">Escolha a sua estação, console ou simulador!</p>
             </div>
 
             <div class="space-y-2">
-                <h3 class="text-xs font-bold uppercase text-zinc-400">1. Selecione o PC no Mapa:</h3>
-                <div class="grid grid-cols-4 gap-2" id="seat-map">
-                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-center hover:border-purple-500 transition-all" data-seat="PC 01 - RTX 4070">
-                        <div class="text-lg">🖥️</div>
-                        <div class="text-[10px] font-bold mt-1 text-zinc-300">PC 01</div>
+                <h3 class="text-xs font-bold uppercase text-zinc-400">1. Selecione o Equipamento:</h3>
+                <div class="grid grid-cols-2 gap-2" id="seat-map">
+                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC Pro RTX 4070">
+                        <div>
+                            <div class="text-xs font-bold text-zinc-200">🖥️ PC Pro</div>
+                            <div class="text-[10px] text-zinc-500">RTX 4070 + 240Hz</div>
+                        </div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 12/h</span>
                     </button>
-                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-center hover:border-purple-500 transition-all" data-seat="PC 02 - RTX 4070">
-                        <div class="text-lg">🖥️</div>
-                        <div class="text-[10px] font-bold mt-1 text-zinc-300">PC 02</div>
+
+                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="VIP Pod Streamer">
+                        <div>
+                            <div class="text-xs font-bold text-purple-300">🎙️ VIP Streamer</div>
+                            <div class="text-[10px] text-zinc-500">Cam 4K + Mic Studio</div>
+                        </div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 18/h</span>
                     </button>
-                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-center hover:border-purple-500 transition-all" data-seat="PC 03 - VIP Streamer">
-                        <div class="text-lg">🎙️</div>
-                        <div class="text-[10px] font-bold mt-1 text-purple-400">VIP 03</div>
+
+                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="Console Zone PS5">
+                        <div>
+                            <div class="text-xs font-bold text-blue-300">🎮 Console PS5</div>
+                            <div class="text-[10px] text-zinc-500">Sofá + TV 4K</div>
+                        </div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 15/h</span>
                     </button>
-                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-center hover:border-purple-500 transition-all" data-seat="PC 04 - VIP Streamer">
-                        <div class="text-lg">🎙️</div>
-                        <div class="text-[10px] font-bold mt-1 text-purple-400">VIP 04</div>
+
+                    <button class="seat-btn bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="Cockpit Simulador">
+                        <div>
+                            <div class="text-xs font-bold text-yellow-300">🏎️ Cockpit Corrida</div>
+                            <div class="text-[10px] text-zinc-500">Volante Direct Drive</div>
+                        </div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 20/h</span>
                     </button>
                 </div>
             </div>
@@ -267,14 +241,14 @@
             <div class="space-y-2">
                 <h3 class="text-xs font-bold uppercase text-zinc-400">2. Tempo de Jogo:</h3>
                 <div class="grid grid-cols-3 gap-2" id="lan-hours">
-                    <button class="hour-btn bg-zinc-900 border border-zinc-800 py-2.5 rounded-xl text-xs font-bold text-zinc-300 hover:border-purple-500" data-hours="1" data-price="12.00">1 Hora (R$ 12)</button>
-                    <button class="hour-btn bg-zinc-900 border border-zinc-800 py-2.5 rounded-xl text-xs font-bold text-zinc-300 hover:border-purple-500" data-hours="2" data-price="22.00">2 Horas (R$ 22)</button>
-                    <button class="hour-btn bg-zinc-900 border border-zinc-800 py-2.5 rounded-xl text-xs font-bold text-zinc-300 hover:border-purple-500" data-hours="5" data-price="45.00">Corujão 5h (R$ 45)</button>
+                    <button class="hour-btn bg-zinc-900 border border-zinc-800 py-2.5 rounded-xl text-xs font-bold text-zinc-300 hover:border-purple-500" data-hours="1" data-mult="1">1 Hora</button>
+                    <button class="hour-btn bg-zinc-900 border border-zinc-800 py-2.5 rounded-xl text-xs font-bold text-zinc-300 hover:border-purple-500" data-hours="2" data-mult="1.8">2 Horas</button>
+                    <button class="hour-btn bg-zinc-900 border border-zinc-800 py-2.5 rounded-xl text-xs font-bold text-zinc-300 hover:border-purple-500" data-hours="5" data-mult="3.5">Corujão 5h</button>
                 </div>
             </div>
 
             <button onclick="addLanToCart()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-3.5 rounded-xl uppercase text-xs tracking-wider">
-                Reservar Cadeira na Lan
+                Reservar Equipamento
             </button>
         </div>
 
@@ -282,8 +256,8 @@
         <div id="tpl-arcade" class="space-y-5">
             <div class="text-center bg-gradient-to-b from-yellow-950/40 to-zinc-900 border border-yellow-500/30 rounded-3xl p-5">
                 <div class="text-3xl mb-1">🕹️</div>
-                <h2 class="text-zinc-300 font-black uppercase text-sm">Recarga de Fichas</h2>
-                <p class="text-zinc-400 text-xs mt-0.5">Use nas máquinas de Arcade e Fliperamas do salão</p>
+                <h2 class="text-zinc-300 font-black uppercase text-sm">Recarga de Fichas & Fliperamas</h2>
+                <p class="text-zinc-400 text-xs mt-0.5">Use nas máquinas do salão ou garanta o seu Mascote Colecionável!</p>
             </div>
 
             <div class="space-y-3" id="arcade-packages"></div>
@@ -294,67 +268,74 @@
             <h2 class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-500 uppercase text-center">
                 Resumo do Pedido
             </h2>
+
+            <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl space-y-2">
+                <label class="block text-[11px] font-bold text-zinc-400 uppercase">🎟️ Resgatar Código Promocional</label>
+                <div class="flex gap-2">
+                    <input type="text" id="promo-code-input" placeholder="Digite seu cupom (ex: ARCADE10)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 uppercase">
+                    <button onclick="applyPromoCode()" class="bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs px-4 py-2 rounded-xl flex-shrink-0">
+                        APLICAR
+                    </button>
+                </div>
+            </div>
+
             <div id="cart-content"></div>
         </div>
 
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript Integrado -->
     <script>
         let currentTab = 'menu';
         let activeCategory = 'all';
         let cart = [];
         let selectedSeat = null;
         let selectedLanOption = null;
+        let appliedDiscount = 0;
+        let currentDifficulty = 'easy';
         const pixKey = "f882100@gmail.com";
 
-        // --- SISTEMA DE SOM DE CLIQUE ARCADE ---
+        // Web Audio API para Som Retro
         let audioCtx = null;
         function playClickSound() {
             try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(600, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
-            } catch (e) { console.log(e); }
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {}
         }
 
-        // Adiciona som automaticamente a qualquer clique em botão/link
         document.addEventListener('click', (e) => {
-            if (e.target.closest('button, a, select, input[type="checkbox"]')) {
-                playClickSound();
-            }
+            if (e.target.closest('button, a, select, input[type="checkbox"]')) playClickSound();
         });
 
         const menuItems = [
-            { id: 1, cat: 'combos', name: "Combo Boss Level", desc: "2x Burguer Duplo + Batata Neon GG + 2 Refris", price: 69.90, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=300&q=80", highlight: true },
-            { id: 2, cat: 'combos', name: "Combo Power Up", desc: "Burguer Artesanal + Fritas Rústicas + Coca Lata", price: 38.90, img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f6?auto=format&fit=crop&w=300&q=80" },
-            { id: 3, cat: 'burgers', name: "Pixel Cheese Burger", desc: "Pão Brioche, 180g Smash, Cheddar Duplo e Maionese Verde", price: 26.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80" },
-            { id: 4, cat: 'burgers', name: "Arcade Bacon Monster", desc: "Pão Australiano, 2x Blend 150g, Muito Bacon e BBQ", price: 34.90, img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=300&q=80" },
-            { id: 5, cat: 'sides', name: "Batata Neon Fries", desc: "Batatas rústicas com Molho Cheddar cremoso e Bacon Bits", price: 21.90, img: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=300&q=80" },
-            { id: 6, cat: 'sides', name: "Onion Rings Gamer", desc: "Anéis de cebola super crocantes com molho especial", price: 19.90, img: "https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=300&q=80" },
-            { id: 7, cat: 'drinks', name: "Ultra Kill Shake (Oreo)", desc: "Milkshake 500ml de Oreo com chantilly e calda de chocolate", price: 18.90, img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=300&q=80" },
-            { id: 8, cat: 'drinks', name: "Refrigerante Lata 350ml", desc: "Coca-Cola, Guaraná Antarctica ou Fanta Gelados", price: 6.50, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" }
+            { id: 1, cat: 'combos', name: "Mascote Box Cristal Roxo", desc: "Burguer Artesanal + Batata Neon + Refri + Mascote de Cristal Colecionável Oficial!", price: 59.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80", highlight: true },
+            { id: 2, cat: 'combos', name: "Combo Boss Level", desc: "2x Burguer Duplo Cheddar + Batata Neon GG + 2 Refris", price: 69.90, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=300&q=80", highlight: true },
+            { id: 3, cat: 'combos', name: "Combo Squad 4P", desc: "4 Burgueres Artesanais + 2 Batatas GG + 4 Refris Lata", price: 129.90, img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f6?auto=format&fit=crop&w=300&q=80" },
+            { id: 4, cat: 'combos', name: "Combo Corujão Gamer", desc: "Burguer Duplo Bacon + Batata Cheddar + 2 Red Bulls", price: 52.90, img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=300&q=80" },
+            { id: 5, cat: 'burgers', name: "Pixel Cheese Burger", desc: "Pão Brioche, 180g Smash, Cheddar Duplo e Maionese Verde", price: 26.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80" },
+            { id: 6, cat: 'burgers', name: "Arcade Bacon Monster", desc: "Pão Australiano, 2x Blend 150g, Muito Bacon e BBQ", price: 34.90, img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=300&q=80" },
+            { id: 7, cat: 'sides', name: "Batata Neon Fries", desc: "Batatas rústicas com Molho Cheddar cremoso e Bacon Bits", price: 21.90, img: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=300&q=80" },
+            { id: 8, cat: 'sides', name: "Onion Rings Gamer", desc: "Anéis de cebola super crocantes com molho especial", price: 19.90, img: "https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=300&q=80" },
+            { id: 9, cat: 'drinks', name: "Ultra Kill Shake (Oreo)", desc: "Milkshake 500ml de Oreo com chantilly e calda de chocolate", price: 18.90, img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=300&q=80" },
+            { id: 10, cat: 'drinks', name: "Refrigerante Lata 350ml", desc: "Coca-Cola, Guaraná Antarctica ou Fanta Gelados", price: 6.50, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" }
         ];
 
         const arcadePackages = [
-            { qty: 10, price: 15.00, bonus: "10 Fichas para jogar" },
-            { qty: 25, price: 30.00, bonus: "+ 2 Fichas Grátis!" },
-            { qty: 50, price: 55.00, bonus: "+ 10 Fichas Bônus!", highlight: true },
-            { qty: "PASSAPORTE", price: 89.90, bonus: "Jogos Liberados o dia todo!", highlight: true }
+            { qty: 5, price: 10.00, bonus: "5 Fichas para jogar" },
+            { qty: 20, price: 30.00, bonus: "+ 2 Fichas Bônus!" },
+            { qty: 50, price: 60.00, bonus: "+ 10 Fichas Bônus!", highlight: true },
+            { qty: "30 FICHAS + MASCOTE", price: 65.00, bonus: "Ganha o Mascote de Cristal Roxo Colecionável!", highlight: true },
+            { qty: "PASSAPORTE DIÁRIO", price: 89.90, bonus: "Jogos Liberados o dia todo!", highlight: true }
         ];
 
         function formatPrice(p) { return p.toFixed(2).replace('.', ','); }
@@ -369,12 +350,8 @@
 
         function updateCartBadge() {
             const badge = document.getElementById('cart-badge');
-            if (cart.length > 0) {
-                badge.textContent = cart.length;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+            if (cart.length > 0) { badge.textContent = cart.length; badge.classList.remove('hidden'); }
+            else { badge.classList.add('hidden'); }
         }
 
         function changeTab(tabName) {
@@ -382,9 +359,7 @@
             const mainContent = document.getElementById('main-content');
             const template = document.getElementById(`tpl-${tabName}`).cloneNode(true);
             template.id = '';
-
-            mainContent.innerHTML = '';
-            mainContent.appendChild(template);
+            mainContent.innerHTML = ''; mainContent.appendChild(template);
 
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('opacity-100', 'opacity-50'));
             document.getElementById(`nav-${tabName}`).classList.replace('opacity-50', 'opacity-100');
@@ -393,7 +368,6 @@
             if (tabName === 'cart') renderCart();
             if (tabName === 'arcade') renderArcade();
             if (tabName === 'lan') attachLanEvents();
-            if (tabName === 'custom') calcCustomPrice();
         }
 
         function filterMenu(cat) {
@@ -409,28 +383,23 @@
             const container = document.querySelector('#main-content #menu-list');
             if (!container) return;
             container.innerHTML = '';
-
             const list = activeCategory === 'all' ? menuItems : menuItems.filter(i => i.cat === activeCategory);
 
             list.forEach(item => {
-                const borderClass = item.highlight ? 'border-cyan-500/60 bg-gradient-to-r from-cyan-950/20 to-zinc-900' : 'border-zinc-800/80 bg-zinc-900/60';
-                
-                const html = `
+                const borderClass = item.highlight ? 'border-purple-500/80 bg-gradient-to-r from-purple-950/30 to-zinc-900' : 'border-zinc-800/80 bg-zinc-900/60';
+                container.innerHTML += `
                     <div class="p-3 rounded-2xl border ${borderClass} flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
-                            <img src="${item.img}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover border border-zinc-800 flex-shrink-0">
+                            <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover border border-zinc-800 flex-shrink-0">
                             <div>
                                 <h4 class="font-bold text-xs text-zinc-100">${item.name}</h4>
                                 <p class="text-[10px] text-zinc-400 leading-tight mt-0.5">${item.desc}</p>
                                 <div class="text-cyan-400 font-black text-xs mt-1">R$ ${formatPrice(item.price)}</div>
                             </div>
                         </div>
-                        <button onclick="addToCart(${item.id})" class="bg-zinc-800 hover:bg-cyan-500 hover:text-black text-white font-bold text-xs px-3 py-2 rounded-xl transition-colors flex-shrink-0">
-                            + ADD
-                        </button>
+                        <button onclick="addToCart(${item.id})" class="bg-zinc-800 hover:bg-cyan-500 hover:text-black text-white font-bold text-xs px-3 py-2 rounded-xl transition-colors flex-shrink-0">+ ADD</button>
                     </div>
                 `;
-                container.innerHTML += html;
             });
         }
 
@@ -443,32 +412,260 @@
             }
         }
 
-        function calcCustomPrice() {
-            const bread = parseFloat(document.getElementById('custom-bread').value);
-            const meat = parseFloat(document.getElementById('custom-meat').value);
-            const cheese = parseFloat(document.getElementById('custom-cheese').value);
-            let extras = 0;
-            document.querySelectorAll('.custom-extra:checked').forEach(e => extras += parseFloat(e.value));
-
-            const total = bread + meat + cheese + extras;
-            const totalEl = document.getElementById('custom-total');
-            if (totalEl) totalEl.textContent = `R$ ${formatPrice(total)}`;
-            return total;
+        function setDifficulty(diff) {
+            currentDifficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(b => {
+                b.className = 'diff-btn bg-zinc-800 border border-zinc-700 text-zinc-400 px-3 py-1 rounded-xl text-xs font-bold';
+            });
+            const selected = document.getElementById(`diff-${diff}`);
+            if (selected) {
+                if (diff === 'easy') selected.className = 'diff-btn bg-green-500/20 border border-green-500 text-green-400 px-3 py-1 rounded-xl text-xs font-bold';
+                if (diff === 'normal') selected.className = 'diff-btn bg-yellow-500/20 border border-yellow-500 text-yellow-400 px-3 py-1 rounded-xl text-xs font-bold';
+                if (diff === 'hard') selected.className = 'diff-btn bg-red-500/20 border border-red-500 text-red-400 px-3 py-1 rounded-xl text-xs font-bold';
+            }
+            showToast(`Dificuldade definida: ${diff.toUpperCase()}`, '🎮');
         }
 
-        function addCustomToCart() {
-            const price = calcCustomPrice();
-            const item = {
-                cartId: Date.now() + Math.random(),
-                name: "Burguer Personalizado Gamer",
-                desc: "Lanche montado sob medida",
-                price: price,
-                img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80"
-            };
-            cart.push(item);
-            updateCartBadge();
-            showToast('Burguer personalizado adicionado!', '🛠️');
-            changeTab('cart');
+        // --- GAME 1: POU VÔLEI DO MASCOTE (HÍBRIDO: PC + MOBILE) ---
+        let volleyLoop = null;
+        function initVolleyGame() {
+            const arena = document.getElementById('game-arena');
+            if (!arena) return;
+            if (volleyLoop) clearInterval(volleyLoop);
+
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+            arena.innerHTML = `
+                <div class="w-full flex justify-between items-center text-xs font-black mb-2 text-zinc-300">
+                    <span class="text-cyan-400">Você: <b id="p-score">0</b></span>
+                    <span class="text-purple-400">Mascote Roxo: <b id="m-score">0</b></span>
+                </div>
+                <canvas id="volleyCanvas" width="300" height="150" class="border border-purple-500/40 rounded-xl bg-gradient-to-b from-purple-950/20 to-black w-full"></canvas>
+                <div class="text-[10px] text-zinc-500 mt-1">Dica PC: Use A/D ou Setas para andar e ESPAÇO/W para Pular!</div>
+                
+                <!-- Controles Virtuais Touch / Mobile -->
+                <div class="${isTouch ? 'flex' : 'hidden md:hidden flex'} justify-between w-full mt-2 gap-2">
+                    <button ontouchstart="movePlayer(-12)" onclick="movePlayer(-12)" class="w-1/3 bg-zinc-800 border border-zinc-700 py-3 rounded-xl font-black text-sm text-white active:bg-cyan-600">◀️ ESQ</button>
+                    <button ontouchstart="jumpPlayer()" onclick="jumpPlayer()" class="w-1/3 bg-purple-600 border border-purple-500 py-3 rounded-xl font-black text-sm text-white active:bg-purple-400">⬆️ PULAR</button>
+                    <button ontouchstart="movePlayer(12)" onclick="movePlayer(12)" class="w-1/3 bg-zinc-800 border border-zinc-700 py-3 rounded-xl font-black text-sm text-white active:bg-cyan-600">DIR ▶️</button>
+                </div>
+            `;
+
+            const canvas = document.getElementById('volleyCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let playerScore = 0, mascotScore = 0;
+            let pX = 50, pY = 120, pVy = 0;
+            let mX = 220, mY = 120, mVy = 0;
+            let bX = 150, bY = 40, bVx = (Math.random() - 0.5) * 4, bVy = 2;
+
+            const speedMult = currentDifficulty === 'easy' ? 1.5 : (currentDifficulty === 'normal' ? 3 : 4.5);
+
+            // Controles de Teclado PC
+            const keys = {};
+            window.onkeydown = (e) => { keys[e.key] = true; };
+            window.onkeyup = (e) => { keys[e.key] = false; };
+
+            volleyLoop = setInterval(() => {
+                // Teclado PC Inputs
+                if (keys['ArrowLeft'] || keys['a'] || keys['A']) movePlayer(-4);
+                if (keys['ArrowRight'] || keys['d'] || keys['D']) movePlayer(4);
+                if ((keys['ArrowUp'] || keys['w'] || keys['W'] || keys[' ']) && pY === 120) jumpPlayer();
+
+                ctx.clearRect(0, 0, 300, 150);
+
+                // Rede
+                ctx.fillStyle = '#6b21a8'; ctx.fillRect(148, 90, 4, 60);
+
+                // Você
+                pY += pVy;
+                if (pY < 120) pVy += 0.5; else { pY = 120; pVy = 0; }
+                ctx.fillStyle = '#06b6d4'; ctx.beginPath(); ctx.arc(pX, pY, 12, 0, Math.PI * 2); ctx.fill();
+
+                // Mascote IA
+                let aiSpeed = speedMult;
+                if (bX > 150) {
+                    if (mX < bX - 5) mX += aiSpeed;
+                    else if (mX > bX + 5) mX -= aiSpeed;
+                    if (bY < 80 && mY === 120 && Math.random() < (currentDifficulty === 'hard' ? 0.3 : 0.1)) mVy = -8;
+                } else { if (mX < 230) mX += 1; }
+
+                mY += mVy;
+                if (mY < 120) mVy += 0.5; else { mY = 120; mVy = 0; }
+                ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(mX, mY, 12, 0, Math.PI * 2); ctx.fill();
+
+                // Bola
+                bX += bVx; bY += bVy; bVy += 0.2;
+
+                if (bY >= 140) {
+                    if (bX < 150) mascotScore++; else playerScore++;
+                    const pEl = document.getElementById('p-score');
+                    const mEl = document.getElementById('m-score');
+                    if (pEl) pEl.textContent = playerScore;
+                    if (mEl) mEl.textContent = mascotScore;
+                    bX = 150; bY = 40; bVx = (Math.random() - 0.5) * 4; bVy = 2;
+
+                    if (playerScore >= 5) {
+                        clearInterval(volleyLoop);
+                        appliedDiscount = 0.10;
+                        showToast('🎉 Você venceu o Mascote Vôlei! Ganhou 10% OFF no carrinho!', '🏆');
+                    }
+                }
+
+                if (bX <= 5 || bX >= 295) bVx *= -1;
+                if (bX >= 145 && bX <= 155 && bY > 90) bVx *= -1;
+
+                let distP = Math.hypot(bX - pX, bY - pY);
+                if (distP < 20) { bVy = -6; bVx = (bX - pX) * 0.4; }
+
+                let distM = Math.hypot(bX - mX, bY - mY);
+                if (distM < 20) { bVy = -6; bVx = (bX - mX) * 0.4; }
+
+                ctx.fillStyle = '#eab308'; ctx.beginPath(); ctx.arc(bX, bY, 7, 0, Math.PI * 2); ctx.fill();
+            }, 30);
+
+            window.movePlayer = (dx) => { pX = Math.max(15, Math.min(135, pX + dx)); };
+            window.jumpPlayer = () => { if (pY === 120) pVy = -8; };
+        }
+
+        // --- GAME 2: PÊNALTI DO MASCOTE (HÍBRIDO: MOUSE / TOUCH) ---
+        function initPenaltyGame() {
+            const arena = document.getElementById('game-arena');
+            if (!arena) return;
+            if (volleyLoop) clearInterval(volleyLoop);
+
+            arena.innerHTML = `
+                <div class="text-xs font-bold text-pink-400 mb-2">Clique no canto do gol para chutar no Mascote!</div>
+                <div class="relative w-60 h-32 border-4 border-white bg-green-900/60 rounded-t-xl mx-auto flex items-end justify-center mb-3 cursor-pointer">
+                    <div id="gk-mascot" class="absolute top-4 w-8 h-8 rounded-full bg-purple-600 border-2 border-purple-300 flex items-center justify-center text-xs font-bold transition-all">👾</div>
+                    <div id="penalty-ball" class="w-5 h-5 rounded-full bg-white border border-black transition-all mb-2"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 w-full">
+                    <button onclick="shootPenalty('left')" class="bg-zinc-800 border border-zinc-700 py-3 rounded-xl font-black text-xs text-white active:bg-pink-600">👈 ESQUERDA</button>
+                    <button onclick="shootPenalty('center')" class="bg-zinc-800 border border-zinc-700 py-3 rounded-xl font-black text-xs text-white active:bg-pink-600">☝️ MEIO</button>
+                    <button onclick="shootPenalty('right')" class="bg-zinc-800 border border-zinc-700 py-3 rounded-xl font-black text-xs text-white active:bg-pink-600">DIREITA 👉</button>
+                </div>
+            `;
+        }
+
+        function shootPenalty(corner) {
+            const gk = document.getElementById('gk-mascot');
+            const ball = document.getElementById('penalty-ball');
+            if (!gk || !ball) return;
+
+            const corners = ['left', 'center', 'right'];
+            let gkChoice = corners[Math.floor(Math.random() * 3)];
+
+            if (currentDifficulty === 'hard') {
+                if (Math.random() < 0.7) gkChoice = corner;
+            }
+
+            if (corner === 'left') ball.style.transform = 'translate(-70px, -70px)';
+            if (corner === 'center') ball.style.transform = 'translate(0px, -85px)';
+            if (corner === 'right') ball.style.transform = 'translate(70px, -70px)';
+
+            if (gkChoice === 'left') gk.style.transform = 'translateX(-70px)';
+            if (gkChoice === 'center') gk.style.transform = 'translateX(0px)';
+            if (gkChoice === 'right') gk.style.transform = 'translateX(70px)';
+
+            setTimeout(() => {
+                if (corner === gkChoice) {
+                    showToast('O Mascote defendeu! Tente de novo!', '⚽');
+                } else {
+                    appliedDiscount = 0.10;
+                    showToast('🎉 GOOOOL! Você venceu o Mascote! Ganhou 10% OFF no carrinho!', '⚽');
+                }
+                setTimeout(() => initPenaltyGame(), 1500);
+            }, 500);
+        }
+
+        // --- ROLETA DA SORTE EXPANDIDA ---
+        const roulettePrizes = [
+            { icon: "🎉", label: "10% OFF!", discount: 0.10, toast: "Parabéns! Ganhou 10% de desconto no carrinho!" },
+            { icon: "❌", label: "Tente Novamente", discount: 0, toast: "Que pena! Tente novamente na próxima!" },
+            { icon: "🎁", label: "+5 Fichas Grátis", discount: 0, addTokens: true, toast: "Ganhou 5 Fichas Grátis de Arcade!" },
+            { icon: "💥", label: "15% OFF VIP!", discount: 0.15, toast: "Incrível! Ganhou 15% de desconto VIP no carrinho!" },
+            { icon: "😅", label: "Quase! Tente Novamente", discount: 0, toast: "Bateu na trave! Tente novamente!" },
+            { icon: "🥤", label: "Refri Grátis", discount: 0, addDrink: true, toast: "Ganhou 1 Refrigerante Lata Grátis!" }
+        ];
+
+        function openRouletteModal() { document.getElementById('roulette-modal').classList.remove('hidden'); }
+        function closeRouletteModal() { document.getElementById('roulette-modal').classList.add('hidden'); }
+
+        function spinWheel() {
+            const wheel = document.getElementById('roulette-wheel');
+            const btn = document.getElementById('spin-btn');
+            const displayIcon = document.getElementById('wheel-display-icon');
+            const displayText = document.getElementById('wheel-display-text');
+            
+            btn.disabled = true; btn.classList.add('opacity-50');
+
+            const selectedIndex = Math.floor(Math.random() * roulettePrizes.length);
+            const prize = roulettePrizes[selectedIndex];
+
+            wheel.classList.add('wheel-spin');
+            wheel.style.transform = 'rotate(1800deg)';
+
+            setTimeout(() => {
+                wheel.classList.remove('wheel-spin');
+                wheel.style.transform = 'rotate(0deg)';
+                displayIcon.textContent = prize.icon;
+                displayText.textContent = prize.label;
+
+                if (prize.discount > 0) appliedDiscount = prize.discount;
+                if (prize.addTokens) {
+                    cart.push({
+                        cartId: Date.now() + Math.random(),
+                        name: "Prêmio Roleta: 5 Fichas Grátis",
+                        desc: "Ganhado na Roleta da Sorte",
+                        price: 0,
+                        img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
+                    });
+                    updateCartBadge();
+                }
+                if (prize.addDrink) {
+                    cart.push({
+                        cartId: Date.now() + Math.random(),
+                        name: "Prêmio Roleta: Refri Lata Grátis",
+                        desc: "Ganhado na Roleta da Sorte",
+                        price: 0,
+                        img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"
+                    });
+                    updateCartBadge();
+                }
+
+                showToast(prize.toast, prize.icon);
+                btn.disabled = false; btn.classList.remove('opacity-50');
+            }, 4000);
+        }
+
+        // --- SISTEMA DE CUPONS ---
+        function applyPromoCode() {
+            const codeInput = document.getElementById('promo-code-input');
+            if (!codeInput) return;
+            const code = codeInput.value.trim().toUpperCase();
+
+            if (code === 'ARCADE10') {
+                appliedDiscount = 0.10;
+                showToast('Cupom ARCADE10 aplicado: 10% de desconto!', '🎟️');
+            } else if (code === 'FICHASGRATIS') {
+                cart.push({
+                    cartId: Date.now() + Math.random(),
+                    name: "Bônus: 5 Fichas Grátis (Cupom)",
+                    desc: "Resgatado via código promocional",
+                    price: 0,
+                    img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
+                });
+                updateCartBadge();
+                showToast('5 Fichas grátis adicionadas ao carrinho!', '🎁');
+            } else if (code === 'MASCOTEVIP') {
+                appliedDiscount = 0.15;
+                showToast('Cupom MASCOTEVIP aplicado: 15% OFF!', '👑');
+            } else {
+                showToast('Cupom inválido ou expirado!', '⚠️');
+            }
+            codeInput.value = '';
+            renderCart();
         }
 
         function attachLanEvents() {
@@ -481,7 +678,10 @@
                     seats.forEach(b => b.classList.remove('border-purple-500', 'bg-purple-950/40'));
                     const btn = e.currentTarget;
                     btn.classList.add('border-purple-500', 'bg-purple-950/40');
-                    selectedSeat = btn.dataset.seat;
+                    selectedSeat = {
+                        name: btn.dataset.seat,
+                        basePrice: btn.dataset.seat.includes('Streamer') ? 18 : (btn.dataset.seat.includes('PS5') ? 15 : (btn.dataset.seat.includes('Cockpit') ? 20 : 12))
+                    };
                 };
             });
 
@@ -490,29 +690,23 @@
                     hours.forEach(b => b.classList.remove('border-purple-500', 'bg-purple-950/40'));
                     const btn = e.currentTarget;
                     btn.classList.add('border-purple-500', 'bg-purple-950/40');
-                    selectedLanOption = {
-                        hours: btn.dataset.hours,
-                        price: parseFloat(btn.dataset.price)
-                    };
+                    selectedLanOption = { hours: btn.dataset.hours, mult: parseFloat(btn.dataset.mult) };
                 };
             });
         }
 
         function addLanToCart() {
-            if (!selectedSeat || !selectedLanOption) {
-                showToast('Selecione um PC no mapa e a duração!', '⚠️');
-                return;
-            }
-            const item = {
+            if (!selectedSeat || !selectedLanOption) { showToast('Selecione um equipamento e o tempo!', '⚠️'); return; }
+            const totalPrice = selectedSeat.basePrice * selectedLanOption.mult;
+            cart.push({
                 cartId: Date.now() + Math.random(),
-                name: `Reserva Lan: ${selectedSeat}`,
+                name: `Reserva: ${selectedSeat.name}`,
                 desc: `Duração: ${selectedLanOption.hours} Hora(s)`,
-                price: selectedLanOption.price,
+                price: totalPrice,
                 img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300&q=80"
-            };
-            cart.push(item);
+            });
             updateCartBadge();
-            showToast('Reserva de PC adicionada!', '🖥️');
+            showToast('Reserva adicionada ao pedido!', '🖥️');
             changeTab('cart');
         }
 
@@ -523,11 +717,10 @@
 
             arcadePackages.forEach((pkg, index) => {
                 const borderClass = pkg.highlight ? 'border-yellow-500/60 bg-gradient-to-r from-yellow-950/20 to-zinc-900' : 'border-zinc-800 bg-zinc-900/60';
-                
-                const html = `
+                container.innerHTML += `
                     <div class="p-3.5 rounded-2xl border ${borderClass} flex items-center justify-between">
                         <div>
-                            <div class="font-black text-base text-yellow-400">${pkg.qty} ${pkg.qty === 'PASSAPORTE' ? '' : 'Fichas'}</div>
+                            <div class="font-black text-sm text-yellow-400">${pkg.qty}</div>
                             <div class="text-[11px] text-zinc-400">${pkg.bonus}</div>
                         </div>
                         <button onclick="addArcadeToCart(${index})" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xs px-3.5 py-2.5 rounded-xl">
@@ -535,22 +728,20 @@
                         </button>
                     </div>
                 `;
-                container.innerHTML += html;
             });
         }
 
         function addArcadeToCart(index) {
             const pkg = arcadePackages[index];
-            const item = {
+            cart.push({
                 cartId: Date.now() + Math.random(),
-                name: pkg.qty === 'PASSAPORTE' ? "Passaporte Livre Arcade" : `Pacote ${pkg.qty} Fichas`,
+                name: `Pacote Arcade: ${pkg.qty}`,
                 desc: pkg.bonus,
                 price: pkg.price,
                 img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
-            };
-            cart.push(item);
+            });
             updateCartBadge();
-            showToast('Fichas adicionadas ao pedido!', '🕹️');
+            showToast('Fichas/Passaporte adicionados!', '🕹️');
         }
 
         function renderCart() {
@@ -567,11 +758,11 @@
                 return;
             }
 
-            let total = 0;
+            let subtotal = 0;
             let itemsHTML = '<div class="space-y-2.5">';
 
             cart.forEach(item => {
-                total += item.price;
+                subtotal += item.price;
                 itemsHTML += `
                     <div class="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -587,13 +778,26 @@
             });
             itemsHTML += '</div>';
 
+            const discountValue = subtotal * appliedDiscount;
+            const finalTotal = Math.max(0, subtotal - discountValue);
+
             const summaryHTML = `
                 <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl space-y-3 mt-3">
+                    ${appliedDiscount > 0 ? `
+                        <div class="flex justify-between items-center text-xs text-zinc-400">
+                            <span>Subtotal:</span>
+                            <span>R$ ${formatPrice(subtotal)}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-pink-400 font-bold">
+                            <span>Desconto Cupom (${appliedDiscount * 100}%):</span>
+                            <span>- R$ ${formatPrice(discountValue)}</span>
+                        </div>
+                    ` : ''}
                     <div class="flex justify-between items-center text-zinc-100">
                         <span class="text-xs font-bold uppercase text-zinc-400">Total do Pedido</span>
-                        <span class="text-xl font-black text-emerald-400">R$ ${formatPrice(total)}</span>
+                        <span class="text-xl font-black text-emerald-400">R$ ${formatPrice(finalTotal)}</span>
                     </div>
-                    <button onclick="openPixModal(${total})" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-black py-3.5 rounded-xl uppercase tracking-wider text-xs flex items-center justify-center gap-2">
+                    <button onclick="openPixModal(${finalTotal})" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-black py-3.5 rounded-xl uppercase tracking-wider text-xs flex items-center justify-center gap-2">
                         <span>PAGAR COM PIX</span>
                         <span>❖</span>
                     </button>
@@ -623,39 +827,16 @@
 
         function confirmPaymentAndClear() {
             const clientName = document.getElementById('client-name').value;
-            if (!clientName) {
-                showToast('Digite seu nome/mesa!', '⚠️');
-                return;
-            }
+            if (!clientName) { showToast('Digite seu nome/mesa!', '⚠️'); return; }
             closePixModal();
-            showToast(`Pedido confirmed para ${clientName}!`, '🎉');
-            cart = [];
-            updateCartBadge();
-            renderCart();
+            showToast(`Pedido confirmado para ${clientName}!`, '🎉');
+            cart = []; appliedDiscount = 0;
+            updateCartBadge(); renderCart();
         }
 
-        function openRouletteModal() { document.getElementById('roulette-modal').classList.remove('hidden'); }
-        function closeRouletteModal() { document.getElementById('roulette-modal').classList.add('hidden'); }
-
-        function spinWheel() {
-            const wheel = document.getElementById('roulette-wheel');
-            const btn = document.getElementById('spin-btn');
-            btn.disabled = true;
-            wheel.classList.add('wheel-spin');
-            wheel.style.transform = 'rotate(1440deg)';
-
-            setTimeout(() => {
-                showToast('🎉 Ganhou 10% de desconto no balcão!', '🎁');
-                closeRouletteModal();
-            }, 4000);
-        }
-
-        window.onload = () => { changeTab('menu'); };
-    </script>
-</body>
-</html>
-
-        window.onload = () => { changeTab('menu'); };
+        window.onload = function() {
+            changeTab('menu');
+        };
     </script>
 </body>
 </html>
