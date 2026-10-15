@@ -64,7 +64,6 @@
                     <div class="flex-grow border-t border-[#30363d]"></div>
                 </div>
 
-                <!-- Botões Google / Apple -->
                 <button onclick="openGooglePicker()" class="w-full bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-white font-medium py-2 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors">
                     <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.1 0-5.74-2.09-6.68-4.91H1.36v3.13C3.33 21.3 7.38 24 12 24z"/><path fill="#FBBC05" d="M5.32 14.27c-.24-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.6H1.36C.49 8.33 0 10.11 0 12s.49 3.67 1.36 5.4l3.96-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.38 0 3.33 2.7 1.36 6.6l3.96 3.13c.94-2.82 3.58-4.98 6.68-4.98z"/></svg>
                     Continue with Google
@@ -78,7 +77,7 @@
         </div>
     </div>
 
-    <!-- Modal Escolha de Conta Google (Igual à imagem) -->
+    <!-- Modal Escolha de Conta Google -->
     <div id="google-picker-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-md w-full p-6 text-left space-y-5 relative shadow-2xl">
             <button onclick="closeGooglePicker()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
@@ -94,7 +93,6 @@
             </div>
 
             <div class="space-y-2 pt-2 border-t border-[#30363d]">
-                <!-- Lista de Contas -->
                 <button onclick="confirmSocialAccount('bernardo.araujo@pinhais.pr.gov.br')" class="w-full text-left p-3 hover:bg-[#21262d] rounded-xl flex items-center justify-between transition-colors border border-transparent hover:border-[#30363d]">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm">B</div>
@@ -139,8 +137,8 @@
             </div>
 
             <div id="admin-panel-btn-container" class="hidden">
-                <button onclick="closeUserProfileModal(); openAdminModal();" class="w-full bg-purple-600/30 border border-purple-500 hover:bg-purple-600/50 text-purple-300 font-bold py-2 rounded-xl text-xs uppercase transition-colors">
-                    👑 Abrir Painel do Administrador
+                <button onclick="closeUserProfileModal(); openAdminModal();" class="w-full bg-purple-600/30 border border-purple-500 hover:bg-purple-600/50 text-purple-300 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
+                    🛠️ Modo Desenvolvedor / Admin
                 </button>
             </div>
 
@@ -150,26 +148,47 @@
         </div>
     </div>
 
-    <!-- Modal Painel Admin -->
+    <!-- Modal Modo Desenvolvedor / Painel Admin -->
     <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-purple-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 relative max-h-[85vh] overflow-y-auto">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <div class="flex items-center gap-2">
-                <span class="text-2xl">👑</span>
+                <span class="text-2xl">🛠️</span>
                 <div>
-                    <h3 class="text-lg font-black text-purple-400 uppercase leading-none">PAINEL ADMINISTRADOR</h3>
-                    <span class="text-[10px] text-zinc-500">Gestão do ArcadeZone</span>
+                    <h3 class="text-lg font-black text-purple-400 uppercase leading-none">MODO DESENVOLVEDOR</h3>
+                    <span class="text-[10px] text-zinc-500">Controle total da Arena</span>
                 </div>
             </div>
 
             <div class="space-y-4 text-xs">
+                <!-- Status do Estabelecimento -->
+                <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] flex items-center justify-between">
+                    <div>
+                        <span class="font-bold text-zinc-300 block uppercase">Status da Arena</span>
+                        <span id="store-status-text" class="text-[10px] text-emerald-400 font-bold">🟢 ABERTO PARA PEDIDOS</span>
+                    </div>
+                    <button onclick="toggleStoreStatus()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] uppercase">
+                        Alterar
+                    </button>
+                </div>
+
+                <!-- Cupons Ativos -->
+                <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-1">
+                    <span class="font-bold text-yellow-400 block uppercase">🎟️ Cupons Promocionais no Sistema</span>
+                    <div class="text-[11px] text-zinc-400">• ARCADE10 (10% OFF)</div>
+                    <div class="text-[11px] text-zinc-400">• MASCOTEVIP (15% OFF)</div>
+                    <div class="text-[11px] text-zinc-400">• FICHASGRATIS (+5 Fichas)</div>
+                </div>
+
+                <!-- Clientes Registrados -->
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-2">
                     <span class="font-bold text-purple-300 block uppercase">👥 Clientes Registrados</span>
                     <div id="admin-users-list" class="space-y-1 text-zinc-400 text-[11px]"></div>
                 </div>
 
+                <!-- Vendas no Pix -->
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-2">
-                    <span class="font-bold text-emerald-400 block uppercase">🛒 Vendas no Pix</span>
+                    <span class="font-bold text-emerald-400 block uppercase">🛒 Reservas & Vendas no Pix</span>
                     <div id="admin-orders-list" class="space-y-1 text-zinc-400 text-[11px]"></div>
                 </div>
             </div>
@@ -191,7 +210,6 @@
                 </div>
             </div>
 
-            <!-- Timer de Segundos em Tempo Real -->
             <div id="roulette-timer-info" class="text-xs font-mono text-yellow-400 font-bold bg-[#0d1117] py-2 px-3 rounded-xl border border-[#30363d] hidden"></div>
 
             <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs">GIRAR ROLETA!</button>
@@ -410,6 +428,7 @@
         let selectedLanOption = null;
         let appliedDiscount = 0;
         let currentDifficulty = 'easy';
+        let storeIsOpen = true;
         const pixKey = "f882100@gmail.com";
 
         // State LocalStorage
@@ -429,7 +448,6 @@
             return audioCtx;
         }
 
-        // Som de Giro da Roleta (Ratchet / Ticks)
         function playWheelTickSound() {
             try {
                 const ctx = getAudioContext();
@@ -579,7 +597,18 @@
         }
 
         function closeUserProfileModal() { document.getElementById('user-profile-modal').classList.add('hidden'); }
+        function openAdminModal() { renderAdminData(); document.getElementById('admin-modal').classList.remove('hidden'); }
         function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); }
+
+        function toggleStoreStatus() {
+            storeIsOpen = !storeIsOpen;
+            const statusEl = document.getElementById('store-status-text');
+            if (statusEl) {
+                statusEl.textContent = storeIsOpen ? '🟢 ABERTO PARA PEDIDOS' : '🔴 FECHADO NO MOMENTO';
+                statusEl.className = storeIsOpen ? 'text-[10px] text-emerald-400 font-bold' : 'text-[10px] text-red-400 font-bold';
+            }
+            showToast(`Status da loja alterado para ${storeIsOpen ? 'Aberto' : 'Fechado'}`, '🛠️');
+        }
 
         function logoutUser() {
             currentUser = null;
@@ -615,7 +644,7 @@
             if (email === 'f882100@gmail.com' && pass === 'lordello051') {
                 currentUser = { name: "Bernardo Admin", email: email, isAdmin: true };
                 localStorage.setItem('az_user', JSON.stringify(currentUser));
-                showToast('👑 Bem-vindo, Administrador!', '👑');
+                showToast('👑 Modo Desenvolvedor Ativado!', '🛠️');
                 closeLoginModal();
                 updateUserUI();
                 openUserProfileModal();
@@ -638,7 +667,7 @@
         function updateUserUI() {
             const lbl = document.getElementById('user-btn-label');
             if (currentUser) {
-                lbl.textContent = currentUser.isAdmin ? "👑 Admin" : currentUser.name;
+                lbl.textContent = currentUser.isAdmin ? "👑 Dev/Admin" : currentUser.name;
             } else {
                 lbl.textContent = "Entrar";
             }
@@ -763,6 +792,7 @@
             }
         }
 
+        // DIFICULDADES
         function setDifficulty(diff) {
             currentDifficulty = diff;
             updateDiffBadgeUI();
@@ -901,6 +931,9 @@
                     if (bY < 140 && mY === 200 && Math.random() < (currentDifficulty === 'hard' ? 0.4 : 0.1)) mVy = -8;
                 } else { if (mX < 230) mX += 1; }
 
+                // Restrição Estrita do Oponente Dentro do Canvas
+                mX = Math.max(162, Math.min(284, mX));
+
                 mY += mVy;
                 if (mY < 200) mVy += 0.5; else { mY = 200; mVy = 0; }
 
@@ -932,7 +965,9 @@
                     startCountdown();
                 }
 
-                if (bX <= 8 || bX >= 292) bVx *= -0.8;
+                // Paredes Laterais Físicas da Bola
+                if (bX <= 8) { bX = 8; bVx *= -0.8; }
+                if (bX >= 292) { bX = 292; bVx *= -0.8; }
 
                 let distP = Math.hypot(bX - pX, bY - pY);
                 if (distP < 24) { bVy = -6.5; bVx = (bX - pX) * 0.45; }
@@ -950,7 +985,13 @@
         function drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY) {
             ctx.fillStyle = '#a855f7'; ctx.fillRect(147, 150, 6, 90);
             ctx.fillStyle = '#06b6d4'; ctx.beginPath(); ctx.arc(pX, pY, 16, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#c084fc'; ctx.beginPath(); ctx.arc(mX, mY, 16, 0, Math.PI * 2); ctx.fill();
+
+            // Cor Dinâmica do Oponente pela Dificuldade
+            if (currentDifficulty === 'easy') ctx.fillStyle = '#22c55e'; // Verde
+            else if (currentDifficulty === 'normal') ctx.fillStyle = '#eab308'; // Amarelo
+            else ctx.fillStyle = '#ef4444'; // Vermelho Neon
+
+            ctx.beginPath(); ctx.arc(mX, mY, 16, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(bX, bY, 8, 0, Math.PI * 2); ctx.fill();
         }
 
@@ -968,44 +1009,82 @@
         let penaltyTimer = null;
         let pTimerVal = 15;
         let aimX = 150, aimY = 50;
+        let barOscillator = null;
+        let curForce = 50, curCurve = 0;
+        let forceDir = 1, curveDir = 1;
+        let isAimLocked = false;
 
         function initPenaltyGame() {
             const arena = document.getElementById('game-arena');
             if (!arena) return;
             if (volleyLoop) clearInterval(volleyLoop);
             if (penaltyTimer) clearInterval(penaltyTimer);
+            if (barOscillator) clearInterval(barOscillator);
 
             pTimerVal = 15;
+            isAimLocked = false;
+            curForce = 50; curCurve = 0;
 
             arena.innerHTML = `
-                <div class="w-full flex justify-between items-center text-xs font-black mb-2 text-zinc-300">
+                <div class="w-full flex justify-between items-center text-xs font-black mb-1 text-zinc-300">
                     <span class="text-pink-400">Pênalti do Mascote</span>
                     <span class="text-yellow-400">Tempo: <b id="pen-timer">15s</b></span>
                 </div>
 
-                <div id="penalty-goal-container" onclick="setPenaltyAim(event)" class="relative w-full h-44 border-4 border-white bg-green-900/80 rounded-t-xl mx-auto cursor-crosshair overflow-hidden">
+                <div id="penalty-goal-container" onclick="lockAimAndShoot(event)" class="relative w-full h-44 border-4 border-white bg-green-900/80 rounded-t-xl mx-auto cursor-crosshair overflow-hidden">
                     <div id="gk-body" class="absolute bottom-2 left-[125px] w-12 h-20 bg-purple-600 border-2 border-purple-300 rounded-lg flex flex-col items-center justify-between p-1 transition-all duration-300">
                         <div class="w-6 h-6 rounded-full bg-purple-300 text-[10px] flex items-center justify-center font-bold">👾</div>
-                        <div class="w-full flex justify-between px-0.5"><span class="w-2 h-2 bg-yellow-400 rounded-full"></span><span class="w-2 h-2 bg-yellow-400 rounded-full"></span></div>
+                        <div class="w-full flex justify-between px-0.5"><span class="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span><span class="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span></div>
                     </div>
 
                     <div id="aim-target" class="absolute w-5 h-5 border-2 border-red-500 rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center text-[8px] text-red-400 font-bold" style="left:150px; top:50px;">🎯</div>
                     <div id="penalty-ball" class="absolute bottom-2 left-[138px] w-6 h-6 rounded-full bg-white border border-black transition-all duration-500"></div>
                 </div>
 
-                <div class="space-y-2 my-2 text-left">
+                <div class="space-y-2 my-2 text-left w-full">
                     <div>
-                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>⚡ Força do Chute:</span><span id="force-val">70%</span></div>
-                        <input type="range" id="pen-force" min="30" max="100" value="70" oninput="document.getElementById('force-val').textContent=this.value+'%'" class="w-full accent-pink-500 bg-zinc-800">
+                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>⚡ Força Oscilante:</span><span id="force-val" class="text-pink-400">50%</span></div>
+                        <div class="w-full bg-zinc-800 h-2.5 rounded-full overflow-hidden border border-zinc-700">
+                            <div id="force-bar-fill" class="bg-gradient-to-r from-yellow-500 to-pink-500 h-full transition-all duration-75" style="width: 50%;"></div>
+                        </div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>🌀 Efeito / Curva:</span><span id="curve-val">0</span></div>
-                        <input type="range" id="pen-curve" min="-30" max="30" value="0" oninput="document.getElementById('curve-val').textContent=this.value" class="w-full accent-cyan-500 bg-zinc-800">
+                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>🌀 Efeito / Curva:</span><span id="curve-val" class="text-cyan-400">0</span></div>
+                        <div class="w-full bg-zinc-800 h-2.5 rounded-full overflow-hidden border border-zinc-700 relative">
+                            <div id="curve-bar-fill" class="bg-cyan-500 h-full transition-all duration-75 absolute" style="width: 10%; left: 45%;"></div>
+                        </div>
                     </div>
                 </div>
 
-                <button onclick="executePenaltyKick()" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-2.5 rounded-xl uppercase text-xs">⚽ BATER PÊNALTI!</button>
+                <div class="text-[10px] text-zinc-400 font-bold">💡 Clique no gol para Travar a Mira e Chutar!</div>
             `;
+
+            const oscSpeed = currentDifficulty === 'hard' ? 6 : (currentDifficulty === 'normal' ? 4 : 2);
+            barOscillator = setInterval(() => {
+                if (isAimLocked) return;
+
+                curForce += forceDir * oscSpeed;
+                if (curForce >= 100) { curForce = 100; forceDir = -1; }
+                if (curForce <= 20) { curForce = 20; forceDir = 1; }
+
+                curCurve += curveDir * (oscSpeed * 1.2);
+                if (curCurve >= 30) { curCurve = 30; curveDir = -1; }
+                if (curCurve <= -30) { curCurve = -30; curveDir = 1; }
+
+                const fFill = document.getElementById('force-bar-fill');
+                const cFill = document.getElementById('curve-bar-fill');
+                const fVal = document.getElementById('force-val');
+                const cVal = document.getElementById('curve-val');
+
+                if (fFill) fFill.style.width = `${curForce}%`;
+                if (fVal) fVal.textContent = `${Math.round(curForce)}%`;
+
+                if (cFill) {
+                    const pct = ((curCurve + 30) / 60) * 100;
+                    cFill.style.left = `${Math.max(0, pct - 5)}%`;
+                }
+                if (cVal) cVal.textContent = `${Math.round(curCurve)}`;
+            }, 50);
 
             penaltyTimer = setInterval(() => {
                 pTimerVal--;
@@ -1019,7 +1098,10 @@
             }, 1000);
         }
 
-        function setPenaltyAim(e) {
+        function lockAimAndShoot(e) {
+            if (isAimLocked) return;
+            isAimLocked = true;
+
             const rect = e.currentTarget.getBoundingClientRect();
             aimX = e.clientX - rect.left;
             aimY = e.clientY - rect.top;
@@ -1029,15 +1111,16 @@
                 target.style.left = `${aimX}px`;
                 target.style.top = `${aimY}px`;
             }
+
+            executePenaltyKick();
         }
 
         function executePenaltyKick() {
             if (penaltyTimer) clearInterval(penaltyTimer);
+            if (barOscillator) clearInterval(barOscillator);
 
             const gk = document.getElementById('gk-body');
             const ball = document.getElementById('penalty-ball');
-            const force = parseInt(document.getElementById('pen-force').value) || 70;
-            const curve = parseInt(document.getElementById('pen-curve').value) || 0;
 
             if (!gk || !ball) return;
 
@@ -1057,18 +1140,18 @@
             gk.style.left = `${gkTargetX}px`;
             gk.style.transform = `translateY(-30px) rotate(${gkTargetX < 125 ? -15 : 15}deg)`;
 
-            const finalBallX = aimX + (curve * 0.8);
+            const finalBallX = aimX + (curCurve * 0.8);
             const finalBallY = aimY;
 
             ball.style.left = `${finalBallX}px`;
             ball.style.top = `${finalBallY}px`;
-            ball.style.transform = `scale(${0.6 + (force / 200)})`;
+            ball.style.transform = `scale(${0.6 + (curForce / 200)})`;
 
             setTimeout(() => {
                 const isSaved = Math.abs(finalBallX - (gkTargetX + 24)) < 30 && Math.abs(finalBallY - 80) < 40;
 
                 if (isSaved) {
-                    showToast(' O Mascote Goleiro defendeu!', '⚽');
+                    showToast(' O Mascote Goleiro defendeu em um baita pulo!', '⚽');
                 } else {
                     appliedDiscount = 0.10;
                     showToast('🎉 GOOOOOLAÇO! Você venceu o Mascote!', '⚽');
@@ -1094,7 +1177,7 @@
             changeTab('cart');
         }
 
-        // ROLETA 24H COM TIMER EM TEMPO REAL
+        // ROLETA 24H
         let rouletteTimerInterval = null;
 
         function openRouletteModal() {
@@ -1133,7 +1216,6 @@
             document.getElementById('roulette-modal').classList.add('hidden');
         }
 
-        // 8 Prêmios Variados
         const roulettePrizes = [
             { icon: "🎁", label: "5% OFF no Pedido", discount: 0.05, isWin: true, toast: "Ganhou 5% de desconto no carrinho!" },
             { icon: "🎉", label: "10% OFF!", discount: 0.10, isWin: true, toast: "Ganhou 10% de desconto no carrinho!" },
@@ -1158,7 +1240,6 @@
 
             const prize = roulettePrizes[Math.floor(Math.random() * roulettePrizes.length)];
 
-            // Som de Giro da Roleta (Ratchet Ticks)
             let tickCount = 0;
             const tickInterval = setInterval(() => {
                 playWheelTickSound();
