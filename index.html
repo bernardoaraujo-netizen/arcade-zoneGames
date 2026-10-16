@@ -17,8 +17,6 @@
             transform: translateX(150%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .toast.show { transform: translateX(0); }
-        .wheel-spin { transition: transform 4s cubic-bezier(0.15, 0.9, 0.15, 1); }
-        
         button, a, .clickable { transition: transform 0.1s ease, filter 0.1s ease; cursor: pointer; }
         button:active, a:active, .clickable:active { transform: scale(0.95) !important; filter: brightness(1.2); }
         svg { max-width: 100%; display: inline-block; vertical-align: middle; }
@@ -46,12 +44,10 @@
     <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-2xl max-w-sm w-full p-6 space-y-4 relative shadow-2xl">
             <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
-
             <div class="text-center space-y-2">
                 <div class="text-3xl">🕹️</div>
                 <h3 class="text-xl font-semibold text-white tracking-tight">Sign in to ArcadeZone</h3>
             </div>
-            
             <div class="space-y-3 pt-2">
                 <div>
                     <label class="block text-xs font-medium text-zinc-300 mb-1">Username or email address</label>
@@ -64,17 +60,14 @@
                     </div>
                     <input type="password" id="login-pass" placeholder="******" class="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
                 </div>
-
                 <button onclick="handleLogin()" class="w-full bg-[#238636] hover:bg-[#2ea043] text-white font-semibold py-2 rounded-lg text-xs transition-colors shadow">
                     Sign in
                 </button>
-
                 <div class="relative flex py-2 items-center">
                     <div class="flex-grow border-t border-[#30363d]"></div>
                     <span class="flex-shrink mx-3 text-[11px] text-zinc-500">or</span>
                     <div class="flex-grow border-t border-[#30363d]"></div>
                 </div>
-
                 <button onclick="openGooglePicker()" class="w-full bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-white font-medium py-2 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors">
                     <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.1 0-5.74-2.09-6.68-4.91H1.36v3.13C3.33 21.3 7.38 24 12 24z"/><path fill="#FBBC05" d="M5.32 14.27c-.24-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.6H1.36C.49 8.33 0 10.11 0 12s.49 3.67 1.36 5.4l3.96-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.38 0 3.33 2.7 1.36 6.6l3.96 3.13c.94-2.82 3.58-4.98 6.68-4.98z"/></svg>
                     Continue with Google
@@ -82,22 +75,18 @@
             </div>
         </div>
     </div>
-
     <!-- Modal Escolha de Conta Google -->
     <div id="google-picker-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[85] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-md w-full p-6 text-left space-y-5 relative shadow-2xl">
             <button onclick="closeGooglePicker()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
-            
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.1 0-5.74-2.09-6.68-4.91H1.36v3.13C3.33 21.3 7.38 24 12 24z"/><path fill="#FBBC05" d="M5.32 14.27c-.24-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.6H1.36C.49 8.33 0 10.11 0 12s.49 3.67 1.36 5.4l3.96-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.38 0 3.33 2.7 1.36 6.6l3.96 3.13c.94-2.82 3.58-4.98 6.68-4.98z"/></svg>
                 <span class="text-xs font-semibold text-zinc-300">Fazer Login com o Google</span>
             </div>
-
             <div class="space-y-1">
                 <h2 class="text-2xl font-bold text-white tracking-tight">Escolha uma conta</h2>
                 <p class="text-xs text-zinc-400">Prosseguir para <span class="text-blue-400 font-semibold">ArcadeZone</span></p>
             </div>
-
             <div class="space-y-2 pt-2 border-t border-[#30363d]">
                 <button onclick="confirmSocialAccount('bernardo.araujo@pinhais.pr.gov.br')" class="w-full text-left p-3 hover:bg-[#21262d] rounded-xl flex items-center justify-between transition-colors border border-transparent hover:border-[#30363d]">
                     <div class="flex items-center gap-3">
@@ -108,7 +97,6 @@
                         </div>
                     </div>
                 </button>
-
                 <button onclick="confirmSocialAccount('bernardo.lara.araujo@escola.pr.gov.br')" class="w-full text-left p-3 hover:bg-[#21262d] rounded-xl flex items-center justify-between transition-colors border border-transparent hover:border-[#30363d]">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm">B</div>
@@ -126,27 +114,22 @@
     <div id="user-profile-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[75] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-2xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeUserProfileModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
-
             <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-3xl font-black flex items-center justify-center mx-auto shadow-lg border-2 border-white/20 overflow-hidden" id="profile-modal-avatar">
                 👤
             </div>
-
             <div>
                 <h3 id="profile-name" class="text-base font-bold text-white">Nome do Usuário</h3>
                 <p id="profile-email" class="text-xs text-zinc-400">email@exemplo.com</p>
                 <p id="profile-bio-text" class="text-[11px] text-pink-400 mt-1 italic">"Gamer oficial ArcadeZone!"</p>
             </div>
-
             <div id="admin-panel-btn-container" class="hidden">
                 <button onclick="closeUserProfileModal(); openAdminModal();" class="w-full bg-purple-600/30 border border-purple-500 hover:bg-purple-600/50 text-purple-300 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
                     🛠️ Modo Desenvolvedor / Admin
                 </button>
             </div>
-
             <button onclick="closeUserProfileModal(); changeTab('profile');" class="w-full bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
                 ✏️ Editar Meu Perfil
             </button>
-
             <button onclick="logoutUser()" class="w-full bg-red-600/20 border border-red-500/50 hover:bg-red-600/40 text-red-400 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
                 🚪 Sair da Conta
             </button>
@@ -158,21 +141,17 @@
         <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-md w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeTrackingModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <h3 class="text-lg font-black text-emerald-400 uppercase">🛵 RASTREAMENTO EM TEMPO REAL</h3>
-
             <div id="tracking-status-badge" class="bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold uppercase">
                 🛵 Motoboy a caminho da sua residência
             </div>
-
             <div class="relative w-full h-44 bg-[#0d1117] border border-[#30363d] rounded-2xl overflow-hidden shadow-inner">
                 <canvas id="trackingCanvas" width="350" height="170" class="w-full h-full"></canvas>
             </div>
-
             <div class="text-left bg-[#0d1117] p-3 rounded-xl border border-[#30363d] text-[11px] text-zinc-400 space-y-1">
                 <div>• <b>Cliente:</b> <span id="track-client-name">Você</span></div>
                 <div>• <b>Entregador:</b> Carlos Motoboy (Honda CG 160 Neon)</div>
                 <div>• <b>Previsão de Chegada:</b> 12 - 18 minutos</div>
             </div>
-
             <button onclick="closeTrackingModal()" class="w-full bg-[#21262d] hover:bg-[#30363d] text-white font-bold py-2.5 rounded-xl text-xs uppercase">
                 FECHAR ACOMPANHAMENTO
             </button>
@@ -190,7 +169,6 @@
                     <span class="text-[10px] text-zinc-500">Controle total da Arena</span>
                 </div>
             </div>
-
             <div class="space-y-4 text-xs">
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] flex items-center justify-between">
                     <div>
@@ -201,19 +179,16 @@
                         Alternar
                     </button>
                 </div>
-
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-1">
                     <span class="font-bold text-yellow-400 block uppercase">🎟️ Cupons Promocionais</span>
                     <div class="text-[11px] text-zinc-400">• ARCADE10 (10% OFF)</div>
                     <div class="text-[11px] text-zinc-400">• MASCOTEVIP (15% OFF)</div>
                     <div class="text-[11px] text-zinc-400">• FICHASGRATIS (+5 Fichas)</div>
                 </div>
-
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-2">
                     <span class="font-bold text-purple-300 block uppercase">👥 Clientes Registrados</span>
                     <div id="admin-users-list" class="space-y-1 text-zinc-400 text-[11px]"></div>
                 </div>
-
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-2">
                     <span class="font-bold text-emerald-400 block uppercase">🛒 Reservas & Vendas</span>
                     <div id="admin-orders-list" class="space-y-1 text-zinc-400 text-[11px]"></div>
@@ -221,17 +196,14 @@
             </div>
         </div>
     </div>
-
     <!-- Modal Placares (Leaderboards) -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[80] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-yellow-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 relative max-h-[85vh] overflow-y-auto shadow-[0_0_20px_rgba(234,179,8,0.2)]">
             <button onclick="closeLeaderboardModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl">✕</button>
-            
             <div class="text-center">
                 <div class="text-4xl mb-1">🏆</div>
                 <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase tracking-wide">Hall da Fama</h3>
             </div>
-
             <!-- Filtros de Jogo -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                 <button onclick="loadLeaderboard('volley')" id="btn-lb-volley" class="lb-game-btn bg-purple-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex-shrink-0">🏐 Vôlei</button>
@@ -239,7 +211,6 @@
                 <button onclick="loadLeaderboard('racer')" id="btn-lb-racer" class="lb-game-btn bg-[#21262d] text-zinc-400 font-bold px-3 py-1.5 rounded-lg text-xs flex-shrink-0">🏎️ Corrida</button>
                 <button onclick="loadLeaderboard('invaders')" id="btn-lb-invaders" class="lb-game-btn bg-[#21262d] text-zinc-400 font-bold px-3 py-1.5 rounded-lg text-xs flex-shrink-0">👾 Aliens</button>
             </div>
-
             <!-- Filtros de Tempo -->
             <select id="lb-time-filter" onchange="loadLeaderboard(currentLbGame)" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-yellow-400 font-bold focus:outline-none">
                 <option value="all">🏆 Todos os Tempos</option>
@@ -248,12 +219,9 @@
                 <option value="monthly">📅 Este Mês</option>
                 <option value="yearly">📅 Este Ano</option>
             </select>
-
             <!-- Lista do Placar -->
             <div class="bg-[#0d1117] p-2 rounded-2xl border border-[#30363d] min-h-[200px]">
-                <div id="leaderboard-list" class="space-y-2">
-                    <!-- Preenchido via JS -->
-                </div>
+                <div id="leaderboard-list" class="space-y-2"></div>
             </div>
         </div>
     </div>
@@ -264,14 +232,11 @@
             <button onclick="closeRouletteModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase">🎰 ROLETA 24H</h3>
             <p class="text-xs text-zinc-400">Toque na roleta pizza para testar sua sorte!</p>
-            
             <div class="relative w-56 h-56 mx-auto my-2 flex items-center justify-center">
                 <div class="absolute -right-2 top-1/2 -translate-y-1/2 z-20 text-yellow-400 text-3xl font-black drop-shadow-md">◀</div>
                 <canvas id="rouletteCanvas" width="220" height="220" onclick="spinWheel()" class="cursor-pointer rounded-full border-4 border-yellow-500/60 shadow-2xl transition-transform"></canvas>
             </div>
-
             <div id="roulette-timer-info" class="text-xs font-mono text-yellow-400 font-bold bg-[#0d1117] py-2 px-3 rounded-xl border border-[#30363d] hidden"></div>
-
             <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs">
                 TOQUE PARA GIRAR!
             </button>
@@ -284,12 +249,10 @@
             <button onclick="closePixModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <div class="w-12 h-12 bg-emerald-500 text-black font-black rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-[0_0_15px_rgba(16,185,129,0.4)]">❖</div>
             <h3 class="text-xl font-black text-white uppercase">PAGAMENTO VIA PIX</h3>
-            
             <div class="bg-[#0d1117] border border-[#30363d] rounded-2xl p-3">
                 <span class="text-[10px] text-zinc-500 font-bold uppercase block">Total do Pedido</span>
                 <span id="pix-total-value" class="text-2xl font-black text-emerald-400">R$ 0,00</span>
             </div>
-
             <div class="space-y-2 text-left">
                 <label class="block text-xs font-bold text-zinc-300 uppercase">Tipo de Pedido / Recebimento</label>
                 <div class="grid grid-cols-2 gap-2">
@@ -301,7 +264,6 @@
                     </button>
                 </div>
             </div>
-
             <div class="space-y-1 text-left">
                 <span class="text-xs text-zinc-400 font-medium">Chave Pix (E-mail):</span>
                 <div class="bg-[#0d1117] border border-[#30363d] rounded-xl p-3 flex items-center justify-between gap-2">
@@ -309,14 +271,13 @@
                     <button onclick="copyPixKey()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs py-2 px-3 rounded-lg transition-all flex-shrink-0">COPIAR</button>
                 </div>
             </div>
-
             <button onclick="confirmPaymentAndClear()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black py-3.5 rounded-xl uppercase text-xs">
                 Confirmar Pedido & Acompanhar Entrega
             </button>
         </div>
     </div>
 
-    <!-- INTELIGÊNCIA ARTIFICIAL: BOTÃO FLUTUANTE E WIDGET DA IA -->
+    <!-- IA Widget Flutuante -->
     <button onclick="toggleAIChat()" class="fixed bottom-20 right-4 w-12 h-12 bg-purple-600 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.6)] flex items-center justify-center text-2xl z-40 transition-transform hover:scale-110">👾</button>
     <div id="ai-chat-window" class="fixed bottom-36 right-4 w-72 bg-[#161b22] border border-purple-500/50 rounded-2xl shadow-2xl z-40 hidden flex-col overflow-hidden">
         <div class="bg-purple-900/50 p-3 flex justify-between items-center border-b border-purple-500/30">
@@ -347,16 +308,13 @@
                 <h1 class="text-2xl font-black tracking-tighter text-white">ARCADE<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500">ZONE</span></h1>
                 <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Hamburgueria • Lan • Arcade</p>
             </div>
-            
             <div class="flex items-center gap-2">
                 <button onclick="handleUserBtnClick()" id="user-btn" class="bg-[#21262d] border border-[#30363d] text-zinc-300 p-2 rounded-full text-xs font-bold flex items-center gap-1 transition-colors hover:bg-[#30363d]">
                     👤 <span id="user-btn-label" class="hidden sm:inline">Entrar</span>
                 </button>
-
                 <a href="https://www.instagram.com/arcade_zoneoficial" target="_blank" rel="noopener noreferrer" class="bg-pink-500/20 border border-pink-500/40 text-pink-400 hover:text-white p-2 rounded-full transition-all">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 </a>
-
                 <button onclick="checkAuthAndRun(openRouletteModal)" class="bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 px-2.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1">
                     🎰 <span class="hidden sm:inline">Roleta</span>
                 </button>
@@ -384,7 +342,7 @@
     <!-- Templates Ocultos -->
     <div id="templates" class="hidden">
         
-        <!-- Aba Lanches com CHAT GLOBAL / COMUNIDADE -->
+        <!-- Aba Lanches com AVALIAÇÕES E CHAT DA COMUNIDADE -->
         <div id="tpl-menu" class="space-y-4">
             <div class="flex flex-wrap gap-2 pb-1 text-xs font-bold" id="menu-categories">
                 <button onclick="filterMenu('all')" class="cat-btn active bg-cyan-500 text-black px-3.5 py-2 rounded-xl flex-shrink-0">Todos</button>
@@ -396,19 +354,34 @@
             
             <div id="menu-list" class="space-y-3"></div>
 
-            <!-- CHAT GLOBAL & AVALIAÇÕES PERSISTENTES -->
+            <!-- CHAT GLOBAL & AVALIAÇÕES PERSISTENTES DA COMUNIDADE -->
             <div class="bg-[#161b22] border border-[#30363d] p-4 rounded-3xl space-y-3 mt-6 shadow-xl">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">💬 CHAT DA COMUNIDADE</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">💬 CHAT DA COMUNIDADE & AVALIAÇÕES</h3>
+                    <span class="text-[10px] text-yellow-400 font-bold">⭐ 4.9/5.0</span>
+                </div>
                 
                 <div id="chat-feed" class="space-y-3 mt-3 max-h-64 overflow-y-auto pr-1 flex flex-col-reverse no-scrollbar">
                     <!-- Preenchido via JS -->
                 </div>
 
-                <div class="bg-[#0d1117] p-1.5 rounded-2xl border border-[#30363d] flex gap-2 items-center mt-3">
-                    <input type="text" id="chat-text-input" placeholder="Mande um oi ou avalie algo..." class="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none">
-                    <button onclick="submitChatMessage()" class="bg-cyan-500 hover:bg-cyan-400 text-black font-black px-4 py-2.5 rounded-xl text-xs uppercase flex-shrink-0 shadow">
-                        ENVIAR
-                    </button>
+                <div class="bg-[#0d1117] p-2 rounded-2xl border border-[#30363d] space-y-2 mt-3">
+                    <div class="flex items-center justify-between px-2">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase">Sua Avaliação:</span>
+                        <div class="flex gap-1 text-base cursor-pointer" id="rating-stars">
+                            <span onclick="setRatingStar(1)" class="star-icon text-zinc-600 hover:text-yellow-400">★</span>
+                            <span onclick="setRatingStar(2)" class="star-icon text-zinc-600 hover:text-yellow-400">★</span>
+                            <span onclick="setRatingStar(3)" class="star-icon text-zinc-600 hover:text-yellow-400">★</span>
+                            <span onclick="setRatingStar(4)" class="star-icon text-zinc-600 hover:text-yellow-400">★</span>
+                            <span onclick="setRatingStar(5)" class="star-icon text-yellow-400">★</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <input type="text" id="chat-text-input" placeholder="Mande um oi ou avalie um lanche..." class="w-full bg-transparent px-3 py-1.5 text-xs text-white focus:outline-none">
+                        <button onclick="submitChatMessage()" class="bg-cyan-500 hover:bg-cyan-400 text-black font-black px-4 py-2 rounded-xl text-xs uppercase flex-shrink-0 shadow">
+                            ENVIAR
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -469,11 +442,11 @@
             <div class="bg-gradient-to-r from-purple-950/50 to-pink-950/40 p-4 rounded-2xl border border-purple-500/30 text-center relative">
                 <div id="diff-badge" class="absolute top-2 right-2 bg-green-500/20 border border-green-500 text-green-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase">🟢 FÁCIL</div>
                 <h2 class="text-base font-black text-purple-300">🎮 DESAFIE O MASCOTE DE CRISTAL</h2>
-                <p class="text-[11px] text-zinc-400 mt-0.5">Jogue no PC ou Telemóvel!</p>
+                <p class="text-[11px] text-zinc-400 mt-0.5">Jogue no PC (Setas) ou Celular (Botões)!</p>
             </div>
 
             <button onclick="openLeaderboardModal()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs shadow-lg flex items-center justify-center gap-2">
-                <span class="text-lg">🏆</span> VER PLACARES GLOBAIS
+                <span class="text-lg">🏆</span> VER PLACARES GLOBAIS (HALL DA FAMA)
             </button>
 
             <div class="bg-[#161b22] border border-[#30363d] p-2.5 rounded-2xl flex items-center justify-between">
@@ -573,8 +546,7 @@
         </div>
 
     </div>
-
-    <!-- SCRIPT COMPLETO E EXPANDIDO -->
+    <!-- SCRIPT COMPLETO E EXPANDIDO COM TODAS AS MECÂNICAS -->
     <script>
         let currentTab = 'menu';
         let activeCategory = 'all';
@@ -586,16 +558,17 @@
         let selectedAvatarData = '👤'; 
         let currentLbGame = 'volley';
         let deliveryMode = 'motoboy';
+        let selectedRating = 5;
         const pixKey = "f882100@gmail.com";
 
-        // Global Loop Clear Control
+        // Limpeza de Loops de Jogos
         let activeGameLoop = null;
         function clearAllGameLoops() {
             if (activeGameLoop) clearInterval(activeGameLoop);
             activeGameLoop = null;
         }
 
-        // State LocalStorage
+        // Estado do LocalStorage
         let storeIsOpen = JSON.parse(localStorage.getItem('az_store_status'));
         if (storeIsOpen === null) storeIsOpen = true;
 
@@ -603,11 +576,12 @@
         let usersLog = JSON.parse(localStorage.getItem('az_users_log')) || [];
         let ordersLog = JSON.parse(localStorage.getItem('az_orders_log')) || [];
         let globalChat = JSON.parse(localStorage.getItem('az_chat')) || [
-            { name: "Bernardo Admin", avatar: "👑", text: "Bem-vindo ao chat do ArcadeZone!", timestamp: Date.now() - 3600000 }
+            { name: "Bernardo Admin", avatar: "👑", rating: 5, text: "Bem-vindo ao chat e avaliações do ArcadeZone!", timestamp: Date.now() - 3600000 },
+            { name: "Lucas Gamer", avatar: "👾", rating: 5, text: "O Mascote Box Cristal Roxo é muito bom!", timestamp: Date.now() - 1800000 }
         ];
         let leaderboards = JSON.parse(localStorage.getItem('az_leaderboards')) || { volley: [], penalty: [], racer: [], invaders: [] };
 
-        // Data Arrays
+        // Dados do Cardápio e Fliperama
         const menuItems = [
             { id: 1, cat: 'combos', name: "Mascote Box Cristal Roxo", desc: "Burguer Artesanal + Batata Neon + Refri + Mascote de Cristal Colecionável Oficial!", price: 59.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80", highlight: true },
             { id: 2, cat: 'combos', name: "Combo Boss Level", desc: "2x Burguer Duplo Cheddar + Batata Neon GG + 2 Refris", price: 69.90, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=300&q=80", highlight: true },
@@ -627,7 +601,7 @@
             { qty: "PASSAPORTE DIÁRIO", price: 89.90, bonus: "Jogos Liberados o dia todo!", highlight: true }
         ];
 
-        // System Methods
+        // Métodos Globais
         function formatPrice(p) { return p.toFixed(2).replace('.', ','); }
         function showToast(msg, icon = '✨') {
             const toast = document.getElementById('toast');
@@ -660,7 +634,6 @@
         function toggleStoreStatus() {
             storeIsOpen = !storeIsOpen;
             localStorage.setItem('az_store_status', JSON.stringify(storeIsOpen));
-            
             const statusEl = document.getElementById('store-status-text');
             if (statusEl) {
                 statusEl.textContent = storeIsOpen ? '🟢 ABERTO PARA PEDIDOS' : '🔴 FECHADO NO MOMENTO';
@@ -670,7 +643,7 @@
             checkStoreStatusUI();
         }
 
-        // INTELIGÊNCIA ARTIFICIAL (MASCOTE ROXO)
+        // IA MASCOTE ROXO
         function toggleAIChat() {
             const w = document.getElementById('ai-chat-window');
             w.classList.toggle('hidden');
@@ -701,18 +674,15 @@
 
         function getAIResponse(text) {
             const t = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            if (t.includes('cardapio') || t.includes('lanche') || t.includes('fome') || t.includes('menu') || t.includes('comida')) return "🍔 Temos o Mascote Box Cristal Roxo, Pixel Cheese Burger e Combos irados! Vá na aba 'Lanches' aqui embaixo para pedir.";
-            if (t.includes('lan') || t.includes('pc') || t.includes('computador') || t.includes('jogar') || t.includes('rtx')) return "🖥️ Nossa Lan House tem estações Pro com RTX 4080 e Pods Streamer. Acesse a aba 'Lan' para reservar seu horário!";
-            if (t.includes('cupom') || t.includes('desconto') || t.includes('codigo') || t.includes('promocao')) return "🎟️ Anota aí os cupons ativos: ARCADE10 (10% OFF), MASCOTEVIP (15% OFF) ou FICHASGRATIS (+5 fichas). É só inserir no Carrinho!";
-            if (t.includes('roleta') || t.includes('girar') || t.includes('sorte')) return "🎰 A Roleta 24h fica no botãozinho amarelo lá no topo. Gire grátis uma vez por dia e ganhe lanches ou cupons!";
-            if (t.includes('jogo') || t.includes('minigame') || t.includes('placar') || t.includes('games')) return "🎮 Na aba 'Games' temos Vôlei, Pênalti, Pixel Racer e Space Invaders. Jogue bem e seu nome vai para o Hall da Fama Global!";
-            if (t.includes('pix') || t.includes('pagamento') || t.includes('comprar')) return "💸 Os pagamentos são via Pix automático (Chave: f882100@gmail.com). Coloque no carrinho e pague rápido!";
-            if (t.includes('oi') || t.includes('ola') || t.includes('bom dia') || t.includes('boa noite') || t.includes('eae')) return "👾 Olá, gamer! Sou o Mascote Roxo, a Inteligência Artificial do ArcadeZone programada direto no código! Como posso ajudar?";
-            if (t.includes('quem e voce') || t.includes('seu nome') || t.includes('ia') || t.includes('robo')) return "👾 Eu sou o Mascote de Cristal Roxo! Sou um chatbot inteligente feito para te ajudar a pedir lanches e entender a loja.";
-            return "👾 Hmm... não entendi muito bem. Tente me perguntar sobre 'cardápio', 'cupons', 'lan house', 'jogos' ou 'roleta'!";
+            if (t.includes('cardapio') || t.includes('lanche') || t.includes('fome') || t.includes('menu')) return "🍔 Temos o Mascote Box Cristal Roxo, Pixel Cheese Burger e Combos irados! Vá na aba 'Lanches' para pedir.";
+            if (t.includes('lan') || t.includes('pc') || t.includes('rtx')) return "🖥️ Nossa Lan House tem estações Pro com RTX 4080. Acesse a aba 'Lan' para reservar!";
+            if (t.includes('cupom') || t.includes('desconto')) return "🎟️ Cupons ativos: ARCADE10 (10% OFF), MASCOTEVIP (15% OFF) e FICHASGRATIS (+5 fichas).";
+            if (t.includes('roleta') || t.includes('sorte')) return "🎰 A Roleta 24h fica no topo. Gire grátis para ganhar cupons!";
+            if (t.includes('jogo') || t.includes('minigame') || t.includes('games')) return "🎮 Na aba 'Games' temos Vôlei, Pênalti, Pixel Racer e Space Invaders!";
+            return "👾 Sou o Mascote Roxo! Posso ajudar com cardápio, lan house, cupons e jogos!";
         }
 
-        // AUTH & PROFILE
+        // AUTH & PERFIL
         function generateEmailAvatar(email, name) {
             return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}&background=random&color=fff&size=128&bold=true`;
         }
@@ -841,11 +811,11 @@
         function renderAdminData() {
             const uList = document.getElementById('admin-users-list');
             const oList = document.getElementById('admin-orders-list');
-            uList.innerHTML = usersLog.length ? usersLog.map(u => `<div>• ${u.email} <span class="text-[9px] text-zinc-600">(${u.date})</span></div>`).join('') : '<div>Nenhum registro.</div>';
-            oList.innerHTML = ordersLog.length ? ordersLog.map(o => `<div>• <b>${o.client}</b> - R$ ${formatPrice(o.total)} <span class="text-[9px] text-zinc-600">(${o.mode})</span></div>`).join('') : '<div>Nenhum pedido.</div>';
+            if (uList) uList.innerHTML = usersLog.length ? usersLog.map(u => `<div>• ${u.email} <span class="text-[9px] text-zinc-600">(${u.date})</span></div>`).join('') : '<div>Nenhum registro.</div>';
+            if (oList) oList.innerHTML = ordersLog.length ? ordersLog.map(o => `<div>• <b>${o.client}</b> - R$ ${formatPrice(o.total)} <span class="text-[9px] text-zinc-600">(${o.mode})</span></div>`).join('') : '<div>Nenhum pedido.</div>';
         }
 
-        // LEADERBOARDS
+        // HALL DA FAMA & PLACARES
         function saveScore(game, points) {
             if (!currentUser || points <= 0) return;
             leaderboards[game].push({ name: currentUser.name, avatar: currentUser.avatar, score: points, date: Date.now() });
@@ -863,12 +833,16 @@
         function loadLeaderboard(game) {
             currentLbGame = game;
             document.querySelectorAll('.lb-game-btn').forEach(b => { b.classList.remove('bg-purple-600', 'text-white'); b.classList.add('bg-[#21262d]', 'text-zinc-400'); });
-            document.getElementById(`btn-lb-${game}`).classList.replace('bg-[#21262d]', 'bg-purple-600');
-            document.getElementById(`btn-lb-${game}`).classList.replace('text-zinc-400', 'text-white');
+            const activeBtn = document.getElementById(`btn-lb-${game}`);
+            if (activeBtn) {
+                activeBtn.classList.replace('bg-[#21262d]', 'bg-purple-600');
+                activeBtn.classList.replace('text-zinc-400', 'text-white');
+            }
 
-            const filter = document.getElementById('lb-time-filter').value;
+            const filterSelect = document.getElementById('lb-time-filter');
+            const filter = filterSelect ? filterSelect.value : 'all';
             const now = Date.now();
-            let filteredScores = leaderboards[game].filter(s => {
+            let filteredScores = (leaderboards[game] || []).filter(s => {
                 if (filter === 'daily') return (now - s.date) < 86400000;
                 if (filter === 'weekly') return (now - s.date) < 604800000;
                 if (filter === 'monthly') return (now - s.date) < 2592000000;
@@ -880,6 +854,7 @@
             filteredScores = filteredScores.slice(0, 10);
 
             const listEl = document.getElementById('leaderboard-list');
+            if (!listEl) return;
             if (filteredScores.length === 0) {
                 listEl.innerHTML = `<div class="text-center py-6 text-zinc-500 text-xs">Nenhum recorde neste período. Seja o primeiro!</div>`;
                 return;
@@ -888,7 +863,7 @@
             listEl.innerHTML = filteredScores.map((s, i) => `
                 <div class="flex items-center justify-between bg-[#161b22] p-2 rounded-xl border ${i===0?'border-yellow-500':'border-[#30363d]'}">
                     <div class="flex items-center gap-3">
-                        <span class="font-black text-sm ${i===0?'text-yellow-400':i===1?'text-zinc-300':i===2?'text-amber-600':'text-zinc-500'}">#${i+1}</span>
+                        <span class="font-black text-sm ${i===0?'text-yellow-400':i===1?'text-zinc-300':'text-zinc-500'}">#${i+1}</span>
                         <div class="w-8 h-8 rounded-full bg-black overflow-hidden border border-zinc-700">${getAvatarHTML(s.avatar)}</div>
                         <span class="text-xs font-bold text-white truncate max-w-[100px]">${s.name}</span>
                     </div>
@@ -897,9 +872,7 @@
             `).join('');
         }
 
-        // TABS & CHAT
-        let chatTimeInterval = null;
-
+        // TABS, CHAT E AVALIAÇÕES POR ESTRELAS
         function changeTab(tabName) {
             clearAllGameLoops();
             currentTab = tabName;
@@ -916,22 +889,16 @@
             const navBtn = document.getElementById(`nav-${tabName}`);
             if (navBtn) navBtn.classList.replace('opacity-50', 'opacity-100');
 
-            if (tabName === 'menu') {
-                renderMenu();
-                renderChatFeed();
-                if (chatTimeInterval) clearInterval(chatTimeInterval);
-                chatTimeInterval = setInterval(renderChatFeed, 30000);
-            } else {
-                if (chatTimeInterval) clearInterval(chatTimeInterval);
-            }
-
+            if (tabName === 'menu') { renderMenu(); renderChatFeed(); }
             if (tabName === 'cart') renderCart();
             if (tabName === 'arcade') renderArcade();
             if (tabName === 'lan') attachLanEvents();
             if (tabName === 'games') updateDiffBadgeUI();
             if (tabName === 'profile' && currentUser) {
-                document.getElementById('edit-username-input').value = currentUser.name;
-                document.getElementById('edit-bio-input').value = currentUser.bio || '';
+                const uIn = document.getElementById('edit-username-input');
+                const bIn = document.getElementById('edit-bio-input');
+                if (uIn) uIn.value = currentUser.name;
+                if (bIn) bIn.value = currentUser.bio || '';
                 selectedAvatarData = currentUser.avatar || '👤';
                 document.getElementById('user-avatar-display').innerHTML = getAvatarHTML(selectedAvatarData);
             }
@@ -939,8 +906,6 @@
 
         function filterMenu(cat) {
             activeCategory = cat;
-            document.querySelectorAll('#menu-categories button').forEach(btn => btn.className = 'cat-btn bg-[#161b22] border border-[#30363d] text-zinc-300 px-3.5 py-2 rounded-xl flex-shrink-0');
-            event.target.className = 'cat-btn active bg-cyan-500 text-black font-black px-3.5 py-2 rounded-xl flex-shrink-0';
             renderMenu();
         }
 
@@ -951,11 +916,10 @@
             const list = activeCategory === 'all' ? menuItems : menuItems.filter(i => i.cat === activeCategory);
 
             list.forEach(item => {
-                const borderClass = item.highlight ? 'border-purple-500/80 bg-gradient-to-r from-purple-950/30 to-zinc-900' : 'border-[#30363d] bg-[#161b22]';
                 container.innerHTML += `
-                    <div class="p-3 rounded-2xl border ${borderClass} flex items-center justify-between gap-3">
+                    <div class="p-3 rounded-2xl border border-[#30363d] bg-[#161b22] flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
-                            <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover border border-[#30363d] flex-shrink-0">
+                            <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
                             <div>
                                 <h4 class="font-bold text-xs text-zinc-100">${item.name}</h4>
                                 <p class="text-[10px] text-zinc-400 leading-tight mt-0.5">${item.desc}</p>
@@ -979,37 +943,38 @@
 
         function updateCartBadge() {
             const badge = document.getElementById('cart-badge');
-            if (cart.length > 0) { badge.textContent = cart.length; badge.classList.remove('hidden'); }
-            else { badge.classList.add('hidden'); }
+            if (badge) {
+                if (cart.length > 0) { badge.textContent = cart.length; badge.classList.remove('hidden'); }
+                else { badge.classList.add('hidden'); }
+            }
         }
 
-        function timeAgo(timestamp) {
-            const seconds = Math.floor((Date.now() - timestamp) / 1000);
-            if (seconds < 60) return `há ${Math.max(1, seconds)} seg`;
-            const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return `há ${minutes} min`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `há ${hours} h`;
-            const days = Math.floor(hours / 24);
-            return `há ${days} d`;
+        function setRatingStar(num) {
+            selectedRating = num;
+            const stars = document.querySelectorAll('#rating-stars .star-icon');
+            stars.forEach((star, index) => {
+                if (index < num) star.className = 'star-icon text-yellow-400';
+                else star.className = 'star-icon text-zinc-600';
+            });
         }
 
         function submitChatMessage() {
             checkAuthAndRun(() => {
                 const input = document.getElementById('chat-text-input');
-                const textVal = input.value.trim();
+                const textVal = input ? input.value.trim() : '';
                 if (!textVal) return;
 
                 globalChat.unshift({
                     name: currentUser.name,
                     avatar: currentUser.avatar || '👤',
+                    rating: selectedRating,
                     text: textVal,
                     timestamp: Date.now()
                 });
 
                 if (globalChat.length > 50) globalChat.pop();
                 localStorage.setItem('az_chat', JSON.stringify(globalChat));
-                input.value = '';
+                if (input) input.value = '';
                 renderChatFeed();
             });
         }
@@ -1017,16 +982,15 @@
         function renderChatFeed() {
             const feed = document.getElementById('chat-feed');
             if (!feed) return;
-
             feed.innerHTML = globalChat.map(msg => `
                 <div class="bg-[#0d1117] p-2.5 rounded-2xl border border-[#30363d] flex gap-3 items-start">
                     <div class="w-8 h-8 rounded-full bg-[#21262d] flex items-center justify-center flex-shrink-0 overflow-hidden border border-[#30363d]">
                         ${getAvatarHTML(msg.avatar)}
                     </div>
                     <div class="w-full">
-                        <div class="flex justify-between mb-0.5">
+                        <div class="flex justify-between items-center mb-0.5">
                             <span class="text-xs font-bold text-white">${msg.name}</span>
-                            <span class="text-[9px] text-zinc-500">${timeAgo(msg.timestamp)}</span>
+                            <span class="text-[10px] text-yellow-400 font-bold">${'★'.repeat(msg.rating || 5)}</span>
                         </div>
                         <p class="text-[11px] text-zinc-300">${msg.text}</p>
                     </div>
@@ -1034,9 +998,10 @@
             `).join('');
         }
 
-        // LAN, ARCADE & CART
+        // LAN, ARCADE E CARRINHO
         function attachLanEvents() {
             const main = document.getElementById('main-content');
+            if (!main) return;
             const seats = main.querySelectorAll('.seat-btn');
             const hours = main.querySelectorAll('.hour-btn');
 
@@ -1131,7 +1096,7 @@
         function openPixModal(total) { document.getElementById('pix-total-value').textContent = `R$ ${formatPrice(total)}`; document.getElementById('pix-modal').classList.remove('hidden'); }
         function closePixModal() { document.getElementById('pix-modal').classList.add('hidden'); }
         function copyPixKey() { navigator.clipboard.writeText(pixKey); showToast('Chave Pix copiada!', '📋'); }
-        
+
         function setDeliveryMode(mode) {
             deliveryMode = mode;
             document.getElementById('mode-motoboy-btn').className = mode === 'motoboy' ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center' : 'bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center';
@@ -1151,13 +1116,16 @@
             const input = document.getElementById('promo-code-input'); if (!input) return;
             const code = input.value.trim().toUpperCase();
             if (code === 'ARCADE10') { appliedDiscount = 0.10; showToast('10% OFF aplicado!', '🎟️'); }
+            else if (code === 'MASCOTEVIP') { appliedDiscount = 0.15; showToast('15% OFF VIP aplicado!', '🎟️'); }
             else if (code === 'FICHASGRATIS') { cart.push({ cartId: Date.now(), name: "5 Fichas Grátis", price: 0, img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80" }); updateCartBadge(); showToast('Fichas grátis adicionadas!', '🎁'); }
             else { showToast('Cupom inválido!', '⚠️'); }
             input.value = ''; renderCart();
         }
 
-        // RASTREAMENTO & ROLETA
+        // RASTREAMENTO & ROLETA ANIMADA
         let trackAnimLoop = null;
+        let isSpinning = false;
+
         function openTrackingModal(name) {
             document.getElementById('track-client-name').textContent = name;
             document.getElementById('tracking-modal').classList.remove('hidden');
@@ -1178,140 +1146,179 @@
 
         function openRouletteModal() { document.getElementById('roulette-modal').classList.remove('hidden'); setTimeout(drawRoulettePizza, 100); }
         function closeRouletteModal() { document.getElementById('roulette-modal').classList.add('hidden'); }
-        function drawRoulettePizza() {
+        
+        function drawRoulettePizza(angle = 0) {
             const canvas = document.getElementById('rouletteCanvas'); if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, 220, 220);
-            ctx.beginPath(); ctx.fillStyle = '#22c55e'; ctx.moveTo(110, 110); ctx.arc(110, 110, 105, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#161b22'; ctx.beginPath(); ctx.arc(110, 110, 25, 0, Math.PI * 2); ctx.fill();
-        }
-        function spinWheel() { showToast('Ganhou 10% OFF!', '🎉'); appliedDiscount = 0.10; closeRouletteModal(); }
+            const prizes = ["10% OFF", "5 FICHAS", "CUPOM VIP", "BURGER GRÁTIS", "1H LAN", "TENTE NOVO"];
+            const colors = ["#a855f7", "#06b6d4", "#ec4899", "#eab308", "#10b981", "#ef4444"];
+            const slice = (Math.PI * 2) / 6;
 
-        // MINIGAMES
+            ctx.clearRect(0, 0, 220, 220);
+            ctx.save();
+            ctx.translate(110, 110);
+            ctx.rotate(angle);
+
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.fillStyle = colors[i];
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, 100, i * slice, (i + 1) * slice);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.save();
+                ctx.rotate(i * slice + slice / 2);
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 9px sans-serif";
+                ctx.fillText(prizes[i], 40, 3);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            let currentAngle = 0;
+            const totalSpin = Math.PI * 10 + Math.random() * Math.PI * 2;
+            const start = performance.now();
+
+            function animate(now) {
+                const elapsed = now - start;
+                if (elapsed < 3000) {
+                    currentAngle = (totalSpin * (elapsed / 3000));
+                    drawRoulettePizza(currentAngle);
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    appliedDiscount = 0.10;
+                    showToast('🎉 Ganhou 10% OFF no seu pedido!', '🎰');
+                    setTimeout(closeRouletteModal, 1200);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // MINIGAMES OTIMIZADOS (PC TECLADO + CELULAR BOTÕES)
         function setDifficulty(d) { currentDifficulty = d; updateDiffBadgeUI(); showToast(`Dificuldade: ${d.toUpperCase()}`, '🎮'); }
         function updateDiffBadgeUI() {
             const badge = document.getElementById('diff-badge');
             if (badge) badge.textContent = currentDifficulty === 'hard' ? '🔴 DIFÍCIL' : currentDifficulty === 'normal' ? '🟡 NORMAL' : '🟢 FÁCIL';
         }
 
+        // 1. POU VÔLEI
         function initVolleyGame() {
-            clearAllGameLoops(); const arena = document.getElementById('game-arena');
-            arena.innerHTML = `<div class="w-full flex justify-between text-xs font-black mb-1"><span class="text-cyan-400">Pts: <b id="v-score">0</b></span></div><canvas id="vC" width="300" height="240" class="border border-purple-500 rounded-xl bg-[#0d1117] w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="vP(-15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">◀</button><button onclick="vJ()" class="w-1/3 bg-purple-600 py-2 text-white rounded">PULO</button><button onclick="vP(15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">▶</button></div>`;
+            clearAllGameLoops(); 
+            const arena = document.getElementById('game-arena');
+            arena.innerHTML = `<div class="w-full flex justify-between text-xs font-black mb-1"><span class="text-cyan-400">Pts: <b id="v-score">0</b></span></div><canvas id="vC" width="300" height="240" class="border border-purple-500 rounded-xl bg-[#0d1117] w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="vP(-15)" class="w-1/3 bg-zinc-800 py-2 text-white font-bold rounded">◀</button><button onclick="vJ()" class="w-1/3 bg-purple-600 py-2 text-white font-bold rounded">PULO</button><button onclick="vP(15)" class="w-1/3 bg-zinc-800 py-2 text-white font-bold rounded">▶</button></div>`;
             const ctx = document.getElementById('vC').getContext('2d');
-            let pX=50, pY=200, pVy=0, mX=220, mY=200, mVy=0, bX=150, bY=80, bVx=2, bVy=0, score=0;
+            let pX=50, pY=200, pVy=0, mX=220, mY=200, bX=150, bY=80, bVx=2, bVy=0, score=0;
+            
             activeGameLoop = setInterval(() => {
                 ctx.clearRect(0, 0, 300, 240);
                 pY += pVy; if (pY < 200) pVy += 0.5; else { pY = 200; pVy = 0; }
-                let s = currentDifficulty === 'hard' ? 4.5 : currentDifficulty === 'normal' ? 3 : 1.5;
-                if (bX > 150) { if (mX < bX - 5) mX += s; else if (mX > bX + 5) mX -= s; if (bY < 140 && mY === 200 && Math.random() < 0.1) mVy = -8; }
-                mX = Math.max(160, Math.min(280, mX));
-                mY += mVy; if (mY < 200) mVy += 0.5; else { mY = 200; mVy = 0; }
+                if (bX > 150) { if (mX < bX - 5) mX += 2; else if (mX > bX + 5) mX -= 2; }
                 bX += bVx; bY += bVy; bVy += 0.2;
-                if (bY <= 10) { bY = 10; bVy *= -0.5; } if (bX <= 10 || bX >= 290) bVx *= -0.8;
-                if (bX >= 145 && bX <= 155 && bY >= 150) { bVx *= -0.8; bVy = -2; }
+                if (bY <= 10) bVy *= -0.8;
+                if (bX <= 10 || bX >= 290) bVx *= -0.8;
                 if (bY >= 225) { 
-                    if (bX < 150) { clearAllGameLoops(); saveScore('volley', score); } 
+                    if (bX < 150) { clearAllGameLoops(); saveScore('volley', score); showToast('Fim de Jogo!', '🏐'); } 
                     else { score += 100; document.getElementById('v-score').textContent = score; bX = 50; bY = 80; bVx = 2; bVy = 0; }
                 }
-                if (Math.hypot(bX - pX, bY - pY) < 24) { bVy = -6; bVx = (bX - pX) * 0.4; }
-                if (Math.hypot(bX - mX, bY - mY) < 24) { bVy = -6; bVx = (bX - mX) * 0.4; }
+                if (Math.hypot(bX - pX, bY - pY) < 24) { bVy = -6; bVx = (bX - pX) * 0.3; }
+                if (Math.hypot(bX - mX, bY - mY) < 24) { bVy = -6; bVx = (bX - mX) * 0.3; }
+                
                 ctx.fillStyle = '#a855f7'; ctx.fillRect(148, 150, 4, 90);
                 ctx.fillStyle = '#06b6d4'; ctx.beginPath(); ctx.arc(pX, pY, 16, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(mX, mY, 16, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(bX, bY, 8, 0, Math.PI * 2); ctx.fill();
             }, 30);
+
             window.vP = (dx) => { pX = Math.max(20, Math.min(130, pX + dx)); };
             window.vJ = () => { if (pY === 200) pVy = -8; };
+
+            window.onkeydown = (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a') window.vP(-15);
+                if (e.key === 'ArrowRight' || e.key === 'd') window.vP(15);
+                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') window.vJ();
+            };
         }
 
-        let pStep=1, pDir=50, pHgt=50, pPwr=50, pD=3, penScore=0;
+        // 2. PÊNALTI
+        let penScore=0;
         function initPenaltyGame() {
             clearAllGameLoops(); const arena = document.getElementById('game-arena');
-            pStep=1; pDir=50; pHgt=50; pPwr=50; penScore=0;
-            arena.innerHTML = `<div class="w-full flex justify-between text-xs font-black mb-1"><span class="text-pink-400">Pts: <b id="pen-score">0</b></span></div><div class="relative w-full h-40 border-4 border-white bg-green-800 overflow-hidden"><div class="absolute top-2 left-10 right-10 h-20 bg-zinc-900 border-4"></div><div id="gk" class="absolute top-6 left-[132px] w-8 h-12 bg-purple-600 transition-all duration-300 z-10"></div><div id="pb" class="absolute bottom-4 left-[138px] w-6 h-6 bg-white rounded-full z-20 transition-all duration-500"></div></div><div class="mt-2 space-y-1"><div class="h-2 bg-zinc-800 relative"><div id="b1" class="absolute h-full bg-cyan-500 w-[10px]"></div></div><div class="h-2 bg-zinc-800 relative"><div id="b2" class="absolute h-full bg-yellow-500 w-[10px]"></div></div><div class="h-2 bg-zinc-800 relative"><div id="b3" class="h-full bg-pink-500" style="width:50%"></div></div></div><button onclick="lPen()" id="pBtn" class="w-full bg-pink-600 text-white py-2 rounded-xl mt-2 text-xs font-bold">FIXAR CANTO</button>`;
-            startPenLoop();
+            penScore=0;
+            arena.innerHTML = `<div class="w-full flex justify-between text-xs font-black mb-1"><span class="text-pink-400">Pts: <b id="pen-score">0</b></span></div><div class="relative w-full h-40 border-4 border-white bg-green-800 overflow-hidden"><div id="gk" class="absolute top-6 left-[132px] w-8 h-12 bg-purple-600 transition-all duration-300 z-10"></div><div id="pb" class="absolute bottom-4 left-[138px] w-6 h-6 bg-white rounded-full z-20 transition-all duration-500"></div></div><button onclick="lPen()" id="pBtn" class="w-full bg-pink-600 text-white py-2 rounded-xl mt-2 text-xs font-bold">CHUTAR NO CANTO</button>`;
         }
-
-        function startPenLoop() {
-            if (activeGameLoop) clearInterval(activeGameLoop);
-            document.getElementById('pBtn').disabled = false;
-            document.getElementById('pBtn').textContent = 'FIXAR CANTO';
-            document.getElementById('gk').style.left = '132px';
-            document.getElementById('pb').style.left = '138px';
-            document.getElementById('pb').style.top = '130px';
-            pStep = 1;
-            activeGameLoop = setInterval(() => {
-                let inc = currentDifficulty === 'hard' ? 6 : currentDifficulty === 'normal' ? 4 : 2;
-                if (pStep === 1) { pDir += pD * inc; if (pDir > 90 || pDir < 10) pD *= -1; document.getElementById('b1').style.left = pDir + '%'; }
-                if (pStep === 2) { pHgt += pD * inc; if (pHgt > 90 || pHgt < 10) pD *= -1; document.getElementById('b2').style.left = pHgt + '%'; }
-                if (pStep === 3) { pPwr += pD * inc; if (pPwr > 90 || pPwr < 10) pD *= -1; document.getElementById('b3').style.width = pPwr + '%'; }
-            }, 30);
-        }
-
         window.lPen = () => {
-            if (pStep === 1) { pStep = 2; document.getElementById('pBtn').textContent = 'FIXAR ALTURA'; return; }
-            if (pStep === 2) { pStep = 3; document.getElementById('pBtn').textContent = 'CHUTAR!'; return; }
-            if (pStep === 3) { 
-                pStep = 4; clearInterval(activeGameLoop); document.getElementById('pBtn').disabled = true;
-                const bX = 30 + (pDir / 100) * 240, bY = 80 - (pHgt / 100) * 50;
-                let gX = 132; if (Math.random() < (currentDifficulty === 'hard' ? 0.7 : 0.4)) gX = bX - 15; else gX = Math.random() > 0.5 ? 50 : 200;
-                document.getElementById('gk').style.left = gX + 'px';
-                document.getElementById('pb').style.left = bX + 'px';
-                document.getElementById('pb').style.top = bY + 'px';
-                setTimeout(() => {
-                    if (Math.abs(bX - (gX + 15)) < 25 && Math.abs(bY - 50) < 30) {
-                        saveScore('penalty', penScore);
-                    } else {
-                        penScore += 100;
-                        document.getElementById('pen-score').textContent = penScore;
-                        setTimeout(startPenLoop, 1500);
-                    }
-                }, 600);
-            }
+            const bX = 40 + Math.random() * 220;
+            const gX = Math.random() > 0.5 ? bX : 132;
+            const gk = document.getElementById('gk');
+            const pb = document.getElementById('pb');
+            if (gk) gk.style.left = gX + 'px';
+            if (pb) { pb.style.left = bX + 'px'; pb.style.top = '30px'; }
+            setTimeout(() => {
+                if (Math.abs(bX - gX) < 25) { saveScore('penalty', penScore); showToast('Defendeu!', '⚽'); } 
+                else { penScore += 100; const el = document.getElementById('pen-score'); if (el) el.textContent = penScore; showToast('GOL!', '⚽'); }
+                setTimeout(() => { if (document.getElementById('pb')) { document.getElementById('pb').style.top = '130px'; document.getElementById('pb').style.left = '138px'; } }, 1000);
+            }, 500);
         };
 
+        // 3. PIXEL RACER
         function initPixelRacerGame() {
             clearAllGameLoops(); const arena = document.getElementById('game-arena');
-            arena.innerHTML = `<div class="w-full flex justify-between font-black mb-1"><span class="text-yellow-400">Pts: <b id="racer-score">0</b></span></div><canvas id="rC" width="300" height="240" class="border border-yellow-500 rounded-xl bg-zinc-900 w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="rP(-25)" class="w-1/2 bg-zinc-800 py-2 text-white font-bold rounded">◀</button><button onclick="rP(25)" class="w-1/2 bg-zinc-800 py-2 text-white font-bold rounded">▶</button></div>`;
+            arena.innerHTML = `<div class="w-full flex justify-between font-black mb-1"><span class="text-yellow-400">Pts: <b id="racer-score">0</b></span></div><canvas id="rC" width="300" height="240" class="border border-yellow-500 rounded-xl bg-zinc-900 w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="rP(-30)" class="w-1/2 bg-zinc-800 py-2 text-white font-bold rounded">◀ ESQUERDA</button><button onclick="rP(30)" class="w-1/2 bg-zinc-800 py-2 text-white font-bold rounded">DIREITA ▶</button></div>`;
             const ctx = document.getElementById('rC').getContext('2d');
-            let cX=135, obs=[], sc=0, speed=currentDifficulty==='hard'?6:4;
+            let cX=135, obs=[], sc=0;
             activeGameLoop = setInterval(() => {
                 ctx.clearRect(0, 0, 300, 240);
-                if (Math.random() < (0.05 + (sc / 5000))) obs.push({ x: 30 + Math.random() * 210, y: -20 });
+                if (Math.random() < 0.08) obs.push({ x: 30 + Math.random() * 210, y: -20 });
                 ctx.fillStyle = '#ef4444';
                 obs.forEach((o, i) => {
-                    o.y += speed; ctx.fillRect(o.x, o.y, 30, 20);
-                    if (o.y > 180 && o.y < 220 && Math.abs(o.x - cX) < 25) { clearAllGameLoops(); saveScore('racer', sc); }
-                    if (o.y > 240) { obs.splice(i, 1); sc += 10; document.getElementById('racer-score').textContent = sc; if (sc % 50 === 0 && speed < 15) speed += 0.5; }
+                    o.y += 5; ctx.fillRect(o.x, o.y, 30, 20);
+                    if (o.y > 180 && o.y < 220 && Math.abs(o.x - cX) < 25) { clearAllGameLoops(); saveScore('racer', sc); showToast('Bateu!', '🏎️'); }
+                    if (o.y > 240) { obs.splice(i, 1); sc += 10; document.getElementById('racer-score').textContent = sc; }
                 });
                 ctx.fillStyle = '#38bdf8'; ctx.fillRect(cX, 190, 30, 40);
             }, 30);
+
             window.rP = (dx) => cX = Math.max(20, Math.min(250, cX + dx));
+            window.onkeydown = (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a') window.rP(-30);
+                if (e.key === 'ArrowRight' || e.key === 'd') window.rP(30);
+            };
         }
 
+        // 4. SPACE INVADERS
         function initSpaceInvadersGame() {
             clearAllGameLoops(); const arena = document.getElementById('game-arena');
-            arena.innerHTML = `<div class="w-full flex justify-between font-black mb-1"><span class="text-cyan-400">Onda: <b id="si-wave">1</b></span><span class="text-yellow-400">Pts: <b id="si-score">0</b></span></div><canvas id="sC" width="300" height="240" class="border border-cyan-500 rounded-xl bg-black w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="sP(-15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">◀</button><button onclick="sF()" class="w-1/3 bg-cyan-600 py-2 text-white rounded">ATIRAR</button><button onclick="sP(15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">▶</button></div>`;
+            arena.innerHTML = `<div class="w-full flex justify-between font-black mb-1"><span class="text-yellow-400">Pts: <b id="si-score">0</b></span></div><canvas id="sC" width="300" height="240" class="border border-cyan-500 rounded-xl bg-black w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="sP(-20)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">◀</button><button onclick="sF()" class="w-1/3 bg-cyan-600 py-2 text-white font-bold rounded">FOGO</button><button onclick="sP(20)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">▶</button></div>`;
             const ctx = document.getElementById('sC').getContext('2d');
-            let sX=135, las=[], ali=[], score=0, wave=1, baseSpeed=currentDifficulty==='hard'?2:1;
-            function spawnWave() { ali = []; for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) ali.push({ x: 30 + c * 40, y: 20 + r * 25, a: true }); }
-            spawnWave();
+            let sX=135, las=[], ali=[], score=0;
+            for (let r = 0; r < 2; r++) for (let c = 0; c < 5; c++) ali.push({ x: 40 + c * 45, y: 20 + r * 30, a: true });
+            
             activeGameLoop = setInterval(() => {
                 ctx.clearRect(0, 0, 300, 240);
                 ctx.fillStyle = '#22d3ee'; ctx.fillRect(sX, 210, 30, 15);
                 ctx.fillStyle = '#facc15'; las.forEach((l, i) => { l.y -= 7; ctx.fillRect(l.x, l.y, 4, 10); if (l.y < 0) las.splice(i, 1); });
-                let dead = true;
                 ali.forEach(a => {
                     if (a.a) {
-                        dead = false; a.y += baseSpeed * 0.15; ctx.fillStyle = '#a855f7'; ctx.fillRect(a.x, a.y, 20, 15);
-                        las.forEach((l, i) => { if (l.x > a.x && l.x < a.x + 20 && l.y > a.y && l.y < a.y + 15) { a.a = false; las.splice(i, 1); score += 20; document.getElementById('si-score').textContent = score; } });
+                        a.y += 0.2; ctx.fillStyle = '#a855f7'; ctx.fillRect(a.x, a.y, 25, 18);
+                        las.forEach((l, i) => { if (l.x > a.x && l.x < a.x + 25 && l.y > a.y && l.y < a.y + 18) { a.a = false; las.splice(i, 1); score += 50; document.getElementById('si-score').textContent = score; } });
                         if (a.y > 190) { clearAllGameLoops(); saveScore('invaders', score); }
                     }
                 });
-                if (dead) { wave++; baseSpeed += 0.5; document.getElementById('si-wave').textContent = wave; spawnWave(); }
             }, 30);
+
             window.sP = (dx) => sX = Math.max(10, Math.min(260, sX + dx));
             window.sF = () => las.push({ x: sX + 13, y: 200 });
+            window.onkeydown = (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a') window.sP(-20);
+                if (e.key === 'ArrowRight' || e.key === 'd') window.sP(20);
+                if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') window.sF();
+            };
         }
 
         window.onload = () => { updateUserUI(); checkStoreStatusUI(); changeTab('menu'); };
