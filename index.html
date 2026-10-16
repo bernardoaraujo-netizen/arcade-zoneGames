@@ -30,7 +30,7 @@
         <span id="toast-message" class="text-xs font-bold text-zinc-200">Mensagem</span>
     </div>
 
-    <!-- Modal Login -->
+    <!-- Modal Login Estilo GitHub/Google -->
     <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-2xl max-w-sm w-full p-6 space-y-4 relative shadow-2xl">
             <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
@@ -122,6 +122,7 @@
             <div>
                 <h3 id="profile-name" class="text-base font-bold text-white">Nome do Usuário</h3>
                 <p id="profile-email" class="text-xs text-zinc-400">email@exemplo.com</p>
+                <p id="profile-bio-text" class="text-[11px] text-pink-400 mt-1 italic">"Gamer oficial ArcadeZone!"</p>
             </div>
 
             <div id="admin-panel-btn-container" class="hidden">
@@ -130,13 +131,44 @@
                 </button>
             </div>
 
+            <button onclick="closeUserProfileModal(); changeTab('profile');" class="w-full bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
+                ✏️ Editar Meu Perfil
+            </button>
+
             <button onclick="logoutUser()" class="w-full bg-red-600/20 border border-red-500/50 hover:bg-red-600/40 text-red-400 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
                 🚪 Sair da Conta
             </button>
         </div>
     </div>
 
-    <!-- Modal Modo Desenvolvedor / Painel Admin -->
+    <!-- Modal Rastreamento de Entrega Fictício (Estilo 99/Uber Eats) -->
+    <div id="tracking-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-md w-full p-6 text-center space-y-4 relative shadow-2xl">
+            <button onclick="closeTrackingModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
+            <h3 class="text-lg font-black text-emerald-400 uppercase">🛵 RASTREAMENTO EM TEMPO REAL</h3>
+
+            <div id="tracking-status-badge" class="bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold uppercase">
+                🛵 Motoboy a caminho da sua residência
+            </div>
+
+            <!-- Canvas do Mapa de Rastreamento -->
+            <div class="relative w-full h-44 bg-[#0d1117] border border-[#30363d] rounded-2xl overflow-hidden shadow-inner">
+                <canvas id="trackingCanvas" width="350" height="170" class="w-full h-full"></canvas>
+            </div>
+
+            <div class="text-left bg-[#0d1117] p-3 rounded-xl border border-[#30363d] text-[11px] text-zinc-400 space-y-1">
+                <div>• <b>Cliente:</b> <span id="track-client-name">Você</span></div>
+                <div>• <b>Entregador:</b> Carlos Motoboy (Honda CG 160 Neon)</div>
+                <div>• <b>Previsão de Chegada:</b> 12 - 18 minutos</div>
+            </div>
+
+            <button onclick="closeTrackingModal()" class="w-full bg-[#21262d] hover:bg-[#30363d] text-white font-bold py-2.5 rounded-xl text-xs uppercase">
+                FECHAR ACOMPANHAMENTO
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Modo Desenvolvedor / Admin -->
     <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-purple-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 relative max-h-[85vh] overflow-y-auto">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
@@ -160,7 +192,7 @@
                 </div>
 
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-1">
-                    <span class="font-bold text-yellow-400 block uppercase">🎟️ Cupons Promocionais no Sistema</span>
+                    <span class="font-bold text-yellow-400 block uppercase">🎟️ Cupons Promocionais</span>
                     <div class="text-[11px] text-zinc-400">• ARCADE10 (10% OFF)</div>
                     <div class="text-[11px] text-zinc-400">• MASCOTEVIP (15% OFF)</div>
                     <div class="text-[11px] text-zinc-400">• FICHASGRATIS (+5 Fichas)</div>
@@ -172,31 +204,33 @@
                 </div>
 
                 <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-2">
-                    <span class="font-bold text-emerald-400 block uppercase">🛒 Reservas & Vendas no Pix</span>
+                    <span class="font-bold text-emerald-400 block uppercase">🛒 Reservas & Vendas</span>
                     <div id="admin-orders-list" class="space-y-1 text-zinc-400 text-[11px]"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Roleta 24h -->
+    <!-- Modal Roleta Pizza 24h -->
     <div id="roulette-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative">
+        <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeRouletteModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase">🎰 ROLETA 24H</h3>
-            <p class="text-xs text-zinc-400">Gire 1x a cada 24 horas e ganhe descontos e brindes!</p>
+            <p class="text-xs text-zinc-400">Toque na roleta pizza para testar sua sorte!</p>
             
-            <div class="relative w-48 h-48 mx-auto my-3 flex items-center justify-center">
-                <div class="absolute -top-3 z-20 text-yellow-400 text-3xl font-black">▼</div>
-                <div id="roulette-wheel" class="w-full h-full rounded-full border-4 border-yellow-500/60 bg-gradient-to-tr from-purple-950 via-indigo-900 to-zinc-950 flex flex-col items-center justify-center text-center p-4 transition-transform">
-                    <span id="wheel-display-icon" class="text-4xl mb-1">🎰</span>
-                    <span id="wheel-display-text" class="text-[10px] font-black text-yellow-300 uppercase">Girar Agora</span>
-                </div>
+            <div class="relative w-56 h-56 mx-auto my-2 flex items-center justify-center">
+                <!-- Ponteiro Fixo -->
+                <div class="absolute -right-2 top-1/2 -translate-y-1/2 z-20 text-yellow-400 text-3xl font-black drop-shadow-md">◀</div>
+                
+                <!-- Canvas da Roleta Pizza em Fatias -->
+                <canvas id="rouletteCanvas" width="220" height="220" onclick="spinWheel()" class="cursor-pointer rounded-full border-4 border-yellow-500/60 shadow-2xl transition-transform"></canvas>
             </div>
 
             <div id="roulette-timer-info" class="text-xs font-mono text-yellow-400 font-bold bg-[#0d1117] py-2 px-3 rounded-xl border border-[#30363d] hidden"></div>
 
-            <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs">GIRAR ROLETA!</button>
+            <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs">
+                TOQUE PARA GIRAR!
+            </button>
         </div>
     </div>
 
@@ -212,9 +246,17 @@
                 <span id="pix-total-value" class="text-2xl font-black text-emerald-400">R$ 0,00</span>
             </div>
 
-            <div class="text-left space-y-1">
-                <label class="block text-xs font-bold text-zinc-300 uppercase">Nome ou Nº da Mesa</label>
-                <input type="text" id="client-name" placeholder="Ex: Bernardo - Mesa 02" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <!-- Seleção do Modo de Entrega -->
+            <div class="space-y-2 text-left">
+                <label class="block text-xs font-bold text-zinc-300 uppercase">Tipo de Pedido / Recebimento</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="setDeliveryMode('motoboy')" id="mode-motoboy-btn" class="bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center">
+                        🛵 Entrega Motoboy
+                    </button>
+                    <button type="button" onclick="setDeliveryMode('retirada')" id="mode-retirada-btn" class="bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center">
+                        🏪 Retirar na Loja
+                    </button>
+                </div>
             </div>
 
             <div class="space-y-1 text-left">
@@ -225,11 +267,9 @@
                 </div>
             </div>
 
-            <div class="text-left bg-zinc-800/30 p-3 rounded-xl border border-zinc-800/50 text-[11px] text-zinc-400">
-                💡 Transfira o valor exato no seu banco e mostre o comprovante no balcão para retirar os itens!
-            </div>
-
-            <button onclick="confirmPaymentAndClear()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black py-3.5 rounded-xl uppercase text-xs">Confirmar Pedido Realizado</button>
+            <button onclick="confirmPaymentAndClear()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black py-3.5 rounded-xl uppercase text-xs">
+                Confirmar Pedido & Acompanhar Entrega
+            </button>
         </div>
     </div>
 
@@ -268,6 +308,7 @@
             <button onclick="changeTab('arcade')" id="nav-arcade" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-yellow-400"><span class="text-lg">🕹️</span><span class="text-[10px] font-bold">Fichas</span></button>
             <button onclick="changeTab('jukebox')" id="nav-jukebox" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-indigo-400"><span class="text-lg">🎵</span><span class="text-[10px] font-bold">Jukebox</span></button>
             <button onclick="changeTab('games')" id="nav-games" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-pink-400"><span class="text-lg">🎮</span><span class="text-[10px] font-bold">Games</span></button>
+            <button onclick="changeTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-blue-400"><span class="text-lg">👤</span><span class="text-[10px] font-bold">Perfil</span></button>
             <button onclick="changeTab('cart')" id="nav-cart" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-emerald-400 relative">
                 <span class="text-lg">🛒</span><span class="text-[10px] font-bold">Pedido</span>
                 <span id="cart-badge" class="hidden absolute top-0.5 right-1 bg-pink-500 text-white text-[10px] font-black h-4 w-4 rounded-full flex items-center justify-center">0</span>
@@ -290,19 +331,42 @@
             <div id="menu-list" class="space-y-3"></div>
         </div>
 
-        <!-- Aba Jukebox -->
+        <!-- Aba Perfil do Usuário Estilo Rede Social -->
+        <div id="tpl-profile" class="space-y-4">
+            <div class="bg-[#161b22] border border-[#30363d] p-5 rounded-3xl text-center space-y-3 relative shadow-xl">
+                <div class="relative w-20 h-20 mx-auto">
+                    <div id="user-avatar-display" class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white font-black text-3xl flex items-center justify-center border-2 border-white/20 shadow-lg">
+                        👤
+                    </div>
+                </div>
+
+                <div>
+                    <h3 id="profile-card-name" class="text-lg font-bold text-white">Visitante ArcadeZone</h3>
+                    <p id="profile-card-email" class="text-xs text-zinc-400">Faça login para salvar suas conquistas!</p>
+                </div>
+
+                <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] text-left space-y-2">
+                    <label class="block text-[10px] font-bold text-zinc-400 uppercase">📝 Biografia / Status</label>
+                    <input type="text" id="edit-bio-input" placeholder="Ex: Pro Player de Vôlei e Pênaltis!" class="w-full bg-[#161b22] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <button onclick="saveUserProfileBio()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black py-2 rounded-xl text-xs uppercase">
+                        Salvar Minha Bio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Jukebox com Link e Play -->
         <div id="tpl-jukebox" class="space-y-4">
             <div class="bg-gradient-to-r from-indigo-950/60 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/30 text-center">
                 <h2 class="text-base font-black text-indigo-300">🎵 JUKEBOX DA SEMANA</h2>
-                <p class="text-[11px] text-zinc-400 mt-0.5">Sugira sua música ou vote na favorita para tocar na casa!</p>
+                <p class="text-[11px] text-zinc-400 mt-0.5">Sugira sua música com link para ouvir e votar!</p>
             </div>
 
             <div class="bg-[#161b22] border border-[#30363d] p-3.5 rounded-2xl space-y-2">
                 <span class="text-xs font-bold text-zinc-300 uppercase block">➕ Adicionar Música (Máx 5)</span>
-                <div class="flex gap-2">
-                    <input type="text" id="song-input" placeholder="Nome da música e artista" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                    <button onclick="addSongSuggestion()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-3 py-2 rounded-xl flex-shrink-0">ENVIAR</button>
-                </div>
+                <input type="text" id="song-input" placeholder="Nome da música e artista" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 mb-1">
+                <input type="url" id="song-link-input" placeholder="Link YouTube/Spotify (Opcional)" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 mb-2">
+                <button onclick="addSongSuggestion()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs py-2.5 rounded-xl uppercase">ENVIAR PARA VOTAÇÃO</button>
             </div>
 
             <div class="space-y-2">
@@ -342,23 +406,39 @@
             </div>
         </div>
 
-        <!-- Aba Lan House -->
+        <!-- Aba Lan House Expandida (10 PCs) -->
         <div id="tpl-lan" class="space-y-5">
             <div class="bg-gradient-to-r from-purple-950/40 to-indigo-950/30 p-4 rounded-2xl border border-purple-500/30">
-                <h2 class="text-lg font-black text-purple-300">🖥️ MAPA DA ARENA GAMER</h2>
-                <p class="text-xs text-purple-200/70">Escolha a sua estação, console ou simulador!</p>
+                <h2 class="text-lg font-black text-purple-300">🖥️ MAPA DA ARENA GAMER (10 ESTAÇÕES)</h2>
+                <p class="text-xs text-purple-200/70">Escolha sua estação de alto desempenho!</p>
             </div>
 
             <div class="space-y-2">
                 <h3 class="text-xs font-bold uppercase text-zinc-400">1. Selecione o Equipamento:</h3>
                 <div class="grid grid-cols-2 gap-2" id="seat-map">
-                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC Pro RTX 4070">
-                        <div><div class="text-xs font-bold text-zinc-200">🖥️ PC Pro</div><div class="text-[10px] text-zinc-500">RTX 4070 + 240Hz</div></div>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC 01 - RTX 4070">
+                        <div><div class="text-xs font-bold text-zinc-200">🖥️ PC 01 Pro</div><div class="text-[10px] text-zinc-500">RTX 4070 + 240Hz</div></div>
                         <span class="text-[10px] font-black text-purple-400">R$ 12/h</span>
                     </button>
-                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="VIP Pod Streamer">
-                        <div><div class="text-xs font-bold text-purple-300">🎙️ VIP Streamer</div><div class="text-[10px] text-zinc-500">Cam 4K + Mic Studio</div></div>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC 02 - RTX 4080 VIP">
+                        <div><div class="text-xs font-bold text-purple-300">🖥️ PC 02 Ultra</div><div class="text-[10px] text-zinc-500">RTX 4080 + 360Hz</div></div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 16/h</span>
+                    </button>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC 03 - Streamer Pod">
+                        <div><div class="text-xs font-bold text-pink-300">🎙️ PC 03 Streamer</div><div class="text-[10px] text-zinc-500">Cam 4K + Mic Studio</div></div>
                         <span class="text-[10px] font-black text-purple-400">R$ 18/h</span>
+                    </button>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC 04 - Cockpit Corrida">
+                        <div><div class="text-xs font-bold text-yellow-300">🏎️ PC 04 Cockpit</div><div class="text-[10px] text-zinc-500">Volante DirectDrive</div></div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 20/h</span>
+                    </button>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC 05 - VR Oculus Station">
+                        <div><div class="text-xs font-bold text-cyan-300">🥽 PC 05 VR Zone</div><div class="text-[10px] text-zinc-500">Realidade Virtual</div></div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 22/h</span>
+                    </button>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="Console Arena PS5">
+                        <div><div class="text-xs font-bold text-blue-300">🎮 Arena PS5</div><div class="text-[10px] text-zinc-500">Sofá + TV 65 4K</div></div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 15/h</span>
                     </button>
                 </div>
             </div>
@@ -413,6 +493,7 @@
         let appliedDiscount = 0;
         let currentDifficulty = 'easy';
         let storeIsOpen = true;
+        let deliveryMode = 'motoboy'; // 'motoboy' ou 'retirada'
         const pixKey = "f882100@gmail.com";
 
         // State LocalStorage
@@ -420,8 +501,8 @@
         let usersLog = JSON.parse(localStorage.getItem('az_users_log')) || [];
         let ordersLog = JSON.parse(localStorage.getItem('az_orders_log')) || [];
         let jukeboxSongs = JSON.parse(localStorage.getItem('az_jukebox')) || [
-            { id: 1, name: "Synthwave Gamer - Cyberpunk Night", votes: 8 },
-            { id: 2, name: "Lo-Fi Gaming - Chill Beats", votes: 5 }
+            { id: 1, name: "Synthwave Gamer - Cyberpunk Night", votes: 8, link: "https://youtube.com" },
+            { id: 2, name: "Lo-Fi Gaming - Chill Beats", votes: 5, link: "https://spotify.com" }
         ];
 
         // Web Audio API
@@ -521,13 +602,12 @@
             { id: 1, cat: 'combos', name: "Mascote Box Cristal Roxo", desc: "Burguer Artesanal + Batata Neon + Refri + Mascote de Cristal Colecionável Oficial!", price: 59.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80", highlight: true },
             { id: 2, cat: 'combos', name: "Combo Boss Level", desc: "2x Burguer Duplo Cheddar + Batata Neon GG + 2 Refris", price: 69.90, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=300&q=80", highlight: true },
             { id: 3, cat: 'combos', name: "Combo Squad 4P", desc: "4 Burgueres Artesanais + 2 Batatas GG + 4 Refris Lata", price: 129.90, img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f6?auto=format&fit=crop&w=300&q=80" },
-            { id: 4, cat: 'combos', name: "Combo Corujão Gamer", desc: "Burguer Duplo Bacon + Batata Cheddar + 2 Red Bulls", price: 52.90, img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=300&q=80" },
-            { id: 5, cat: 'burgers', name: "Pixel Cheese Burger", desc: "Pão Brioche, 180g Smash, Cheddar Duplo e Maionese Verde", price: 26.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80" },
-            { id: 6, cat: 'burgers', name: "Arcade Bacon Monster", desc: "Pão Australiano, 2x Blend 150g, Muito Bacon e BBQ", price: 34.90, img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=300&q=80" },
-            { id: 7, cat: 'sides', name: "Batata Neon Fries", desc: "Batatas rústicas com Molho Cheddar cremoso e Bacon Bits", price: 21.90, img: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=300&q=80" },
-            { id: 8, cat: 'sides', name: "Onion Rings Gamer", desc: "Anéis de cebola super crocantes com molho especial", price: 19.90, img: "https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=300&q=80" },
-            { id: 9, cat: 'drinks', name: "Ultra Kill Shake (Oreo)", desc: "Milkshake 500ml de Oreo com chantilly e calda de chocolate", price: 18.90, img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=300&q=80" },
-            { id: 10, cat: 'drinks', name: "Refrigerante Lata 350ml", desc: "Coca-Cola, Guaraná Antarctica ou Fanta Gelados", price: 6.50, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" }
+            { id: 4, cat: 'burgers', name: "Pixel Cheese Burger", desc: "Pão Brioche, 180g Smash, Cheddar Duplo e Maionese Verde", price: 26.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80" },
+            { id: 5, cat: 'burgers', name: "Arcade Bacon Monster", desc: "Pão Australiano, 2x Blend 150g, Muito Bacon e BBQ", price: 34.90, img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=300&q=80" },
+            { id: 6, cat: 'sides', name: "Batata Neon Fries", desc: "Batatas rústicas com Molho Cheddar cremoso e Bacon Bits", price: 21.90, img: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=300&q=80" },
+            { id: 7, cat: 'sides', name: "Onion Rings Gamer", desc: "Anéis de cebola super crocantes com molho especial", price: 19.90, img: "https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=300&q=80" },
+            { id: 8, cat: 'drinks', name: "Ultra Kill Shake (Oreo)", desc: "Milkshake 500ml de Oreo com chantilly e calda de chocolate", price: 18.90, img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=300&q=80" },
+            { id: 9, cat: 'drinks', name: "Refrigerante Lata 350ml", desc: "Coca-Cola, Guaraná Antarctica ou Fanta Gelados", price: 6.50, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" }
         ];
 
         const arcadePackages = [
@@ -556,11 +636,7 @@
 
         // Auth System
         function handleUserBtnClick() {
-            if (currentUser) {
-                openUserProfileModal();
-            } else {
-                openLoginModal();
-            }
+            if (currentUser) openUserProfileModal(); else openLoginModal();
         }
 
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
@@ -599,14 +675,14 @@
             localStorage.removeItem('az_user');
             closeUserProfileModal();
             updateUserUI();
-            showToast('Você saiu da sua conta.', '🚪');
+            showToast('Você saiu da sua conta com sucesso.', '🚪');
         }
 
         function confirmSocialAccount(emailVal) {
             const email = emailVal ? emailVal.trim() : '';
             if (!email) { showToast('Digite um e-mail válido!', '⚠️'); return; }
 
-            currentUser = { name: email.split('@')[0], email: email, isAdmin: (email === 'f882100@gmail.com') };
+            currentUser = { name: email.split('@')[0], email: email, bio: "Pro Player ArcadeZone!", isAdmin: (email === 'f882100@gmail.com') };
             localStorage.setItem('az_user', JSON.stringify(currentUser));
 
             if (!usersLog.some(u => u.email === email)) {
@@ -614,7 +690,7 @@
                 localStorage.setItem('az_users_log', JSON.stringify(usersLog));
             }
 
-            showToast(`Logado como ${currentUser.name}!`, '🌐');
+            showToast(`Logado como ${currentUser.name}! E-mail de boas-vindas enviado.`, '📧');
             closeGooglePicker();
             updateUserUI();
         }
@@ -626,7 +702,7 @@
             if (!email || !pass) { showToast('Preencha o e-mail e a senha!', '⚠️'); return; }
 
             if (email === 'f882100@gmail.com' && pass === 'lordello051') {
-                currentUser = { name: "Bernardo Admin", email: email, isAdmin: true };
+                currentUser = { name: "Bernardo Admin", email: email, bio: "Desenvolvedor Oficial ArcadeZone", isAdmin: true };
                 localStorage.setItem('az_user', JSON.stringify(currentUser));
                 showToast('👑 Modo Desenvolvedor Ativado!', '🛠️');
                 closeLoginModal();
@@ -635,7 +711,7 @@
                 return;
             }
 
-            currentUser = { name: email.split('@')[0], email: email, isAdmin: false };
+            currentUser = { name: email.split('@')[0], email: email, bio: "Gamer Oficial", isAdmin: false };
             localStorage.setItem('az_user', JSON.stringify(currentUser));
             
             if (!usersLog.some(u => u.email === email)) {
@@ -643,7 +719,7 @@
                 localStorage.setItem('az_users_log', JSON.stringify(usersLog));
             }
 
-            showToast(`Bem-vindo, ${currentUser.name}!`, '👤');
+            showToast(`Bem-vindo, ${currentUser.name}! Notificação enviada para o Gmail.`, '📧');
             closeLoginModal();
             updateUserUI();
         }
@@ -655,6 +731,27 @@
             } else {
                 lbl.textContent = "Entrar";
             }
+        }
+
+        function saveUserProfileBio() {
+            const bioInput = document.getElementById('edit-bio-input');
+            if (bioInput && currentUser) {
+                currentUser.bio = bioInput.value.trim();
+                localStorage.setItem('az_user', JSON.stringify(currentUser));
+                showToast('Biografia do perfil atualizada!', '✏️');
+                renderProfileUI();
+            }
+        }
+
+        function renderProfileUI() {
+            if (!currentUser) return;
+            const nameEl = document.getElementById('profile-card-name');
+            const emailEl = document.getElementById('profile-card-email');
+            const bioInput = document.getElementById('edit-bio-input');
+
+            if (nameEl) nameEl.textContent = currentUser.name;
+            if (emailEl) emailEl.textContent = currentUser.email;
+            if (bioInput) bioInput.value = currentUser.bio || '';
         }
 
         function renderAdminData() {
@@ -673,7 +770,8 @@
             mainContent.innerHTML = ''; mainContent.appendChild(template);
 
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('opacity-100', 'opacity-50'));
-            document.getElementById(`nav-${tabName}`).classList.replace('opacity-50', 'opacity-100');
+            const navBtn = document.getElementById(`nav-${tabName}`);
+            if (navBtn) navBtn.classList.replace('opacity-50', 'opacity-100');
 
             if (tabName === 'menu') renderMenu();
             if (tabName === 'cart') renderCart();
@@ -681,6 +779,7 @@
             if (tabName === 'lan') attachLanEvents();
             if (tabName === 'jukebox') renderJukebox();
             if (tabName === 'games') updateDiffBadgeUI();
+            if (tabName === 'profile') renderProfileUI();
         }
 
         function filterMenu(cat) {
@@ -725,7 +824,7 @@
             }
         }
 
-        // JUKEBOX
+        // JUKEBOX COM LINK E PLAY
         function renderJukebox() {
             const container = document.querySelector('#main-content #jukebox-list');
             if (!container) return;
@@ -737,15 +836,18 @@
                 const isWinner = idx === 0;
                 const borderClass = isWinner ? 'border-yellow-500/80 bg-gradient-to-r from-yellow-950/30 to-zinc-900' : 'border-[#30363d] bg-[#161b22]';
                 container.innerHTML += `
-                    <div class="p-3 rounded-2xl border ${borderClass} flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
+                    <div class="p-3 rounded-2xl border ${borderClass} flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
                             <span class="text-xs font-black ${isWinner ? 'text-yellow-400' : 'text-zinc-500'}">#${idx + 1}</span>
                             <div>
                                 <div class="text-xs font-bold text-zinc-100">${song.name}</div>
-                                <div class="text-[10px] text-indigo-400 font-bold">${song.votes} Votos ${isWinner ? '🏆 (Tocando em 1º)' : ''}</div>
+                                <div class="text-[10px] text-indigo-400 font-bold">${song.votes} Votos ${isWinner ? '🏆 (Em 1º Lado A)' : ''}</div>
                             </div>
                         </div>
-                        <button onclick="voteSong(${song.id})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-3 py-1.5 rounded-xl">👍 VOTAR</button>
+                        <div class="flex items-center gap-1.5">
+                            ${song.link ? `<a href="${song.link}" target="_blank" class="bg-zinc-800 hover:bg-zinc-700 text-cyan-400 p-2 rounded-xl text-xs font-bold">▶️ Play</a>` : ''}
+                            <button onclick="voteSong(${song.id})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-3 py-2 rounded-xl">👍 VOTAR</button>
+                        </div>
                     </div>
                 `;
             });
@@ -753,15 +855,17 @@
 
         function addSongSuggestion() {
             const input = document.getElementById('song-input');
+            const linkInput = document.getElementById('song-link-input');
             if (!input) return;
             const songName = input.value.trim();
+            const songLink = linkInput ? linkInput.value.trim() : '';
 
             if (!songName) { showToast('Digite o nome da música!', '⚠️'); return; }
             if (jukeboxSongs.length >= 5) { showToast('Limite de 5 músicas na semana atingido!', '⚠️'); return; }
 
-            jukeboxSongs.push({ id: Date.now(), name: songName, votes: 1 });
+            jukeboxSongs.push({ id: Date.now(), name: songName, votes: 1, link: songLink });
             localStorage.setItem('az_jukebox', JSON.stringify(jukeboxSongs));
-            input.value = '';
+            input.value = ''; if (linkInput) linkInput.value = '';
             renderJukebox();
             showToast('Música enviada para a votação!', '🎵');
         }
@@ -776,11 +880,10 @@
             }
         }
 
-        // DIFICULDADES
         function setDifficulty(diff) {
             currentDifficulty = diff;
             updateDiffBadgeUI();
-            showToast(`Dificuldade definida: ${diff.toUpperCase()}`, '🎮');
+            showToast(`Dificuldade: ${diff.toUpperCase()}`, '🎮');
         }
 
         function updateDiffBadgeUI() {
@@ -797,19 +900,9 @@
                     badge.textContent = '🔴 DIFÍCIL';
                 }
             }
-
-            document.querySelectorAll('.diff-btn').forEach(b => {
-                b.className = 'diff-btn bg-[#21262d] border border-[#30363d] text-zinc-400 px-3 py-1 rounded-xl text-xs font-bold';
-            });
-            const selected = document.getElementById(`diff-${currentDifficulty}`);
-            if (selected) {
-                if (currentDifficulty === 'easy') selected.className = 'diff-btn bg-green-500/20 border border-green-500 text-green-400 px-3 py-1 rounded-xl text-xs font-bold';
-                if (currentDifficulty === 'normal') selected.className = 'diff-btn bg-yellow-500/20 border border-yellow-500 text-yellow-400 px-3 py-1 rounded-xl text-xs font-bold';
-                if (currentDifficulty === 'hard') selected.className = 'diff-btn bg-red-500/20 border border-red-500 text-red-400 px-3 py-1 rounded-xl text-xs font-bold';
-            }
         }
 
-        // GAME 1: POU VÔLEI REALISTA
+        // GAME 1: POU VÔLEI
         let volleyLoop = null;
         function initVolleyGame() {
             const arena = document.getElementById('game-arena');
@@ -986,11 +1079,9 @@
             }
         }
 
-        // GAME 2: PÊNALTI ESTILO WORLD CUP (3 BARRAS DE TRAVA)
-        let penStep = 1; // 1: Canto, 2: Altura, 3: Força, 4: Executando
-        let penDirVal = 50;  // 0 (esq) a 100 (dir)
-        let penHgtVal = 50;  // 0 (rasteiro) a 100 (gaveta)
-        let penPwrVal = 50;  // 0 (fraco) a 100 (forte)
+        // GAME 2: PÊNALTI ESTILO WORLD CUP
+        let penStep = 1;
+        let penDirVal = 50, penHgtVal = 50, penPwrVal = 50;
         let penDirInc = 3, penHgtInc = 3, penPwrInc = 3;
         let penAnimLoop = null;
 
@@ -1009,29 +1100,22 @@
                     <span class="text-yellow-400 font-bold" id="pen-step-info">Passo 1/3: Escolha o Canto</span>
                 </div>
 
-                <!-- Campo de Futebol de Pênalti Estilo World Cup -->
                 <div id="penalty-field" class="relative w-full h-48 border-4 border-white bg-gradient-to-b from-green-800 to-green-950 rounded-t-xl mx-auto overflow-hidden shadow-2xl">
-                    <!-- Gol de Futebol -->
                     <div class="absolute top-2 left-[30px] right-[30px] h-24 border-4 border-white bg-zinc-900/60 rounded-t-sm flex items-center justify-center">
-                        <!-- Rede Traçada -->
                         <div class="w-full h-full border-r border-b border-zinc-700/50 bg-[radial-gradient(#30363d_1px,transparent_1px)] [background-size:8px_8px]"></div>
                     </div>
 
-                    <!-- Goleiro Mascote -->
                     <div id="gk-body" class="absolute top-10 left-[132px] w-9 h-14 bg-purple-600 border-2 border-purple-300 rounded-md flex flex-col items-center justify-between p-0.5 transition-all duration-300 z-10 shadow-lg">
                         <div class="w-5 h-5 rounded-full bg-purple-300 text-[9px] flex items-center justify-center font-bold">👾</div>
                         <div class="w-full flex justify-between px-0.5"><span class="w-2 h-2 bg-yellow-400 rounded-full"></span><span class="w-2 h-2 bg-yellow-400 rounded-full"></span></div>
                     </div>
 
-                    <!-- Ponto e Bola de Pênalti Centralizada -->
                     <div class="absolute bottom-6 left-[142px] w-4 h-2 bg-white/40 rounded-full"></div>
                     <div id="penalty-ball" class="absolute bottom-6 left-[138px] w-6 h-6 rounded-full bg-white border-2 border-black transition-all duration-500 shadow-md z-20"></div>
 
-                    <!-- Jogador Chutador de Costas -->
                     <div id="kicker-player" class="absolute bottom-1 left-[138px] w-6 h-8 bg-blue-600 border border-blue-300 rounded-t-md z-10"></div>
                 </div>
 
-                <!-- 3 Barras Trava-Clique Estilo Flash Game -->
                 <div class="space-y-2 my-2 text-left w-full">
                     <div>
                         <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>1. Canto / Direção:</span><span id="pen-dir-lbl" class="text-cyan-400">Centro</span></div>
@@ -1120,11 +1204,9 @@
 
             if (btn) { btn.disabled = true; btn.classList.add('opacity-50'); }
 
-            // Destino Final da Bola baseado na trava das 3 barras
-            const ballX = 35 + ((penDirVal / 100) * 210); // 35px a 245px
-            const ballY = 80 - ((penHgtVal / 100) * 55);   // Altura no gol
+            const ballX = 35 + ((penDirVal / 100) * 210);
+            const ballY = 80 - ((penHgtVal / 100) * 55);
 
-            // Pulo Inteligente do Goleiro
             let gkTargetX = 132;
             const rand = Math.random();
 
@@ -1175,7 +1257,53 @@
             changeTab('cart');
         }
 
-        // ROLETA 24H
+        // ROLETA PIZZA CANVAS 2D
+        const pizzaPrizes = [
+            { label: "5% OFF", color: "#f97316", discount: 0.05, isWin: true },
+            { label: "10% OFF", color: "#22c55e", discount: 0.10, isWin: true },
+            { label: "15% VIP", color: "#a855f7", discount: 0.15, isWin: true },
+            { label: "Refri Grátis", color: "#eab308", discount: 0, isWin: true, addDrink: true },
+            { label: "Fritas Grátis", color: "#ffffff", discount: 0, isWin: true, addFries: true },
+            { label: "+5 Fichas", color: "#3b82f6", discount: 0, isWin: true, addTokens: true },
+            { label: "Tente Dnv", color: "#ef4444", discount: 0, isWin: false }
+        ];
+
+        function drawRoulettePizza() {
+            const canvas = document.getElementById('rouletteCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const numSlices = pizzaPrizes.length;
+            const sliceAngle = (2 * Math.PI) / numSlices;
+
+            ctx.clearRect(0, 0, 220, 220);
+
+            pizzaPrizes.forEach((prize, idx) => {
+                const angle = idx * sliceAngle;
+                ctx.beginPath();
+                ctx.fillStyle = prize.color;
+                ctx.moveTo(110, 110);
+                ctx.arc(110, 110, 105, angle, angle + sliceAngle);
+                ctx.lineTo(110, 110);
+                ctx.fill();
+                ctx.stroke();
+
+                // Texto da Fatia
+                ctx.save();
+                ctx.translate(110, 110);
+                ctx.rotate(angle + sliceAngle / 2);
+                ctx.fillStyle = prize.color === '#ffffff' ? '#000000' : '#ffffff';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.fillText(prize.label, 45, 4);
+                ctx.restore();
+            });
+
+            // Círculo Central
+            ctx.fillStyle = '#161b22';
+            ctx.beginPath(); ctx.arc(110, 110, 25, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = '#facc15'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('GIRAR', 110, 113);
+        }
+
         let rouletteTimerInterval = null;
 
         function openRouletteModal() {
@@ -1184,6 +1312,7 @@
             rouletteTimerInterval = setInterval(updateRouletteTimer, 1000);
 
             document.getElementById('roulette-modal').classList.remove('hidden');
+            setTimeout(drawRoulettePizza, 100);
         }
 
         function updateRouletteTimer() {
@@ -1200,12 +1329,10 @@
                 
                 timerInfo.classList.remove('hidden');
                 timerInfo.textContent = `⏳ Próximo giro em: ${hours}h ${mins}m ${secs}s`;
-                btn.disabled = true;
-                btn.classList.add('opacity-50');
+                if (btn) { btn.disabled = true; btn.classList.add('opacity-50'); }
             } else {
                 timerInfo.classList.add('hidden');
-                btn.disabled = false;
-                btn.classList.remove('opacity-50');
+                if (btn) { btn.disabled = false; btn.classList.remove('opacity-50'); }
             }
         }
 
@@ -1214,29 +1341,15 @@
             document.getElementById('roulette-modal').classList.add('hidden');
         }
 
-        const roulettePrizes = [
-            { icon: "🎁", label: "5% OFF no Pedido", discount: 0.05, isWin: true, toast: "Ganhou 5% de desconto no carrinho!" },
-            { icon: "🎉", label: "10% OFF!", discount: 0.10, isWin: true, toast: "Ganhou 10% de desconto no carrinho!" },
-            { icon: "💥", label: "15% OFF VIP!", discount: 0.15, isWin: true, toast: "Ganhou 15% de desconto VIP!" },
-            { icon: "🥤", label: "Refri Lata Grátis", discount: 0, isWin: true, addDrink: true, toast: "Ganhou 1 Refri Lata Grátis!" },
-            { icon: "🍟", label: "Fritas Grátis", discount: 0, isWin: true, addFries: true, toast: "Ganhou 1 Porção de Batata Grátis!" },
-            { icon: "🕹️", label: "+5 Fichas Grátis", discount: 0, isWin: true, addTokens: true, toast: "Ganhou 5 Fichas de Arcade Grátis!" },
-            { icon: "🎺", label: "Tente Novamente", discount: 0, isWin: false, toast: "Que pena! Tente novamente amanhã!" },
-            { icon: "😅", label: "Bateu na Trave!", discount: 0, isWin: false, toast: "Bateu na trave! Tente novamente!" }
-        ];
-
         function spinWheel() {
-            const wheel = document.getElementById('roulette-wheel');
+            const canvas = document.getElementById('rouletteCanvas');
             const btn = document.getElementById('spin-btn');
-            const displayIcon = document.getElementById('wheel-display-icon');
-            const displayText = document.getElementById('wheel-display-text');
             
-            btn.disabled = true;
-            btn.classList.add('opacity-50');
+            if (btn && btn.disabled) return;
 
             localStorage.setItem('az_roulette_last', Date.now().toString());
 
-            const prize = roulettePrizes[Math.floor(Math.random() * roulettePrizes.length)];
+            const prize = pizzaPrizes[Math.floor(Math.random() * pizzaPrizes.length)];
 
             let tickCount = 0;
             const tickInterval = setInterval(() => {
@@ -1245,14 +1358,12 @@
                 if (tickCount > 25) clearInterval(tickInterval);
             }, 120);
 
-            wheel.classList.add('wheel-spin');
-            wheel.style.transform = 'rotate(1800deg)';
+            canvas.classList.add('wheel-spin');
+            canvas.style.transform = 'rotate(1800deg)';
 
             setTimeout(() => {
-                wheel.classList.remove('wheel-spin');
-                wheel.style.transform = 'rotate(0deg)';
-                displayIcon.textContent = prize.icon;
-                displayText.textContent = prize.label;
+                canvas.classList.remove('wheel-spin');
+                canvas.style.transform = 'rotate(0deg)';
 
                 if (prize.isWin) {
                     playWinFanfare();
@@ -1271,30 +1382,67 @@
                     });
                     updateCartBadge();
                 }
-                if (prize.addDrink) {
-                    cart.push({
-                        cartId: Date.now() + Math.random(),
-                        name: "Prêmio Roleta: Refri Lata Grátis",
-                        desc: "Ganhado na Roleta 24h",
-                        price: 0,
-                        img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"
-                    });
-                    updateCartBadge();
-                }
-                if (prize.addFries) {
-                    cart.push({
-                        cartId: Date.now() + Math.random(),
-                        name: "Prêmio Roleta: Porção de Batatas Grátis",
-                        desc: "Ganhado na Roleta 24h",
-                        price: 0,
-                        img: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=300&q=80"
-                    });
-                    updateCartBadge();
-                }
 
-                showToast(prize.toast, prize.icon);
+                showToast(`Prêmio: ${prize.label}!`, prize.isWin ? '🎉' : '🎺');
                 updateRouletteTimer();
             }, 4000);
+        }
+
+        // RASTREAMENTO DE ENTREGA FICTÍCIO
+        let trackAnimLoop = null;
+
+        function openTrackingModal(clientName) {
+            document.getElementById('track-client-name').textContent = clientName || (currentUser ? currentUser.name : 'Cliente');
+            document.getElementById('tracking-modal').classList.remove('hidden');
+
+            const canvas = document.getElementById('trackingCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let motoX = 30;
+            if (trackAnimLoop) clearInterval(trackAnimLoop);
+
+            trackAnimLoop = setInterval(() => {
+                ctx.clearRect(0, 0, 350, 170);
+
+                // Rua
+                ctx.fillStyle = '#21262d'; ctx.fillRect(20, 80, 310, 20);
+                ctx.strokeStyle = '#facc15'; ctx.setLineDash([10, 10]); ctx.beginPath(); ctx.moveTo(20, 90); ctx.lineTo(330, 90); ctx.stroke();
+
+                // Ponto de Origem (Restaurante)
+                ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(30, 90, 12, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText('🍔 Loja', 15, 65);
+
+                // Ponto de Destino (Residência)
+                ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(320, 90, 12, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText('🏠 Você', 305, 65);
+
+                // Motoboy se deslocando
+                motoX += 1.5;
+                if (motoX > 320) motoX = 30;
+
+                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(motoX, 90, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('🛵', motoX - 6, 94);
+            }, 40);
+        }
+
+        function closeTrackingModal() {
+            if (trackAnimLoop) clearInterval(trackAnimLoop);
+            document.getElementById('tracking-modal').classList.add('hidden');
+        }
+
+        function setDeliveryMode(mode) {
+            deliveryMode = mode;
+            const mBtn = document.getElementById('mode-motoboy-btn');
+            const rBtn = document.getElementById('mode-retirada-btn');
+
+            if (mode === 'motoboy') {
+                if (mBtn) mBtn.className = 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center';
+                if (rBtn) rBtn.className = 'bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center';
+            } else {
+                if (rBtn) rBtn.className = 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center';
+                if (mBtn) mBtn.className = 'bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center';
+            }
         }
 
         // PROMOCODE SYSTEM
@@ -1484,15 +1632,21 @@
         }
 
         function confirmPaymentAndClear() {
-            const clientName = document.getElementById('client-name').value;
-            if (!clientName) { showToast('Digite seu nome/mesa!', '⚠️'); return; }
-
+            const clientName = currentUser ? currentUser.name : (document.getElementById('client-name') ? document.getElementById('client-name').value : 'Cliente');
+            
             const totalVal = parseFloat(document.getElementById('pix-total-value').textContent.replace('R$', '').replace(',', '.'));
-            ordersLog.push({ client: clientName, total: totalVal, date: new Date().toLocaleString() });
+            ordersLog.push({ client: clientName, total: totalVal, mode: deliveryMode, date: new Date().toLocaleString() });
             localStorage.setItem('az_orders_log', JSON.stringify(ordersLog));
 
             closePixModal();
-            showToast(`Pedido confirmado para ${clientName}!`, '🎉');
+            
+            if (deliveryMode === 'motoboy') {
+                showToast(`Pedido Pix confirmado! Abrindo rastreamento...`, '🛵');
+                openTrackingModal(clientName);
+            } else {
+                showToast(`Pedido confirmado para retirada na loja!`, '🏪');
+            }
+
             cart = []; appliedDiscount = 0;
             updateCartBadge(); renderCart();
         }
