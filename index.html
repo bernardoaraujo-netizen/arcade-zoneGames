@@ -26,14 +26,24 @@
 </head>
 <body class="min-h-screen relative overflow-x-hidden pb-24 bg-[#0d1117]">
 
+    <!-- Tela de Bloqueio: Empresa em Descanso -->
+    <div id="store-closed-overlay" class="fixed inset-0 bg-[#0d1117]/95 backdrop-blur-lg z-[90] flex flex-col items-center justify-center p-6 hidden">
+        <div class="text-6xl mb-4">💤</div>
+        <h2 class="text-2xl font-black text-white uppercase text-center mb-2">Empresa em Descanso</h2>
+        <p class="text-zinc-400 text-center mb-8 text-sm max-w-xs">Nossos serviços estão temporariamente fechados. Volte mais tarde!</p>
+        <button onclick="openLoginModal()" class="bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-zinc-300 font-bold py-3 px-6 rounded-xl text-xs uppercase shadow-lg">
+            Acesso Restrito / Admin
+        </button>
+    </div>
+
     <!-- Toast Notification -->
-    <div id="toast" class="toast flex items-center gap-3 border-l-4 border-l-emerald-500 shadow-2xl">
+    <div id="toast" class="toast flex items-center gap-3 border-l-4 border-l-emerald-500 shadow-2xl z-[95]">
         <span id="toast-icon" class="text-xl">✨</span>
         <span id="toast-message" class="text-xs font-bold text-zinc-200">Mensagem</span>
     </div>
 
-    <!-- Modal Login Estilo GitHub/Google -->
-    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <!-- Modal Login -->
+    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-2xl max-w-sm w-full p-6 space-y-4 relative shadow-2xl">
             <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
 
@@ -74,7 +84,7 @@
     </div>
 
     <!-- Modal Escolha de Conta Google -->
-    <div id="google-picker-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="google-picker-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[85] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-md w-full p-6 text-left space-y-5 relative shadow-2xl">
             <button onclick="closeGooglePicker()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             
@@ -113,11 +123,11 @@
     </div>
 
     <!-- Modal Perfil do Usuário / Logout -->
-    <div id="user-profile-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="user-profile-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[75] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-2xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeUserProfileModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
 
-            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-2xl font-black flex items-center justify-center mx-auto shadow-lg overflow-hidden border-2 border-white/20" id="profile-modal-avatar">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-3xl font-black flex items-center justify-center mx-auto shadow-lg border-2 border-white/20 overflow-hidden" id="profile-modal-avatar">
                 👤
             </div>
 
@@ -144,7 +154,7 @@
     </div>
 
     <!-- Modal Rastreamento de Entrega Fictício -->
-    <div id="tracking-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="tracking-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-md w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeTrackingModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <h3 class="text-lg font-black text-emerald-400 uppercase">🛵 RASTREAMENTO EM TEMPO REAL</h3>
@@ -170,7 +180,7 @@
     </div>
 
     <!-- Modal Modo Desenvolvedor / Admin -->
-    <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[80] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-purple-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 relative max-h-[85vh] overflow-y-auto">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <div class="flex items-center gap-2">
@@ -187,8 +197,8 @@
                         <span class="font-bold text-zinc-300 block uppercase">Status da Arena</span>
                         <span id="store-status-text" class="text-[10px] text-emerald-400 font-bold">🟢 ABERTO PARA PEDIDOS</span>
                     </div>
-                    <button onclick="toggleStoreStatus()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] uppercase">
-                        Alterar
+                    <button onclick="toggleStoreStatus()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] uppercase transition-colors">
+                        Alternar
                     </button>
                 </div>
 
@@ -212,8 +222,44 @@
         </div>
     </div>
 
+    <!-- Modal Placares (Leaderboards) -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[80] flex items-center justify-center p-4 hidden">
+        <div class="bg-[#161b22] border border-yellow-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 relative max-h-[85vh] overflow-y-auto shadow-[0_0_20px_rgba(234,179,8,0.2)]">
+            <button onclick="closeLeaderboardModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl">✕</button>
+            
+            <div class="text-center">
+                <div class="text-4xl mb-1">🏆</div>
+                <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase tracking-wide">Hall da Fama</h3>
+            </div>
+
+            <!-- Filtros de Jogo -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                <button onclick="loadLeaderboard('volley')" id="btn-lb-volley" class="lb-game-btn bg-purple-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex-shrink-0">🏐 Vôlei</button>
+                <button onclick="loadLeaderboard('penalty')" id="btn-lb-penalty" class="lb-game-btn bg-[#21262d] text-zinc-400 font-bold px-3 py-1.5 rounded-lg text-xs flex-shrink-0">⚽ Pênalti</button>
+                <button onclick="loadLeaderboard('racer')" id="btn-lb-racer" class="lb-game-btn bg-[#21262d] text-zinc-400 font-bold px-3 py-1.5 rounded-lg text-xs flex-shrink-0">🏎️ Corrida</button>
+                <button onclick="loadLeaderboard('invaders')" id="btn-lb-invaders" class="lb-game-btn bg-[#21262d] text-zinc-400 font-bold px-3 py-1.5 rounded-lg text-xs flex-shrink-0">👾 Aliens</button>
+            </div>
+
+            <!-- Filtros de Tempo -->
+            <select id="lb-time-filter" onchange="loadLeaderboard(currentLbGame)" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-yellow-400 font-bold focus:outline-none">
+                <option value="all">🏆 Todos os Tempos</option>
+                <option value="daily">📅 Hoje (Diário)</option>
+                <option value="weekly">📅 Esta Semana</option>
+                <option value="monthly">📅 Este Mês</option>
+                <option value="yearly">📅 Este Ano</option>
+            </select>
+
+            <!-- Lista do Placar -->
+            <div class="bg-[#0d1117] p-2 rounded-2xl border border-[#30363d] min-h-[200px]">
+                <div id="leaderboard-list" class="space-y-2">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Roleta Pizza 24h -->
-    <div id="roulette-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="roulette-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeRouletteModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase">🎰 ROLETA 24H</h3>
@@ -233,7 +279,7 @@
     </div>
 
     <!-- Modal Pix -->
-    <div id="pix-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="pix-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden">
         <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-md w-full p-6 text-center space-y-4 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closePixModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <div class="w-12 h-12 bg-emerald-500 text-black font-black rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-[0_0_15px_rgba(16,185,129,0.4)]">❖</div>
@@ -270,8 +316,32 @@
         </div>
     </div>
 
+    <!-- INTELIGÊNCIA ARTIFICIAL: BOTÃO FLUTUANTE E WIDGET DA IA -->
+    <button onclick="toggleAIChat()" class="fixed bottom-20 right-4 w-12 h-12 bg-purple-600 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.6)] flex items-center justify-center text-2xl z-40 transition-transform hover:scale-110">👾</button>
+    <div id="ai-chat-window" class="fixed bottom-36 right-4 w-72 bg-[#161b22] border border-purple-500/50 rounded-2xl shadow-2xl z-40 hidden flex-col overflow-hidden">
+        <div class="bg-purple-900/50 p-3 flex justify-between items-center border-b border-purple-500/30">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">👾</span>
+                <div>
+                    <h4 class="text-xs font-bold text-purple-300">IA Mascote Roxo</h4>
+                    <span class="text-[9px] text-green-400 font-bold">Online</span>
+                </div>
+            </div>
+            <button onclick="toggleAIChat()" class="text-zinc-400 hover:text-white text-lg">✕</button>
+        </div>
+        <div id="ai-messages" class="h-60 p-3 overflow-y-auto space-y-3 bg-[#0d1117] flex flex-col text-xs no-scrollbar">
+            <div class="bg-purple-600/20 border border-purple-500/30 text-zinc-200 p-2 rounded-xl rounded-tl-none self-start max-w-[85%]">
+                Olá! Eu sou a IA oficial do ArcadeZone. Pode me perguntar sobre o cardápio, cupons, minigames ou a Lan House!
+            </div>
+        </div>
+        <div class="p-2 bg-[#161b22] border-t border-[#30363d] flex gap-2">
+            <input type="text" id="ai-input" placeholder="Digite sua dúvida..." class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none" onkeypress="handleAIKeyPress(event)">
+            <button onclick="sendAIMessage()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">➤</button>
+        </div>
+    </div>
+
     <!-- Header Principal -->
-    <header class="p-4 border-b border-[#30363d] bg-[#161b22]/80 backdrop-blur-md sticky top-0 z-30">
+    <header class="p-4 border-b border-[#30363d] bg-[#161b22]/90 backdrop-blur-md sticky top-0 z-50 shadow-md">
         <div class="max-w-md mx-auto flex items-center justify-between">
             <div class="text-left">
                 <h1 class="text-2xl font-black tracking-tighter text-white">ARCADE<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500">ZONE</span></h1>
@@ -279,7 +349,7 @@
             </div>
             
             <div class="flex items-center gap-2">
-                <button onclick="handleUserBtnClick()" id="user-btn" class="bg-[#21262d] border border-[#30363d] text-zinc-300 p-2 rounded-full text-xs font-bold flex items-center gap-1">
+                <button onclick="handleUserBtnClick()" id="user-btn" class="bg-[#21262d] border border-[#30363d] text-zinc-300 p-2 rounded-full text-xs font-bold flex items-center gap-1 transition-colors hover:bg-[#30363d]">
                     👤 <span id="user-btn-label" class="hidden sm:inline">Entrar</span>
                 </button>
 
@@ -287,7 +357,7 @@
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 </a>
 
-                <button onclick="openRouletteModal()" class="bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 px-2.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1">
+                <button onclick="checkAuthAndRun(openRouletteModal)" class="bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 px-2.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1">
                     🎰 <span class="hidden sm:inline">Roleta</span>
                 </button>
             </div>
@@ -295,7 +365,7 @@
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="max-w-md mx-auto p-4" id="main-content"></main>
+    <main class="max-w-md mx-auto p-4 z-10 relative" id="main-content"></main>
 
     <!-- Navegação Inferior -->
     <nav class="fixed bottom-0 left-0 right-0 bg-[#161b22]/90 backdrop-blur-lg border-t border-[#30363d] px-2 py-2 z-40">
@@ -303,7 +373,6 @@
             <button onclick="changeTab('menu')" id="nav-menu" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-cyan-400"><span class="text-lg">🍔</span><span class="text-[10px] font-bold">Lanches</span></button>
             <button onclick="changeTab('lan')" id="nav-lan" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-purple-400"><span class="text-lg">🖥️</span><span class="text-[10px] font-bold">Lan</span></button>
             <button onclick="changeTab('arcade')" id="nav-arcade" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-yellow-400"><span class="text-lg">🕹️</span><span class="text-[10px] font-bold">Fichas</span></button>
-            <button onclick="changeTab('jukebox')" id="nav-jukebox" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-indigo-400"><span class="text-lg">🎵</span><span class="text-[10px] font-bold">Jukebox</span></button>
             <button onclick="changeTab('games')" id="nav-games" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-pink-400"><span class="text-lg">🎮</span><span class="text-[10px] font-bold">Games</span></button>
             <button onclick="changeTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-blue-400"><span class="text-lg">👤</span><span class="text-[10px] font-bold">Perfil</span></button>
             <button onclick="changeTab('cart')" id="nav-cart" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-emerald-400 relative">
@@ -311,12 +380,10 @@
                 <span id="cart-badge" class="hidden absolute top-0.5 right-1 bg-pink-500 text-white text-[10px] font-black h-4 w-4 rounded-full flex items-center justify-center">0</span>
             </button>
         </div>
-    </nav>
-
-    <!-- Templates Ocultos -->
+    </nav><!-- Templates Ocultos -->
     <div id="templates" class="hidden">
         
-        <!-- Aba Lanches com Seção de Avaliações -->
+        <!-- Aba Lanches com CHAT GLOBAL / COMUNIDADE -->
         <div id="tpl-menu" class="space-y-4">
             <div class="flex flex-wrap gap-2 pb-1 text-xs font-bold" id="menu-categories">
                 <button onclick="filterMenu('all')" class="cat-btn active bg-cyan-500 text-black px-3.5 py-2 rounded-xl flex-shrink-0">Todos</button>
@@ -328,40 +395,24 @@
             
             <div id="menu-list" class="space-y-3"></div>
 
-            <!-- Seção de Avaliações e Comentários dos Clientes -->
+            <!-- CHAT GLOBAL & AVALIAÇÕES PERSISTENTES -->
             <div class="bg-[#161b22] border border-[#30363d] p-4 rounded-3xl space-y-3 mt-6 shadow-xl">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">⭐ AVALIAÇÕES DOS CLIENTES</h3>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">💬 CHAT DA COMUNIDADE</h3>
                 
-                <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-2">
-                    <span class="text-[11px] font-bold text-zinc-400 block uppercase">Deixe sua Avaliação:</span>
-                    <select id="review-item-select" class="w-full bg-[#161b22] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                        <option value="Mascote Box Cristal Roxo">Mascote Box Cristal Roxo</option>
-                        <option value="Combo Boss Level">Combo Boss Level</option>
-                        <option value="Pixel Cheese Burger">Pixel Cheese Burger</option>
-                        <option value="Batata Neon Fries">Batata Neon Fries</option>
-                    </select>
-
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-zinc-400">Nota:</span>
-                        <select id="review-rating-select" class="bg-[#161b22] border border-[#30363d] rounded-xl px-2 py-1 text-xs text-yellow-400 font-bold focus:outline-none">
-                            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                            <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                            <option value="3">⭐⭐⭐ (3/5)</option>
-                        </select>
-                    </div>
-
-                    <input type="text" id="review-text-input" placeholder="O que achou do lanche ou atendimento? (Opcional)" class="w-full bg-[#161b22] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-
-                    <button onclick="submitCustomerReview()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black py-2 rounded-xl text-xs uppercase">
-                        PUBLICAR AVALIAÇÃO
-                    </button>
+                <div id="chat-feed" class="space-y-3 mt-3 max-h-64 overflow-y-auto pr-1 flex flex-col-reverse no-scrollbar">
+                    <!-- Preenchido via JS -->
                 </div>
 
-                <div id="reviews-feed" class="space-y-2 mt-3"></div>
+                <div class="bg-[#0d1117] p-1.5 rounded-2xl border border-[#30363d] flex gap-2 items-center mt-3">
+                    <input type="text" id="chat-text-input" placeholder="Mande um oi ou avalie algo..." class="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none">
+                    <button onclick="submitChatMessage()" class="bg-cyan-500 hover:bg-cyan-400 text-black font-black px-4 py-2.5 rounded-xl text-xs uppercase flex-shrink-0 shadow">
+                        ENVIAR
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Aba Perfil Completo (Nome, Avatar e Bio) -->
+        <!-- Aba Perfil -->
         <div id="tpl-profile" class="space-y-4">
             <div class="bg-[#161b22] border border-[#30363d] p-5 rounded-3xl text-center space-y-4 relative shadow-xl">
                 <div class="relative w-24 h-24 mx-auto">
@@ -375,7 +426,6 @@
                     <p id="profile-card-email" class="text-xs text-zinc-400">Faça login para salvar seu perfil!</p>
                 </div>
 
-                <!-- Formulário de Edição Completa -->
                 <div class="bg-[#0d1117] p-4 rounded-2xl border border-[#30363d] text-left space-y-3">
                     <div>
                         <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">👤 Nome de Usuário</label>
@@ -384,13 +434,21 @@
 
                     <div>
                         <label class="block text-[10px] font-bold text-zinc-400 uppercase mb-1">🎨 Foto de Perfil / Avatar</label>
-                        <div class="grid grid-cols-5 gap-1.5" id="avatar-picker-grid">
-                            <button onclick="selectProfileAvatar('👤')" class="bg-[#161b22] border border-[#30363d] hover:border-cyan-500 p-2 rounded-xl text-xl">👤</button>
+                        <div class="grid grid-cols-4 gap-1.5 mb-2" id="avatar-picker-grid">
                             <button onclick="selectProfileAvatar('👾')" class="bg-[#161b22] border border-[#30363d] hover:border-cyan-500 p-2 rounded-xl text-xl">👾</button>
                             <button onclick="selectProfileAvatar('🏎️')" class="bg-[#161b22] border border-[#30363d] hover:border-cyan-500 p-2 rounded-xl text-xl">🏎️</button>
                             <button onclick="selectProfileAvatar('👑')" class="bg-[#161b22] border border-[#30363d] hover:border-cyan-500 p-2 rounded-xl text-xl">👑</button>
                             <button onclick="selectProfileAvatar('🍔')" class="bg-[#161b22] border border-[#30363d] hover:border-cyan-500 p-2 rounded-xl text-xl">🍔</button>
                         </div>
+                        
+                        <label class="block w-full bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-center text-zinc-300 font-bold py-2 rounded-xl text-xs uppercase cursor-pointer transition-colors mb-2">
+                            📸 Escolher da Galeria
+                            <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                        </label>
+
+                        <button onclick="fetchGoogleAvatar()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-xl text-xs uppercase transition-colors">
+                            📧 Puxar Foto do E-mail
+                        </button>
                     </div>
 
                     <div>
@@ -405,26 +463,6 @@
             </div>
         </div>
 
-        <!-- Aba Jukebox -->
-        <div id="tpl-jukebox" class="space-y-4">
-            <div class="bg-gradient-to-r from-indigo-950/60 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/30 text-center">
-                <h2 class="text-base font-black text-indigo-300">🎵 JUKEBOX DA SEMANA</h2>
-                <p class="text-[11px] text-zinc-400 mt-0.5">Sugira sua música com link para ouvir e votar!</p>
-            </div>
-
-            <div class="bg-[#161b22] border border-[#30363d] p-3.5 rounded-2xl space-y-2">
-                <span class="text-xs font-bold text-zinc-300 uppercase block">➕ Adicionar Música (Máx 5)</span>
-                <input type="text" id="song-input" placeholder="Nome da música e artista" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 mb-1">
-                <input type="url" id="song-link-input" placeholder="Link YouTube/Spotify (Opcional)" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 mb-2">
-                <button onclick="addSongSuggestion()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs py-2.5 rounded-xl uppercase">ENVIAR PARA VOTAÇÃO</button>
-            </div>
-
-            <div class="space-y-2">
-                <h3 class="text-xs font-bold uppercase text-zinc-400">Votação em Andamento:</h3>
-                <div id="jukebox-list" class="space-y-2"></div>
-            </div>
-        </div>
-
         <!-- Aba Minigames -->
         <div id="tpl-games" class="space-y-4">
             <div class="bg-gradient-to-r from-purple-950/50 to-pink-950/40 p-4 rounded-2xl border border-purple-500/30 text-center relative">
@@ -432,6 +470,10 @@
                 <h2 class="text-base font-black text-purple-300">🎮 DESAFIE O MASCOTE DE CRISTAL</h2>
                 <p class="text-[11px] text-zinc-400 mt-0.5">Jogue no PC ou Telemóvel!</p>
             </div>
+
+            <button onclick="openLeaderboardModal()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs shadow-lg flex items-center justify-center gap-2">
+                <span class="text-lg">🏆</span> VER PLACARES GLOBAIS
+            </button>
 
             <div class="bg-[#161b22] border border-[#30363d] p-2.5 rounded-2xl flex items-center justify-between">
                 <span class="text-xs font-bold text-zinc-400">Dificuldade:</span>
@@ -480,6 +522,14 @@
                         <div><div class="text-xs font-bold text-purple-300">🖥️ PC 02 Ultra</div><div class="text-[10px] text-zinc-500">RTX 4080 + 360Hz</div></div>
                         <span class="text-[10px] font-black text-purple-400">R$ 16/h</span>
                     </button>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC 03 - Streamer Pod">
+                        <div><div class="text-xs font-bold text-pink-300">🎙️ PC 03 Streamer</div><div class="text-[10px] text-zinc-500">Cam 4K + Mic Studio</div></div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 18/h</span>
+                    </button>
+                    <button class="seat-btn bg-[#161b22] border border-[#30363d] p-3 rounded-xl text-left hover:border-purple-500 transition-all flex items-center justify-between" data-seat="PC 04 - VR Zone">
+                        <div><div class="text-xs font-bold text-cyan-300">🥽 PC 04 VR Zone</div><div class="text-[10px] text-zinc-500">Realidade Virtual</div></div>
+                        <span class="text-[10px] font-black text-purple-400">R$ 22/h</span>
+                    </button>
                 </div>
             </div>
 
@@ -523,7 +573,7 @@
 
     </div>
 
-    <!-- JavaScript Integrado -->
+    <!-- SCRIPT COMPLETO E EXPANDIDO -->
     <script>
         let currentTab = 'menu';
         let activeCategory = 'all';
@@ -532,133 +582,31 @@
         let selectedLanOption = null;
         let appliedDiscount = 0;
         let currentDifficulty = 'easy';
-        let storeIsOpen = true;
+        let selectedAvatarData = '👤'; 
+        let currentLbGame = 'volley';
         let deliveryMode = 'motoboy';
-        let selectedAvatarIcon = '👤';
         const pixKey = "f882100@gmail.com";
 
+        // Global Loop Clear Control
         let activeGameLoop = null;
-
         function clearAllGameLoops() {
             if (activeGameLoop) clearInterval(activeGameLoop);
             activeGameLoop = null;
         }
 
         // State LocalStorage
+        let storeIsOpen = JSON.parse(localStorage.getItem('az_store_status'));
+        if (storeIsOpen === null) storeIsOpen = true;
+
         let currentUser = JSON.parse(localStorage.getItem('az_user')) || null;
         let usersLog = JSON.parse(localStorage.getItem('az_users_log')) || [];
         let ordersLog = JSON.parse(localStorage.getItem('az_orders_log')) || [];
-        let customerReviews = JSON.parse(localStorage.getItem('az_reviews')) || [
-            { name: "Bernardo Araujo", avatar: "👑", item: "Mascote Box Cristal Roxo", rating: "5", text: "Melhor lanche da cidade e o mascote é muito top!", date: "Hoje" }
+        let globalChat = JSON.parse(localStorage.getItem('az_chat')) || [
+            { name: "Bernardo Admin", avatar: "👑", text: "Bem-vindo ao chat do ArcadeZone!", timestamp: Date.now() - 3600000 }
         ];
-        let jukeboxSongs = JSON.parse(localStorage.getItem('az_jukebox')) || [
-            { id: 1, name: "Synthwave Gamer - Cyberpunk Night", votes: 8, link: "https://youtube.com" },
-            { id: 2, name: "Lo-Fi Gaming - Chill Beats", votes: 5, link: "https://spotify.com" }
-        ];
+        let leaderboards = JSON.parse(localStorage.getItem('az_leaderboards')) || { volley: [], penalty: [], racer: [], invaders: [] };
 
-        // Trava de Login Obrigatório
-        function checkAuthAndRun(callback) {
-            if (!currentUser) {
-                showToast('Login obrigatório para esta ação!', '🔒');
-                openLoginModal();
-                return;
-            }
-            if (callback) callback();
-        }
-
-        // Web Audio API
-        let audioCtx = null;
-        function getAudioContext() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            return audioCtx;
-        }
-
-        function playWheelTickSound() {
-            try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, ctx.currentTime);
-                gain.gain.setValueAtTime(0.05, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 0.03);
-            } catch (e) {}
-        }
-
-        function playWhistleSound() {
-            try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(2200, ctx.currentTime);
-                osc.frequency.setValueAtTime(2400, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 0.4);
-            } catch (e) {}
-        }
-
-        function playWinFanfare() {
-            try {
-                const ctx = getAudioContext();
-                const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.08));
-                    gain.gain.setValueAtTime(0.2, ctx.currentTime + (idx * 0.08));
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (idx * 0.08) + 0.2);
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + (idx * 0.08));
-                    osc.stop(ctx.currentTime + (idx * 0.08) + 0.2);
-                });
-            } catch (e) {}
-        }
-
-        function playSadTrombone() {
-            try {
-                const ctx = getAudioContext();
-                const notes = [466.16, 440.00, 415.30, 392.00];
-                notes.forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.25));
-                    if (idx === 3) osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + (idx * 0.25) + 0.6);
-                    gain.gain.setValueAtTime(0.2, ctx.currentTime + (idx * 0.25));
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (idx * 0.25) + (idx === 3 ? 0.6 : 0.22));
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + (idx * 0.25));
-                    osc.stop(ctx.currentTime + (idx * 0.25) + (idx === 3 ? 0.6 : 0.22));
-                });
-            } catch (e) {}
-        }
-
-        function playClickSound() {
-            try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(600, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.12, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 0.05);
-            } catch (e) {}
-        }
-
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('button, a, select, input[type="checkbox"]')) playClickSound();
-        });
-
+        // Data Arrays
         const menuItems = [
             { id: 1, cat: 'combos', name: "Mascote Box Cristal Roxo", desc: "Burguer Artesanal + Batata Neon + Refri + Mascote de Cristal Colecionável Oficial!", price: 59.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80", highlight: true },
             { id: 2, cat: 'combos', name: "Combo Boss Level", desc: "2x Burguer Duplo Cheddar + Batata Neon GG + 2 Refris", price: 69.90, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=300&q=80", highlight: true },
@@ -675,12 +623,11 @@
             { qty: 5, price: 10.00, bonus: "5 Fichas para jogar" },
             { qty: 20, price: 30.00, bonus: "+ 2 Fichas Bônus!" },
             { qty: 50, price: 60.00, bonus: "+ 10 Fichas Bônus!", highlight: true },
-            { qty: "30 FICHAS + MASCOTE", price: 65.00, bonus: "Ganha o Mascote de Cristal Roxo Colecionável!", highlight: true },
             { qty: "PASSAPORTE DIÁRIO", price: 89.90, bonus: "Jogos Liberados o dia todo!", highlight: true }
         ];
 
+        // System Methods
         function formatPrice(p) { return p.toFixed(2).replace('.', ','); }
-
         function showToast(msg, icon = '✨') {
             const toast = document.getElementById('toast');
             document.getElementById('toast-message').textContent = msg;
@@ -689,16 +636,87 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        function updateCartBadge() {
-            const badge = document.getElementById('cart-badge');
-            if (cart.length > 0) { badge.textContent = cart.length; badge.classList.remove('hidden'); }
-            else { badge.classList.add('hidden'); }
+        function checkStoreStatusUI() {
+            const overlay = document.getElementById('store-closed-overlay');
+            if (!storeIsOpen && (!currentUser || !currentUser.isAdmin)) {
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
         }
 
-        function handleUserBtnClick() {
-            if (currentUser) openUserProfileModal(); else openLoginModal();
+        function checkAuthAndRun(callback) {
+            if (!currentUser) {
+                showToast('Login obrigatório para esta ação!', '🔒');
+                openLoginModal();
+                return;
+            }
+            if (callback) callback();
         }
 
+        function toggleStoreStatus() {
+            storeIsOpen = !storeIsOpen;
+            localStorage.setItem('az_store_status', JSON.stringify(storeIsOpen));
+            
+            const statusEl = document.getElementById('store-status-text');
+            if (statusEl) {
+                statusEl.textContent = storeIsOpen ? '🟢 ABERTO PARA PEDIDOS' : '🔴 FECHADO NO MOMENTO';
+                statusEl.className = storeIsOpen ? 'text-[10px] text-emerald-400 font-bold' : 'text-[10px] text-red-400 font-bold';
+            }
+            showToast(`Status da loja alterado!`, '🛠️');
+            checkStoreStatusUI();
+        }
+
+        // INTELIGÊNCIA ARTIFICIAL (MASCOTE ROXO)
+        function toggleAIChat() {
+            const w = document.getElementById('ai-chat-window');
+            w.classList.toggle('hidden');
+            w.classList.toggle('flex');
+        }
+
+        function handleAIKeyPress(e) { if (e.key === 'Enter') sendAIMessage(); }
+
+        function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const text = input.value.trim();
+            if (!text) return;
+            appendAIMessage(text, 'user');
+            input.value = '';
+            setTimeout(() => { const reply = getAIResponse(text); appendAIMessage(reply, 'bot'); }, 600);
+        }
+
+        function appendAIMessage(text, sender) {
+            const box = document.getElementById('ai-messages');
+            const div = document.createElement('div');
+            div.className = sender === 'user' 
+                ? 'bg-blue-600/20 border border-blue-500/30 text-blue-100 p-2 rounded-xl rounded-tr-none self-end max-w-[85%]'
+                : 'bg-purple-600/20 border border-purple-500/30 text-purple-100 p-2 rounded-xl rounded-tl-none self-start max-w-[85%]';
+            div.textContent = text;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function getAIResponse(text) {
+            const t = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if (t.includes('cardapio') || t.includes('lanche') || t.includes('fome') || t.includes('menu') || t.includes('comida')) return "🍔 Temos o Mascote Box Cristal Roxo, Pixel Cheese Burger e Combos irados! Vá na aba 'Lanches' aqui embaixo para pedir.";
+            if (t.includes('lan') || t.includes('pc') || t.includes('computador') || t.includes('jogar') || t.includes('rtx')) return "🖥️ Nossa Lan House tem estações Pro com RTX 4080 e Pods Streamer. Acesse a aba 'Lan' para reservar seu horário!";
+            if (t.includes('cupom') || t.includes('desconto') || t.includes('codigo') || t.includes('promocao')) return "🎟️ Anota aí os cupons ativos: ARCADE10 (10% OFF), MASCOTEVIP (15% OFF) ou FICHASGRATIS (+5 fichas). É só inserir no Carrinho!";
+            if (t.includes('roleta') || t.includes('girar') || t.includes('sorte')) return "🎰 A Roleta 24h fica no botãozinho amarelo lá no topo. Gire grátis uma vez por dia e ganhe lanches ou cupons!";
+            if (t.includes('jogo') || t.includes('minigame') || t.includes('placar') || t.includes('games')) return "🎮 Na aba 'Games' temos Vôlei, Pênalti, Pixel Racer e Space Invaders. Jogue bem e seu nome vai para o Hall da Fama Global!";
+            if (t.includes('pix') || t.includes('pagamento') || t.includes('comprar')) return "💸 Os pagamentos são via Pix automático (Chave: f882100@gmail.com). Coloque no carrinho e pague rápido!";
+            if (t.includes('oi') || t.includes('ola') || t.includes('bom dia') || t.includes('boa noite') || t.includes('eae')) return "👾 Olá, gamer! Sou o Mascote Roxo, a Inteligência Artificial do ArcadeZone programada direto no código! Como posso ajudar?";
+            if (t.includes('quem e voce') || t.includes('seu nome') || t.includes('ia') || t.includes('robo')) return "👾 Eu sou o Mascote de Cristal Roxo! Sou um chatbot inteligente feito para te ajudar a pedir lanches e entender a loja.";
+            return "👾 Hmm... não entendi muito bem. Tente me perguntar sobre 'cardápio', 'cupons', 'lan house', 'jogos' ou 'roleta'!";
+        }
+
+        // AUTH & PROFILE
+        function generateEmailAvatar(email, name) {
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}&background=random&color=fff&size=128&bold=true`;
+        }
+
+        function handleUserBtnClick() { if (currentUser) openUserProfileModal(); else openLoginModal(); }
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
         function openGooglePicker() { closeLoginModal(); document.getElementById('google-picker-modal').classList.remove('hidden'); }
@@ -708,7 +726,8 @@
             if (!currentUser) return;
             document.getElementById('profile-name').textContent = currentUser.name;
             document.getElementById('profile-email').textContent = currentUser.email;
-            document.getElementById('profile-modal-avatar').textContent = currentUser.avatar || '👤';
+            document.getElementById('profile-bio-text').textContent = currentUser.bio || '"Gamer Oficial"';
+            document.getElementById('profile-modal-avatar').innerHTML = getAvatarHTML(currentUser.avatar);
 
             const adminBtn = document.getElementById('admin-panel-btn-container');
             if (currentUser.isAdmin) adminBtn.classList.remove('hidden'); else adminBtn.classList.add('hidden');
@@ -720,10 +739,88 @@
         function openAdminModal() { renderAdminData(); document.getElementById('admin-modal').classList.remove('hidden'); }
         function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); }
 
+        function logoutUser() {
+            currentUser = null;
+            localStorage.removeItem('az_user');
+            closeUserProfileModal();
+            updateUserUI();
+            checkStoreStatusUI();
+            showToast('Você saiu da sua conta.', '🚪');
+            changeTab('menu');
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            if (!email || !pass) { showToast('Preencha os campos!', '⚠️'); return; }
+
+            const name = email.split('@')[0];
+            if (email === 'f882100@gmail.com' && pass === 'lordello051') {
+                currentUser = { name: "Bernardo Admin", email: email, avatar: generateEmailAvatar(email, "Bernardo Admin"), bio: "Desenvolvedor Oficial", isAdmin: true };
+                showToast('👑 Modo Desenvolvedor Ativado!', '🛠️');
+            } else {
+                currentUser = { name: name, email: email, avatar: generateEmailAvatar(email, name), bio: "Gamer Oficial", isAdmin: false };
+                showToast(`Bem-vindo, ${currentUser.name}!`, '👤');
+            }
+
+            localStorage.setItem('az_user', JSON.stringify(currentUser));
+            if (!usersLog.some(u => u.email === email)) {
+                usersLog.push({ email: email, date: new Date().toLocaleString() });
+                localStorage.setItem('az_users_log', JSON.stringify(usersLog));
+            }
+            closeLoginModal();
+            updateUserUI();
+            checkStoreStatusUI();
+        }
+
+        function confirmSocialAccount(email) {
+            const name = email.split('@')[0];
+            currentUser = { name: name, email: email, avatar: generateEmailAvatar(email, name), bio: "Gamer Oficial", isAdmin: (email === 'f882100@gmail.com') };
+            localStorage.setItem('az_user', JSON.stringify(currentUser));
+            if (!usersLog.some(u => u.email === email)) {
+                usersLog.push({ email: email, date: new Date().toLocaleString() });
+                localStorage.setItem('az_users_log', JSON.stringify(usersLog));
+            }
+            showToast(`Logado via Google!`, '🌐');
+            closeGooglePicker();
+            updateUserUI();
+            checkStoreStatusUI();
+        }
+
+        function fetchGoogleAvatar() {
+            if (!currentUser) return;
+            selectedAvatarData = generateEmailAvatar(currentUser.email, currentUser.name);
+            document.getElementById('user-avatar-display').innerHTML = getAvatarHTML(selectedAvatarData);
+            showToast('Foto do e-mail puxada!', '📧');
+        }
+
+        function updateUserUI() {
+            const lbl = document.getElementById('user-btn-label');
+            if (currentUser) lbl.textContent = currentUser.isAdmin ? "👑 Admin" : currentUser.name;
+            else lbl.textContent = "Entrar";
+        }
+
+        function getAvatarHTML(data) {
+            if (!data) return '👤';
+            if (data.startsWith('http') || data.startsWith('data:image')) return `<img src="${data}" class="w-full h-full object-cover">`;
+            return data;
+        }
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedAvatarData = e.target.result;
+                    document.getElementById('user-avatar-display').innerHTML = getAvatarHTML(selectedAvatarData);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function selectProfileAvatar(icon) {
-            selectedAvatarIcon = icon;
-            if (currentUser) currentUser.avatar = icon;
-            showToast(`Avatar ${icon} selecionado!`, '🎨');
+            selectedAvatarData = icon;
+            document.getElementById('user-avatar-display').innerHTML = getAvatarHTML(selectedAvatarData);
         }
 
         function saveFullUserProfile() {
@@ -733,181 +830,115 @@
 
             if (uInput && uInput.value.trim()) currentUser.name = uInput.value.trim();
             if (bInput) currentUser.bio = bInput.value.trim();
-            currentUser.avatar = selectedAvatarIcon;
+            currentUser.avatar = selectedAvatarData;
 
             localStorage.setItem('az_user', JSON.stringify(currentUser));
             showToast('Perfil atualizado com sucesso!', '👤');
             updateUserUI();
-            renderProfileUI();
-        }
-
-        function toggleStoreStatus() {
-            storeIsOpen = !storeIsOpen;
-            const statusEl = document.getElementById('store-status-text');
-            if (statusEl) {
-                statusEl.textContent = storeIsOpen ? '🟢 ABERTO PARA PEDIDOS' : '🔴 FECHADO NO MOMENTO';
-                statusEl.className = storeIsOpen ? 'text-[10px] text-emerald-400 font-bold' : 'text-[10px] text-red-400 font-bold';
-            }
-            showToast(`Status da loja alterado para ${storeIsOpen ? 'Aberto' : 'Fechado'}`, '🛠️');
-        }
-
-        function logoutUser() {
-            currentUser = null;
-            localStorage.removeItem('az_user');
-            closeUserProfileModal();
-            updateUserUI();
-            showToast('Você saiu da sua conta com sucesso.', '🚪');
-        }
-
-        function confirmSocialAccount(emailVal) {
-            const email = emailVal ? emailVal.trim() : '';
-            if (!email) { showToast('Digite um e-mail válido!', '⚠️'); return; }
-
-            currentUser = { name: email.split('@')[0], email: email, avatar: "👤", bio: "Pro Player ArcadeZone!", isAdmin: (email === 'f882100@gmail.com') };
-            localStorage.setItem('az_user', JSON.stringify(currentUser));
-
-            if (!usersLog.some(u => u.email === email)) {
-                usersLog.push({ email: email, date: new Date().toLocaleString() });
-                localStorage.setItem('az_users_log', JSON.stringify(usersLog));
-            }
-
-            showToast(`Logado como ${currentUser.name}!`, '🌐');
-            closeGooglePicker();
-            updateUserUI();
-        }
-
-        function handleLogin() {
-            const email = document.getElementById('login-email').value.trim();
-            const pass = document.getElementById('login-pass').value.trim();
-
-            if (!email || !pass) { showToast('Preencha o e-mail e a senha!', '⚠️'); return; }
-
-            if (email === 'f882100@gmail.com' && pass === 'lordello051') {
-                currentUser = { name: "Bernardo Admin", email: email, avatar: "👑", bio: "Desenvolvedor Oficial ArcadeZone", isAdmin: true };
-                localStorage.setItem('az_user', JSON.stringify(currentUser));
-                showToast('👑 Modo Desenvolvedor Ativado!', '🛠️');
-                closeLoginModal();
-                updateUserUI();
-                openUserProfileModal();
-                return;
-            }
-
-            currentUser = { name: email.split('@')[0], email: email, avatar: "👤", bio: "Gamer Oficial", isAdmin: false };
-            localStorage.setItem('az_user', JSON.stringify(currentUser));
-            
-            if (!usersLog.some(u => u.email === email)) {
-                usersLog.push({ email: email, date: new Date().toLocaleString() });
-                localStorage.setItem('az_users_log', JSON.stringify(usersLog));
-            }
-
-            showToast(`Bem-vindo, ${currentUser.name}!`, '👤');
-            closeLoginModal();
-            updateUserUI();
-        }
-
-        function updateUserUI() {
-            const lbl = document.getElementById('user-btn-label');
-            if (currentUser) {
-                lbl.textContent = currentUser.isAdmin ? "👑 Dev/Admin" : currentUser.name;
-            } else {
-                lbl.textContent = "Entrar";
-            }
-        }
-
-        function renderProfileUI() {
-            if (!currentUser) return;
-            const nameEl = document.getElementById('profile-card-name');
-            const emailEl = document.getElementById('profile-card-email');
-            const avatarEl = document.getElementById('user-avatar-display');
-            const usernameInput = document.getElementById('edit-username-input');
-            const bioInput = document.getElementById('edit-bio-input');
-
-            if (nameEl) nameEl.textContent = currentUser.name;
-            if (emailEl) emailEl.textContent = currentUser.email;
-            if (avatarEl) avatarEl.textContent = currentUser.avatar || '👤';
-            if (usernameInput) usernameInput.value = currentUser.name || '';
-            if (bioInput) bioInput.value = currentUser.bio || '';
-        }
-
-        function submitCustomerReview() {
-            if (!currentUser) {
-                showToast('Login obrigatório para avaliar!', '🔒');
-                openLoginModal();
-                return;
-            }
-
-            const itemVal = document.getElementById('review-item-select').value;
-            const ratingVal = document.getElementById('review-rating-select').value;
-            const textVal = document.getElementById('review-text-input').value.trim();
-
-            customerReviews.unshift({
-                name: currentUser.name,
-                avatar: currentUser.avatar || '👤',
-                item: itemVal,
-                rating: ratingVal,
-                text: textVal || 'Muito bom, recomendo!',
-                date: 'Agora'
-            });
-
-            localStorage.setItem('az_reviews', JSON.stringify(customerReviews));
-            document.getElementById('review-text-input').value = '';
-            showToast('Sua avaliação foi publicada!', '⭐');
-            renderReviewsFeed();
-        }
-
-        function renderReviewsFeed() {
-            const feed = document.getElementById('reviews-feed');
-            if (!feed) return;
-
-            feed.innerHTML = customerReviews.map(r => `
-                <div class="bg-[#0d1117] p-3 rounded-2xl border border-[#30363d] space-y-1">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-base">${r.avatar}</span>
-                            <span class="text-xs font-bold text-white">${r.name}</span>
-                        </div>
-                        <span class="text-[10px] text-yellow-400 font-bold">${'⭐'.repeat(parseInt(r.rating))}</span>
-                    </div>
-                    <div class="text-[10px] text-cyan-400 font-bold">• ${r.item}</div>
-                    <p class="text-[11px] text-zinc-300 italic">"${r.text}"</p>
-                </div>
-            `).join('');
         }
 
         function renderAdminData() {
             const uList = document.getElementById('admin-users-list');
             const oList = document.getElementById('admin-orders-list');
-            
-            uList.innerHTML = usersLog.length ? usersLog.map(u => `<div>• ${u.email} <span class="text-[9px] text-zinc-600">(${u.date})</span></div>`).join('') : '<div>Nenhum cliente registrado ainda.</div>';
-            oList.innerHTML = ordersLog.length ? ordersLog.map(o => `<div>• <b>${o.client}</b> - R$ ${formatPrice(o.total)} <span class="text-[9px] text-zinc-600">(${o.date})</span></div>`).join('') : '<div>Nenhum pedido efetuado no Pix ainda.</div>';
+            uList.innerHTML = usersLog.length ? usersLog.map(u => `<div>• ${u.email} <span class="text-[9px] text-zinc-600">(${u.date})</span></div>`).join('') : '<div>Nenhum registro.</div>';
+            oList.innerHTML = ordersLog.length ? ordersLog.map(o => `<div>• <b>${o.client}</b> - R$ ${formatPrice(o.total)} <span class="text-[9px] text-zinc-600">(${o.mode})</span></div>`).join('') : '<div>Nenhum pedido.</div>';
         }
+
+        // LEADERBOARDS
+        function saveScore(game, points) {
+            if (!currentUser || points <= 0) return;
+            leaderboards[game].push({ name: currentUser.name, avatar: currentUser.avatar, score: points, date: Date.now() });
+            localStorage.setItem('az_leaderboards', JSON.stringify(leaderboards));
+            showToast(`Pontuação salva: ${points} pts!`, '🏆');
+        }
+
+        function openLeaderboardModal() {
+            document.getElementById('leaderboard-modal').classList.remove('hidden');
+            loadLeaderboard('volley');
+        }
+
+        function closeLeaderboardModal() { document.getElementById('leaderboard-modal').classList.add('hidden'); }
+
+        function loadLeaderboard(game) {
+            currentLbGame = game;
+            document.querySelectorAll('.lb-game-btn').forEach(b => { b.classList.remove('bg-purple-600', 'text-white'); b.classList.add('bg-[#21262d]', 'text-zinc-400'); });
+            document.getElementById(`btn-lb-${game}`).classList.replace('bg-[#21262d]', 'bg-purple-600');
+            document.getElementById(`btn-lb-${game}`).classList.replace('text-zinc-400', 'text-white');
+
+            const filter = document.getElementById('lb-time-filter').value;
+            const now = Date.now();
+            let filteredScores = leaderboards[game].filter(s => {
+                if (filter === 'daily') return (now - s.date) < 86400000;
+                if (filter === 'weekly') return (now - s.date) < 604800000;
+                if (filter === 'monthly') return (now - s.date) < 2592000000;
+                if (filter === 'yearly') return (now - s.date) < 31536000000;
+                return true;
+            });
+
+            filteredScores.sort((a, b) => b.score - a.score);
+            filteredScores = filteredScores.slice(0, 10);
+
+            const listEl = document.getElementById('leaderboard-list');
+            if (filteredScores.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-6 text-zinc-500 text-xs">Nenhum recorde neste período. Seja o primeiro!</div>`;
+                return;
+            }
+
+            listEl.innerHTML = filteredScores.map((s, i) => `
+                <div class="flex items-center justify-between bg-[#161b22] p-2 rounded-xl border ${i===0?'border-yellow-500':'border-[#30363d]'}">
+                    <div class="flex items-center gap-3">
+                        <span class="font-black text-sm ${i===0?'text-yellow-400':i===1?'text-zinc-300':i===2?'text-amber-600':'text-zinc-500'}">#${i+1}</span>
+                        <div class="w-8 h-8 rounded-full bg-black overflow-hidden border border-zinc-700">${getAvatarHTML(s.avatar)}</div>
+                        <span class="text-xs font-bold text-white truncate max-w-[100px]">${s.name}</span>
+                    </div>
+                    <span class="text-xs font-black text-cyan-400">${s.score} pts</span>
+                </div>
+            `).join('');
+        }
+
+        // TABS & CHAT
+        let chatTimeInterval = null;
 
         function changeTab(tabName) {
             clearAllGameLoops();
             currentTab = tabName;
             const mainContent = document.getElementById('main-content');
-            const template = document.getElementById(`tpl-${tabName}`).cloneNode(true);
-            template.id = '';
-            mainContent.innerHTML = ''; mainContent.appendChild(template);
+            const template = document.getElementById(`tpl-${tabName}`);
+            
+            if (template) {
+                mainContent.innerHTML = ''; 
+                mainContent.appendChild(template.cloneNode(true));
+                document.querySelector('#main-content > div').id = '';
+            }
 
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('opacity-100', 'opacity-50'));
             const navBtn = document.getElementById(`nav-${tabName}`);
             if (navBtn) navBtn.classList.replace('opacity-50', 'opacity-100');
 
-            if (tabName === 'menu') { renderMenu(); renderReviewsFeed(); }
+            if (tabName === 'menu') {
+                renderMenu();
+                renderChatFeed();
+                if (chatTimeInterval) clearInterval(chatTimeInterval);
+                chatTimeInterval = setInterval(renderChatFeed, 30000);
+            } else {
+                if (chatTimeInterval) clearInterval(chatTimeInterval);
+            }
+
             if (tabName === 'cart') renderCart();
             if (tabName === 'arcade') renderArcade();
             if (tabName === 'lan') attachLanEvents();
-            if (tabName === 'jukebox') renderJukebox();
             if (tabName === 'games') updateDiffBadgeUI();
-            if (tabName === 'profile') renderProfileUI();
+            if (tabName === 'profile' && currentUser) {
+                document.getElementById('edit-username-input').value = currentUser.name;
+                document.getElementById('edit-bio-input').value = currentUser.bio || '';
+                selectedAvatarData = currentUser.avatar || '👤';
+                document.getElementById('user-avatar-display').innerHTML = getAvatarHTML(selectedAvatarData);
+            }
         }
 
         function filterMenu(cat) {
             activeCategory = cat;
-            document.querySelectorAll('#menu-categories button').forEach(btn => {
-                btn.className = 'cat-btn bg-[#161b22] border border-[#30363d] text-zinc-300 px-3.5 py-2 rounded-xl flex-shrink-0';
-            });
+            document.querySelectorAll('#menu-categories button').forEach(btn => btn.className = 'cat-btn bg-[#161b22] border border-[#30363d] text-zinc-300 px-3.5 py-2 rounded-xl flex-shrink-0');
             event.target.className = 'cat-btn active bg-cyan-500 text-black font-black px-3.5 py-2 rounded-xl flex-shrink-0';
             renderMenu();
         }
@@ -930,836 +961,79 @@
                                 <div class="text-cyan-400 font-black text-xs mt-1">R$ ${formatPrice(item.price)}</div>
                             </div>
                         </div>
-                        <button onclick="addToCart(${item.id})" class="bg-[#21262d] hover:bg-cyan-500 hover:text-black text-white font-bold text-xs px-3 py-2 rounded-xl transition-colors flex-shrink-0">+ ADD</button>
+                        <button onclick="checkAuthAndRun(() => addToCart(${item.id}))" class="bg-[#21262d] hover:bg-cyan-500 hover:text-black text-white font-bold text-xs px-3 py-2 rounded-xl transition-colors flex-shrink-0">+ ADD</button>
                     </div>
                 `;
             });
         }
 
         function addToCart(id) {
-            checkAuthAndRun(() => {
-                const item = menuItems.find(i => i.id === id);
-                if (item) {
-                    cart.push({ ...item, cartId: Date.now() + Math.random() });
-                    updateCartBadge();
-                    showToast(`${item.name} adicionado ao pedido!`, '🍔');
-                }
-            });
-        }
-
-        // JUKEBOX
-        function renderJukebox() {
-            const container = document.querySelector('#main-content #jukebox-list');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const sorted = [...jukeboxSongs].sort((a, b) => b.votes - a.votes);
-
-            sorted.forEach((song, idx) => {
-                const isWinner = idx === 0;
-                const borderClass = isWinner ? 'border-yellow-500/80 bg-gradient-to-r from-yellow-950/30 to-zinc-900' : 'border-[#30363d] bg-[#161b22]';
-                container.innerHTML += `
-                    <div class="p-3 rounded-2xl border ${borderClass} flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-black ${isWinner ? 'text-yellow-400' : 'text-zinc-500'}">#${idx + 1}</span>
-                            <div>
-                                <div class="text-xs font-bold text-zinc-100">${song.name}</div>
-                                <div class="text-[10px] text-indigo-400 font-bold">${song.votes} Votos ${isWinner ? '🏆 (Em 1º)' : ''}</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            ${song.link ? `<a href="${song.link}" target="_blank" class="bg-zinc-800 hover:bg-zinc-700 text-cyan-400 p-2 rounded-xl text-xs font-bold">▶️ Play</a>` : ''}
-                            <button onclick="voteSong(${song.id})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-3 py-2 rounded-xl">👍 VOTAR</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function addSongSuggestion() {
-            checkAuthAndRun(() => {
-                const input = document.getElementById('song-input');
-                const linkInput = document.getElementById('song-link-input');
-                if (!input) return;
-                const songName = input.value.trim();
-                const songLink = linkInput ? linkInput.value.trim() : '';
-
-                if (!songName) { showToast('Digite o nome da música!', '⚠️'); return; }
-                if (jukeboxSongs.length >= 5) { showToast('Limite de 5 músicas na semana atingido!', '⚠️'); return; }
-
-                jukeboxSongs.push({ id: Date.now(), name: songName, votes: 1, link: songLink });
-                localStorage.setItem('az_jukebox', JSON.stringify(jukeboxSongs));
-                input.value = ''; if (linkInput) linkInput.value = '';
-                renderJukebox();
-                showToast('Música enviada para a votação!', '🎵');
-            });
-        }
-
-        function voteSong(id) {
-            checkAuthAndRun(() => {
-                const song = jukeboxSongs.find(s => s.id === id);
-                if (song) {
-                    song.votes++;
-                    localStorage.setItem('az_jukebox', JSON.stringify(jukeboxSongs));
-                    renderJukebox();
-                    showToast(`Voto registrado em "${song.name}"!`, '🎵');
-                }
-            });
-        }
-
-        function setDifficulty(diff) {
-            currentDifficulty = diff;
-            updateDiffBadgeUI();
-            showToast(`Dificuldade: ${diff.toUpperCase()}`, '🎮');
-        }
-
-        function updateDiffBadgeUI() {
-            const badge = document.getElementById('diff-badge');
-            if (badge) {
-                if (currentDifficulty === 'easy') {
-                    badge.className = 'absolute top-2 right-2 bg-green-500/20 border border-green-500 text-green-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase';
-                    badge.textContent = '🟢 FÁCIL';
-                } else if (currentDifficulty === 'normal') {
-                    badge.className = 'absolute top-2 right-2 bg-yellow-500/20 border border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase';
-                    badge.textContent = '🟡 NORMAL';
-                } else {
-                    badge.className = 'absolute top-2 right-2 bg-red-500/20 border border-red-500 text-red-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase';
-                    badge.textContent = '🔴 DIFÍCIL';
-                }
-            }
-        }
-
-        // GAME 1: POU VÔLEI
-        function initVolleyGame() {
-            clearAllGameLoops();
-            const arena = document.getElementById('game-arena');
-            if (!arena) return;
-
-            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-            arena.innerHTML = `
-                <div class="w-full flex justify-between items-center text-xs font-black mb-1 text-zinc-300">
-                    <span class="text-cyan-400">Você: <b id="p-score">0</b></span>
-                    <span class="text-yellow-400">Tempo: <b id="volley-timer">02:00</b></span>
-                    <span class="text-purple-400">Mascote: <b id="m-score">0</b></span>
-                </div>
-                <canvas id="volleyCanvas" width="300" height="240" class="border border-purple-500/40 rounded-xl bg-gradient-to-b from-purple-950/20 to-black w-full"></canvas>
-                
-                <div class="${isTouch ? 'flex' : 'hidden md:hidden flex'} justify-between w-full mt-2 gap-2">
-                    <button ontouchstart="movePlayer(-12)" onclick="movePlayer(-12)" class="w-1/3 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">◀️ ESQ</button>
-                    <button ontouchstart="jumpPlayer()" onclick="jumpPlayer()" class="w-1/3 bg-purple-600 border border-purple-500 py-2.5 rounded-xl font-black text-xs text-white">⬆️ PULAR</button>
-                    <button ontouchstart="movePlayer(12)" onclick="movePlayer(12)" class="w-1/3 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">DIR ▶️</button>
-                </div>
-            `;
-
-            const canvas = document.getElementById('volleyCanvas');
-            const ctx = canvas.getContext('2d');
-
-            let playerScore = 0, mascotScore = 0;
-            let gameTimeLeft = 120;
-            let isCountingDown = true;
-            let countdownVal = 3;
-            let pX = 50, pY = 200, pVy = 0;
-            let mX = 220, mY = 200, mVy = 0;
-            let bX = 50, bY = 80, bVx = 0, bVy = 0;
-            let serverSide = 'player';
-
-            const speedMult = currentDifficulty === 'easy' ? 1.5 : (currentDifficulty === 'normal' ? 2.8 : 4.5);
-
-            const matchTimer = setInterval(() => {
-                if (!isCountingDown && gameTimeLeft > 0) {
-                    gameTimeLeft--;
-                    const m = String(Math.floor(gameTimeLeft / 60)).padStart(2, '0');
-                    const s = String(gameTimeLeft % 60).padStart(2, '0');
-                    const timerEl = document.getElementById('volley-timer');
-                    if (timerEl) timerEl.textContent = `${m}:${s}`;
-
-                    if (gameTimeLeft <= 0) {
-                        clearInterval(matchTimer);
-                        clearAllGameLoops();
-                        finishVolleyGame(playerScore, mascotScore);
-                    }
-                }
-            }, 1000);
-
-            function startCountdown(onComplete) {
-                isCountingDown = true;
-                countdownVal = 3;
-                playWhistleSound();
-                
-                const cInterval = setInterval(() => {
-                    if (countdownVal > 0) {
-                        ctx.clearRect(0, 0, 300, 240);
-                        drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY);
-                        ctx.fillStyle = '#facc15'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
-                        ctx.fillText(countdownVal, 150, 120);
-                        countdownVal--;
-                    } else {
-                        clearInterval(cInterval);
-                        ctx.clearRect(0, 0, 300, 240);
-                        drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY);
-                        ctx.fillStyle = '#22c55e'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center';
-                        ctx.fillText('COMEÇE!', 150, 120);
-                        setTimeout(() => {
-                            isCountingDown = false;
-                            if (serverSide === 'player') { bX = 50; bY = 80; bVx = 2; bVy = 1; }
-                            else { bX = 220; bY = 80; bVx = -2; bVy = 1; }
-                            if (onComplete) onComplete();
-                        }, 500);
-                    }
-                }, 700);
-            }
-
-            const keys = {};
-            window.onkeydown = (e) => { keys[e.key] = true; };
-            window.onkeyup = (e) => { keys[e.key] = false; };
-
-            startCountdown();
-
-            activeGameLoop = setInterval(() => {
-                if (isCountingDown) return;
-
-                if (keys['ArrowLeft'] || keys['a'] || keys['A']) movePlayer(-4);
-                if (keys['ArrowRight'] || keys['d'] || keys['D']) movePlayer(4);
-                if ((keys['ArrowUp'] || keys['w'] || keys['W'] || keys[' ']) && pY === 200) jumpPlayer();
-
-                ctx.clearRect(0, 0, 300, 240);
-
-                pY += pVy;
-                if (pY < 200) pVy += 0.5; else { pY = 200; pVy = 0; }
-
-                let aiSpeed = speedMult;
-                if (bX > 148) {
-                    if (mX < bX - 5) mX += aiSpeed; else if (mX > bX + 5) mX -= aiSpeed;
-                    if (bY < 140 && mY === 200 && Math.random() < (currentDifficulty === 'hard' ? 0.4 : 0.1)) mVy = -8;
-                } else { if (mX < 230) mX += 1; }
-
-                mX = Math.max(162, Math.min(284, mX));
-
-                mY += mVy;
-                if (mY < 200) mVy += 0.5; else { mY = 200; mVy = 0; }
-
-                bX += bVx; bY += bVy; bVy += 0.22;
-
-                if (bY <= 10) { bY = 10; bVy *= -0.5; }
-
-                if (bX >= 142 && bX <= 154 && bY >= 150) {
-                    bVx *= -0.5; bVy += 1;
-                }
-
-                if (bY >= 225) {
-                    if (bX < 148) { mascotScore++; serverSide = 'player'; } 
-                    else { playerScore++; serverSide = 'mascot'; }
-
-                    const pEl = document.getElementById('p-score');
-                    const mEl = document.getElementById('m-score');
-                    if (pEl) pEl.textContent = playerScore;
-                    if (mEl) mEl.textContent = mascotScore;
-
-                    if (playerScore >= 7 || mascotScore >= 7) {
-                        clearInterval(matchTimer);
-                        clearAllGameLoops();
-                        finishVolleyGame(playerScore, mascotScore);
-                        return;
-                    }
-
-                    pX = 50; pY = 200; mX = 220; mY = 200;
-                    startCountdown();
-                }
-
-                if (bX <= 8) { bX = 8; bVx *= -0.8; }
-                if (bX >= 292) { bX = 292; bVx *= -0.8; }
-
-                let distP = Math.hypot(bX - pX, bY - pY);
-                if (distP < 24) { bVy = -6.5; bVx = (bX - pX) * 0.45; }
-
-                let distM = Math.hypot(bX - mX, bY - mY);
-                if (distM < 24) { bVy = -6.5; bVx = (bX - mX) * 0.45; }
-
-                drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY);
-            }, 30);
-
-            window.movePlayer = (dx) => { pX = Math.max(16, Math.min(136, pX + dx)); };
-            window.jumpPlayer = () => { if (pY === 200) pVy = -8; };
-        }
-
-        function drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY) {
-            ctx.fillStyle = '#a855f7'; ctx.fillRect(147, 150, 6, 90);
-            ctx.fillStyle = '#06b6d4'; ctx.beginPath(); ctx.arc(pX, pY, 16, 0, Math.PI * 2); ctx.fill();
-
-            if (currentDifficulty === 'easy') ctx.fillStyle = '#22c55e';
-            else if (currentDifficulty === 'normal') ctx.fillStyle = '#eab308';
-            else ctx.fillStyle = '#ef4444';
-
-            ctx.beginPath(); ctx.arc(mX, mY, 16, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(bX, bY, 8, 0, Math.PI * 2); ctx.fill();
-        }
-
-        function finishVolleyGame(pScore, mScore) {
-            if (pScore > mScore) {
-                appliedDiscount = 0.10;
-                showToast(`🎉 Você venceu por ${pScore}x${mScore}! Ganhou 10% OFF!`, '🏆');
-                renderApplyCouponBtn('ARCADE10');
-            } else {
-                showToast(`Mascote Roxo venceu por ${mScore}x${pScore}. Tente novamente!`, '⚽');
-            }
-        }
-
-        // GAME 2: PÊNALTI WORLD CUP
-        let penStep = 1;
-        let penDirVal = 50, penHgtVal = 50, penPwrVal = 50;
-        let penDirInc = 3, penHgtInc = 3, penPwrInc = 3;
-
-        function initPenaltyGame() {
-            clearAllGameLoops();
-            const arena = document.getElementById('game-arena');
-            if (!arena) return;
-
-            penStep = 1;
-            penDirVal = 50; penHgtVal = 50; penPwrVal = 50;
-
-            arena.innerHTML = `
-                <div class="w-full flex justify-between items-center text-xs font-black mb-1 text-zinc-300">
-                    <span class="text-pink-400">Pênalti do Mascote</span>
-                    <span class="text-yellow-400 font-bold" id="pen-step-info">Passo 1/3: Escolha o Canto</span>
-                </div>
-
-                <div id="penalty-field" class="relative w-full h-48 border-4 border-white bg-gradient-to-b from-green-800 to-green-950 rounded-t-xl mx-auto overflow-hidden shadow-2xl">
-                    <div class="absolute top-2 left-[30px] right-[30px] h-24 border-4 border-white bg-zinc-900/60 rounded-t-sm flex items-center justify-center">
-                        <div class="w-full h-full border-r border-b border-zinc-700/50 bg-[radial-gradient(#30363d_1px,transparent_1px)] [background-size:8px_8px]"></div>
-                    </div>
-
-                    <div id="gk-body" class="absolute top-10 left-[132px] w-9 h-14 bg-purple-600 border-2 border-purple-300 rounded-md flex flex-col items-center justify-between p-0.5 transition-all duration-300 z-10 shadow-lg">
-                        <div class="w-5 h-5 rounded-full bg-purple-300 text-[9px] flex items-center justify-center font-bold">👾</div>
-                        <div class="w-full flex justify-between px-0.5"><span class="w-2 h-2 bg-yellow-400 rounded-full"></span><span class="w-2 h-2 bg-yellow-400 rounded-full"></span></div>
-                    </div>
-
-                    <div class="absolute bottom-6 left-[142px] w-4 h-2 bg-white/40 rounded-full"></div>
-                    <div id="penalty-ball" class="absolute bottom-6 left-[138px] w-6 h-6 rounded-full bg-white border-2 border-black transition-all duration-500 shadow-md z-20"></div>
-
-                    <div id="kicker-player" class="absolute bottom-1 left-[138px] w-6 h-8 bg-blue-600 border border-blue-300 rounded-t-md z-10"></div>
-                </div>
-
-                <div class="space-y-2 my-2 text-left w-full">
-                    <div>
-                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>1. Canto / Direção:</span><span id="pen-dir-lbl" class="text-cyan-400">Centro</span></div>
-                        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden border border-zinc-700 relative">
-                            <div id="bar-dir-fill" class="bg-cyan-500 h-full absolute transition-all duration-75" style="width: 10%; left: 45%;"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>2. Altura do Chute:</span><span id="pen-hgt-lbl" class="text-yellow-400">Meia-altura</span></div>
-                        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden border border-zinc-700 relative">
-                            <div id="bar-hgt-fill" class="bg-yellow-400 h-full absolute transition-all duration-75" style="width: 10%; left: 45%;"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>3. Força da Batida:</span><span id="pen-pwr-lbl" class="text-pink-400">Média</span></div>
-                        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden border border-zinc-700">
-                            <div id="bar-pwr-fill" class="bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 h-full transition-all duration-75" style="width: 50%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <button id="lock-bar-btn" onclick="lockPenaltyStep()" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-2.5 rounded-xl uppercase text-xs shadow-lg">
-                    🎯 FIXAR CANTO (Passo 1/3)
-                </button>
-            `;
-
-            const speed = currentDifficulty === 'hard' ? 5 : (currentDifficulty === 'normal' ? 3.5 : 2);
-            penDirInc = speed; penHgtInc = speed; penPwrInc = speed;
-
-            activeGameLoop = setInterval(() => {
-                if (penStep === 1) {
-                    penDirVal += penDirInc;
-                    if (penDirVal >= 95 || penDirVal <= 5) penDirInc *= -1;
-
-                    const fill = document.getElementById('bar-dir-fill');
-                    const lbl = document.getElementById('pen-dir-lbl');
-                    if (fill) fill.style.left = `${penDirVal}%`;
-                    if (lbl) lbl.textContent = penDirVal < 35 ? 'Esquerda 👈' : (penDirVal > 65 ? 'Direita 👉' : 'Centro ☝️');
-                } else if (penStep === 2) {
-                    penHgtVal += penHgtInc;
-                    if (penHgtVal >= 95 || penHgtVal <= 5) penHgtInc *= -1;
-
-                    const fill = document.getElementById('bar-hgt-fill');
-                    const lbl = document.getElementById('pen-hgt-lbl');
-                    if (fill) fill.style.left = `${penHgtVal}%`;
-                    if (lbl) lbl.textContent = penHgtVal < 35 ? 'Rasteiro ⬇️' : (penHgtVal > 65 ? 'Gaveta ⬆️' : 'Meia-altura ➡️');
-                } else if (penStep === 3) {
-                    penPwrVal += penPwrInc;
-                    if (penPwrVal >= 95 || penPwrVal <= 5) penPwrInc *= -1;
-
-                    const fill = document.getElementById('bar-pwr-fill');
-                    const lbl = document.getElementById('pen-pwr-lbl');
-                    if (fill) fill.style.width = `${penPwrVal}%`;
-                    if (lbl) lbl.textContent = `${Math.round(penPwrVal)}% Potência`;
-                }
-            }, 30);
-        }
-
-        function lockPenaltyStep() {
-            const btn = document.getElementById('lock-bar-btn');
-            const info = document.getElementById('pen-step-info');
-
-            if (penStep === 1) {
-                penStep = 2;
-                if (btn) btn.textContent = '📐 FIXAR ALTURA (Passo 2/3)';
-                if (info) info.textContent = 'Passo 2/3: Escolha a Altura';
-                showToast(`Canto fixado!`, '🎯');
-            } else if (penStep === 2) {
-                penStep = 3;
-                if (btn) btn.textContent = '⚡ TRAVAR FORÇA E CHUTAR!';
-                if (info) info.textContent = 'Passo 3/3: Chute com Força!';
-                showToast(`Altura fixada!`, '📐');
-            } else if (penStep === 3) {
-                penStep = 4;
-                clearAllGameLoops();
-                executeWorldCupPenalty();
-            }
-        }
-
-        function executeWorldCupPenalty() {
-            const gk = document.getElementById('gk-body');
-            const ball = document.getElementById('penalty-ball');
-            const btn = document.getElementById('lock-bar-btn');
-
-            if (btn) { btn.disabled = true; btn.classList.add('opacity-50'); }
-
-            const ballX = 35 + ((penDirVal / 100) * 210);
-            const ballY = 80 - ((penHgtVal / 100) * 55);
-
-            let gkTargetX = 132;
-            const rand = Math.random();
-
-            if (currentDifficulty === 'hard') {
-                if (rand < 0.75) gkTargetX = ballX - 18;
-                else gkTargetX = Math.random() < 0.5 ? 40 : 210;
-            } else if (currentDifficulty === 'normal') {
-                if (rand < 0.45) gkTargetX = ballX - 18;
-                else gkTargetX = Math.random() < 0.5 ? 40 : 210;
-            } else {
-                gkTargetX = Math.random() < 0.5 ? 40 : 210;
-            }
-
-            gk.style.left = `${gkTargetX}px`;
-            gk.style.transform = `translateY(${penHgtVal > 50 ? '-20px' : '0px'}) rotate(${gkTargetX < 132 ? -20 : 20}deg)`;
-
-            ball.style.left = `${ballX}px`;
-            ball.style.top = `${ballY}px`;
-            ball.style.transform = `scale(${0.5 + (penPwrVal / 200)})`;
-
-            setTimeout(() => {
-                const isSaved = Math.abs(ballX - (gkTargetX + 18)) < 28 && Math.abs(ballY - 40) < 30;
-
-                if (isSaved) {
-                    showToast(' O Mascote Goleiro defendeu o chute!', '⚽');
-                } else {
-                    appliedDiscount = 0.10;
-                    showToast('🎉 GOOOOOOLAZO! Você venceu o Mascote!', '⚽');
-                    renderApplyCouponBtn('ARCADE10');
-                }
-                setTimeout(() => initPenaltyGame(), 2200);
-            }, 600);
-        }
-
-        // GAME 3: PIXEL RACER
-        function initPixelRacerGame() {
-            clearAllGameLoops();
-            const arena = document.getElementById('game-arena');
-            if (!arena) return;
-
-            arena.innerHTML = `
-                <div class="w-full flex justify-between items-center text-xs font-black mb-1 text-zinc-300">
-                    <span class="text-yellow-400">🏎️ Pixel Racer</span>
-                    <span class="text-cyan-400">Pontos: <b id="racer-score">0</b></span>
-                </div>
-                <canvas id="racerCanvas" width="300" height="240" class="border border-yellow-500/40 rounded-xl bg-[#0d1117] w-full"></canvas>
-                <div class="flex justify-between w-full mt-2 gap-2">
-                    <button ontouchstart="moveRacer(-25)" onclick="moveRacer(-25)" class="w-1/2 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">◀️ ESQUERDA</button>
-                    <button ontouchstart="moveRacer(25)" onclick="moveRacer(25)" class="w-1/2 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">DIREITA ▶️</button>
-                </div>
-            `;
-
-            const canvas = document.getElementById('racerCanvas');
-            const ctx = canvas.getContext('2d');
-
-            let carX = 135;
-            let score = 0;
-            let obstacles = [];
-            let speed = currentDifficulty === 'hard' ? 6 : (currentDifficulty === 'normal' ? 4.5 : 3);
-
-            const keys = {};
-            window.onkeydown = (e) => { keys[e.key] = true; };
-            window.onkeyup = (e) => { keys[e.key] = false; };
-
-            activeGameLoop = setInterval(() => {
-                if (keys['ArrowLeft'] || keys['a'] || keys['A']) carX = Math.max(20, carX - 5);
-                if (keys['ArrowRight'] || keys['d'] || keys['D']) carX = Math.min(250, carX + 5);
-
-                ctx.clearRect(0, 0, 300, 240);
-
-                ctx.fillStyle = '#161b22'; ctx.fillRect(20, 0, 260, 240);
-                ctx.strokeStyle = '#facc15'; ctx.setLineDash([15, 15]); ctx.beginPath(); ctx.moveTo(150, 0); ctx.lineTo(150, 240); ctx.stroke();
-
-                if (Math.random() < 0.05) {
-                    obstacles.push({ x: 30 + Math.random() * 210, y: -30 });
-                }
-
-                ctx.fillStyle = '#ef4444';
-                obstacles.forEach((obs, idx) => {
-                    obs.y += speed;
-                    ctx.fillRect(obs.x, obs.y, 30, 20);
-
-                    if (obs.y > 180 && obs.y < 220 && Math.abs(obs.x - carX) < 25) {
-                        clearAllGameLoops();
-                        showToast(`💥 Fim de jogo! Pontuação: ${score}`, '🏎️');
-                        if (score >= 150) {
-                            appliedDiscount = 0.10;
-                            renderApplyCouponBtn('ARCADE10');
-                        }
-                    }
-
-                    if (obs.y > 240) {
-                        obstacles.splice(idx, 1);
-                        score += 10;
-                        const scoreEl = document.getElementById('racer-score');
-                        if (scoreEl) scoreEl.textContent = score;
-                    }
-                });
-
-                ctx.fillStyle = '#38bdf8';
-                ctx.fillRect(carX, 190, 30, 40);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(carX + 5, 200, 20, 10);
-            }, 30);
-
-            window.moveRacer = (dx) => { carX = Math.max(20, Math.min(250, carX + dx)); };
-        }
-
-        // GAME 4: SPACE INVADERS
-        function initSpaceInvadersGame() {
-            clearAllGameLoops();
-            const arena = document.getElementById('game-arena');
-            if (!arena) return;
-
-            arena.innerHTML = `
-                <div class="w-full flex justify-between items-center text-xs font-black mb-1 text-zinc-300">
-                    <span class="text-cyan-400">👾 Space Invaders</span>
-                    <span class="text-yellow-400">Score: <b id="invaders-score">0</b></span>
-                </div>
-                <canvas id="invadersCanvas" width="300" height="240" class="border border-cyan-500/40 rounded-xl bg-black w-full"></canvas>
-                <div class="flex justify-between w-full mt-2 gap-2">
-                    <button ontouchstart="moveShip(-15)" onclick="moveShip(-15)" class="w-1/3 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">◀️ ESQ</button>
-                    <button ontouchstart="shootLaser()" onclick="shootLaser()" class="w-1/3 bg-cyan-600 border border-cyan-500 py-2.5 rounded-xl font-black text-xs text-white">⚡ ATIRAR</button>
-                    <button ontouchstart="moveShip(15)" onclick="moveShip(15)" class="w-1/3 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">DIR ▶️</button>
-                </div>
-            `;
-
-            const canvas = document.getElementById('invadersCanvas');
-            const ctx = canvas.getContext('2d');
-
-            let shipX = 135;
-            let lasers = [];
-            let aliens = [];
-            let score = 0;
-            let alienSpeed = currentDifficulty === 'hard' ? 2 : (currentDifficulty === 'normal' ? 1.3 : 0.8);
-
-            for (let r = 0; r < 3; r++) {
-                for (let c = 0; c < 6; c++) {
-                    aliens.push({ x: 30 + c * 40, y: 20 + r * 25, alive: true });
-                }
-            }
-
-            const keys = {};
-            window.onkeydown = (e) => {
-                keys[e.key] = true;
-                if (e.key === ' ' || e.key === 'ArrowUp') shootLaser();
-            };
-            window.onkeyup = (e) => { keys[e.key] = false; };
-
-            activeGameLoop = setInterval(() => {
-                if (keys['ArrowLeft'] || keys['a'] || keys['A']) shipX = Math.max(10, shipX - 5);
-                if (keys['ArrowRight'] || keys['d'] || keys['D']) shipX = Math.min(260, shipX + 5);
-
-                ctx.clearRect(0, 0, 300, 240);
-
-                ctx.fillStyle = '#22d3ee'; ctx.fillRect(shipX, 210, 30, 15); ctx.fillRect(shipX + 12, 202, 6, 8);
-
-                ctx.fillStyle = '#facc15';
-                lasers.forEach((l, lIdx) => {
-                    l.y -= 7;
-                    ctx.fillRect(l.x, l.y, 4, 10);
-                    if (l.y < 0) lasers.splice(lIdx, 1);
-                });
-
-                let allDead = true;
-                aliens.forEach(a => {
-                    if (a.alive) {
-                        allDead = false;
-                        a.y += alienSpeed * 0.15;
-                        ctx.fillStyle = '#a855f7';
-                        ctx.fillRect(a.x, a.y, 22, 16);
-
-                        lasers.forEach((l, lIdx) => {
-                            if (l.x >= a.x && l.x <= a.x + 22 && l.y >= a.y && l.y <= a.y + 16) {
-                                a.alive = false;
-                                lasers.splice(lIdx, 1);
-                                score += 20;
-                                const scoreEl = document.getElementById('invaders-score');
-                                if (scoreEl) scoreEl.textContent = score;
-                            }
-                        });
-
-                        if (a.y > 190) {
-                            clearAllGameLoops();
-                            showToast('👾 Invasores invadiram a base!', '💥');
-                        }
-                    }
-                });
-
-                if (allDead) {
-                    clearAllGameLoops();
-                    appliedDiscount = 0.10;
-                    showToast('🎉 Você defendeu a base ArcadeZone!', '👾');
-                    renderApplyCouponBtn('ARCADE10');
-                }
-            }, 30);
-
-            window.moveShip = (dx) => { shipX = Math.max(10, Math.min(260, shipX + dx)); };
-            window.shootLaser = () => { lasers.push({ x: shipX + 13, y: 200 }); };
-        }
-
-        function renderApplyCouponBtn(code) {
-            const arena = document.getElementById('game-arena');
-            if (!arena) return;
-            arena.innerHTML += `
-                <button onclick="applyWinCoupon('${code}')" class="mt-3 w-full bg-emerald-500 text-black font-black py-2.5 rounded-xl text-xs uppercase tracking-wider">
-                    🎁 APLICAR CUPOM DE DESCONTO NO CARRINHO
-                </button>
-            `;
-        }
-
-        function applyWinCoupon(code) {
-            appliedDiscount = 0.10;
-            showToast('Cupom aplicado com sucesso no carrinho!', '🎟️');
-            changeTab('cart');
-        }
-
-        // ROLETA PIZZA
-        const pizzaPrizes = [
-            { label: "5% OFF", color: "#f97316", discount: 0.05, isWin: true },
-            { label: "10% OFF", color: "#22c55e", discount: 0.10, isWin: true },
-            { label: "15% VIP", color: "#a855f7", discount: 0.15, isWin: true },
-            { label: "Refri Grátis", color: "#eab308", discount: 0, isWin: true, addDrink: true },
-            { label: "Fritas Grátis", color: "#ffffff", discount: 0, isWin: true, addFries: true },
-            { label: "+5 Fichas", color: "#3b82f6", discount: 0, isWin: true, addTokens: true },
-            { label: "Tente Dnv", color: "#ef4444", discount: 0, isWin: false }
-        ];
-
-        function drawRoulettePizza() {
-            const canvas = document.getElementById('rouletteCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const numSlices = pizzaPrizes.length;
-            const sliceAngle = (2 * Math.PI) / numSlices;
-
-            ctx.clearRect(0, 0, 220, 220);
-
-            pizzaPrizes.forEach((prize, idx) => {
-                const angle = idx * sliceAngle;
-                ctx.beginPath();
-                ctx.fillStyle = prize.color;
-                ctx.moveTo(110, 110);
-                ctx.arc(110, 110, 105, angle, angle + sliceAngle);
-                ctx.lineTo(110, 110);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.save();
-                ctx.translate(110, 110);
-                ctx.rotate(angle + sliceAngle / 2);
-                ctx.fillStyle = prize.color === '#ffffff' ? '#000000' : '#ffffff';
-                ctx.font = 'bold 10px sans-serif';
-                ctx.fillText(prize.label, 45, 4);
-                ctx.restore();
-            });
-
-            ctx.fillStyle = '#161b22';
-            ctx.beginPath(); ctx.arc(110, 110, 25, 0, 2 * Math.PI); ctx.fill();
-            ctx.fillStyle = '#facc15'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('GIRAR', 110, 113);
-        }
-
-        let rouletteTimerInterval = null;
-
-        function openRouletteModal() {
-            checkAuthAndRun(() => {
-                updateRouletteTimer();
-                if (rouletteTimerInterval) clearInterval(rouletteTimerInterval);
-                rouletteTimerInterval = setInterval(updateRouletteTimer, 1000);
-
-                document.getElementById('roulette-modal').classList.remove('hidden');
-                setTimeout(drawRoulettePizza, 100);
-            });
-        }
-
-        function updateRouletteTimer() {
-            const lastSpin = localStorage.getItem('az_roulette_last');
-            const now = Date.now();
-            const btn = document.getElementById('spin-btn');
-            const timerInfo = document.getElementById('roulette-timer-info');
-
-            if (lastSpin && (now - parseInt(lastSpin)) < 24 * 60 * 60 * 1000) {
-                const diff = (24 * 60 * 60 * 1000) - (now - parseInt(lastSpin));
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((diff % (1000 * 60)) / 1000);
-                
-                timerInfo.classList.remove('hidden');
-                timerInfo.textContent = `⏳ Próximo giro em: ${hours}h ${mins}m ${secs}s`;
-                if (btn) { btn.disabled = true; btn.classList.add('opacity-50'); }
-            } else {
-                timerInfo.classList.add('hidden');
-                if (btn) { btn.disabled = false; btn.classList.remove('opacity-50'); }
-            }
-        }
-
-        function closeRouletteModal() {
-            if (rouletteTimerInterval) clearInterval(rouletteTimerInterval);
-            document.getElementById('roulette-modal').classList.add('hidden');
-        }
-
-        function spinWheel() {
-            const canvas = document.getElementById('rouletteCanvas');
-            const btn = document.getElementById('spin-btn');
-            
-            if (btn && btn.disabled) return;
-
-            localStorage.setItem('az_roulette_last', Date.now().toString());
-
-            const prize = pizzaPrizes[Math.floor(Math.random() * pizzaPrizes.length)];
-
-            let tickCount = 0;
-            const tickInterval = setInterval(() => {
-                playWheelTickSound();
-                tickCount++;
-                if (tickCount > 25) clearInterval(tickInterval);
-            }, 120);
-
-            canvas.classList.add('wheel-spin');
-            canvas.style.transform = 'rotate(1800deg)';
-
-            setTimeout(() => {
-                canvas.classList.remove('wheel-spin');
-                canvas.style.transform = 'rotate(0deg)';
-
-                if (prize.isWin) {
-                    playWinFanfare();
-                } else {
-                    playSadTrombone();
-                }
-
-                if (prize.discount > 0) appliedDiscount = prize.discount;
-                if (prize.addTokens) {
-                    cart.push({
-                        cartId: Date.now() + Math.random(),
-                        name: "Prêmio Roleta: 5 Fichas Grátis",
-                        desc: "Ganhado na Roleta 24h",
-                        price: 0,
-                        img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
-                    });
-                    updateCartBadge();
-                }
-
-                showToast(`Prêmio: ${prize.label}!`, prize.isWin ? '🎉' : '🎺');
-                updateRouletteTimer();
-            }, 4000);
-        }
-
-        // RASTREAMENTO FICTÍCIO
-        let trackAnimLoop = null;
-
-        function openTrackingModal(clientName) {
-            document.getElementById('track-client-name').textContent = clientName || (currentUser ? currentUser.name : 'Cliente');
-            document.getElementById('tracking-modal').classList.remove('hidden');
-
-            const canvas = document.getElementById('trackingCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            let motoX = 30;
-            if (trackAnimLoop) clearInterval(trackAnimLoop);
-
-            trackAnimLoop = setInterval(() => {
-                ctx.clearRect(0, 0, 350, 170);
-
-                ctx.fillStyle = '#21262d'; ctx.fillRect(20, 80, 310, 20);
-                ctx.strokeStyle = '#facc15'; ctx.setLineDash([10, 10]); ctx.beginPath(); ctx.moveTo(20, 90); ctx.lineTo(330, 90); ctx.stroke();
-
-                ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(30, 90, 12, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText('🍔 Loja', 15, 65);
-
-                ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(320, 90, 12, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText('🏠 Você', 305, 65);
-
-                motoX += 1.5;
-                if (motoX > 320) motoX = 30;
-
-                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(motoX, 90, 8, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('🛵', motoX - 6, 94);
-            }, 40);
-        }
-
-        function closeTrackingModal() {
-            if (trackAnimLoop) clearInterval(trackAnimLoop);
-            document.getElementById('tracking-modal').classList.add('hidden');
-        }
-
-        function setDeliveryMode(mode) {
-            deliveryMode = mode;
-            const mBtn = document.getElementById('mode-motoboy-btn');
-            const rBtn = document.getElementById('mode-retirada-btn');
-
-            if (mode === 'motoboy') {
-                if (mBtn) mBtn.className = 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center';
-                if (rBtn) rBtn.className = 'bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center';
-            } else {
-                if (rBtn) rBtn.className = 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center';
-                if (mBtn) mBtn.className = 'bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center';
-            }
-        }
-
-        function applyPromoCode() {
-            const codeInput = document.getElementById('promo-code-input');
-            if (!codeInput) return;
-            const code = codeInput.value.trim().toUpperCase();
-
-            if (code === 'ARCADE10') {
-                appliedDiscount = 0.10;
-                showToast('Cupom ARCADE10 aplicado: 10% de desconto!', '🎟️');
-            } else if (code === 'FICHASGRATIS') {
-                cart.push({
-                    cartId: Date.now() + Math.random(),
-                    name: "Bônus: 5 Fichas Grátis (Cupom)",
-                    desc: "Resgatado via código promocional",
-                    price: 0,
-                    img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
-                });
+            const item = menuItems.find(i => i.id === id);
+            if (item) {
+                cart.push({ ...item, cartId: Date.now() + Math.random() });
                 updateCartBadge();
-                showToast('5 Fichas grátis adicionadas ao carrinho!', '🎁');
-            } else if (code === 'MASCOTEVIP') {
-                appliedDiscount = 0.15;
-                showToast('Cupom MASCOTEVIP aplicado: 15% OFF!', '👑');
-            } else {
-                showToast('Cupom inválido ou expirado!', '⚠️');
+                showToast(`${item.name} adicionado ao pedido!`, '🍔');
             }
-            codeInput.value = '';
-            renderCart();
         }
 
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            if (cart.length > 0) { badge.textContent = cart.length; badge.classList.remove('hidden'); }
+            else { badge.classList.add('hidden'); }
+        }
+
+        function timeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            if (seconds < 60) return `há ${Math.max(1, seconds)} seg`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `há ${minutes} min`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `há ${hours} h`;
+            const days = Math.floor(hours / 24);
+            return `há ${days} d`;
+        }
+
+        function submitChatMessage() {
+            checkAuthAndRun(() => {
+                const input = document.getElementById('chat-text-input');
+                const textVal = input.value.trim();
+                if (!textVal) return;
+
+                globalChat.unshift({
+                    name: currentUser.name,
+                    avatar: currentUser.avatar || '👤',
+                    text: textVal,
+                    timestamp: Date.now()
+                });
+
+                if (globalChat.length > 50) globalChat.pop();
+                localStorage.setItem('az_chat', JSON.stringify(globalChat));
+                input.value = '';
+                renderChatFeed();
+            });
+        }
+
+        function renderChatFeed() {
+            const feed = document.getElementById('chat-feed');
+            if (!feed) return;
+
+            feed.innerHTML = globalChat.map(msg => `
+                <div class="bg-[#0d1117] p-2.5 rounded-2xl border border-[#30363d] flex gap-3 items-start">
+                    <div class="w-8 h-8 rounded-full bg-[#21262d] flex items-center justify-center flex-shrink-0 overflow-hidden border border-[#30363d]">
+                        ${getAvatarHTML(msg.avatar)}
+                    </div>
+                    <div class="w-full">
+                        <div class="flex justify-between mb-0.5">
+                            <span class="text-xs font-bold text-white">${msg.name}</span>
+                            <span class="text-[9px] text-zinc-500">${timeAgo(msg.timestamp)}</span>
+                        </div>
+                        <p class="text-[11px] text-zinc-300">${msg.text}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // LAN, ARCADE & CART
         function attachLanEvents() {
             const main = document.getElementById('main-content');
             const seats = main.querySelectorAll('.seat-btn');
@@ -1770,10 +1044,7 @@
                     seats.forEach(b => b.classList.remove('border-purple-500', 'bg-purple-950/40'));
                     const btn = e.currentTarget;
                     btn.classList.add('border-purple-500', 'bg-purple-950/40');
-                    selectedSeat = {
-                        name: btn.dataset.seat,
-                        basePrice: btn.dataset.seat.includes('Streamer') ? 18 : 12
-                    };
+                    selectedSeat = { name: btn.dataset.seat, basePrice: parseInt(btn.querySelector('span').textContent.replace('R$ ', '')) };
                 };
             });
 
@@ -1788,85 +1059,54 @@
         }
 
         function addLanToCart() {
-            checkAuthAndRun(() => {
-                if (!selectedSeat || !selectedLanOption) { showToast('Selecione um equipamento e o tempo!', '⚠️'); return; }
-                const totalPrice = selectedSeat.basePrice * selectedLanOption.mult;
-                cart.push({
-                    cartId: Date.now() + Math.random(),
-                    name: `Reserva: ${selectedSeat.name}`,
-                    desc: `Duração: ${selectedLanOption.hours} Hora(s)`,
-                    price: totalPrice,
-                    img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300&q=80"
-                });
-                updateCartBadge();
-                showToast('Reserva adicionada ao pedido!', '🖥️');
-                changeTab('cart');
+            if (!selectedSeat || !selectedLanOption) { showToast('Selecione equipamento e tempo!', '⚠️'); return; }
+            cart.push({
+                cartId: Date.now() + Math.random(),
+                name: `Reserva: ${selectedSeat.name}`,
+                desc: `${selectedLanOption.hours} Hora(s)`,
+                price: selectedSeat.basePrice * selectedLanOption.mult,
+                img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300&q=80"
             });
+            updateCartBadge();
+            showToast('Reserva adicionada ao pedido!', '🖥️');
+            changeTab('cart');
         }
 
         function renderArcade() {
             const container = document.querySelector('#main-content #arcade-packages');
             if (!container) return;
-            container.innerHTML = '';
-
-            arcadePackages.forEach((pkg, index) => {
-                const borderClass = pkg.highlight ? 'border-yellow-500/60 bg-gradient-to-r from-yellow-950/20 to-zinc-900' : 'border-[#30363d] bg-[#161b22]';
-                container.innerHTML += `
-                    <div class="p-3.5 rounded-2xl border ${borderClass} flex items-center justify-between">
-                        <div>
-                            <div class="font-black text-sm text-yellow-400">${pkg.qty}</div>
-                            <div class="text-[11px] text-zinc-400">${pkg.bonus}</div>
-                        </div>
-                        <button onclick="addArcadeToCart(${index})" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xs px-3.5 py-2.5 rounded-xl">
-                            R$ ${formatPrice(pkg.price)}
-                        </button>
-                    </div>
-                `;
-            });
+            container.innerHTML = arcadePackages.map((pkg, index) => `
+                <div class="p-3.5 rounded-2xl border ${pkg.highlight ? 'border-yellow-500/60 bg-gradient-to-r from-yellow-950/20 to-zinc-900' : 'border-[#30363d] bg-[#161b22]'} flex justify-between items-center">
+                    <div><div class="font-black text-sm text-yellow-400">${pkg.qty}</div><div class="text-[11px] text-zinc-400">${pkg.bonus}</div></div>
+                    <button onclick="checkAuthAndRun(() => addArcadeToCart(${index}))" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xs px-3.5 py-2.5 rounded-xl">R$ ${formatPrice(pkg.price)}</button>
+                </div>
+            `).join('');
         }
 
         function addArcadeToCart(index) {
-            checkAuthAndRun(() => {
-                const pkg = arcadePackages[index];
-                cart.push({
-                    cartId: Date.now() + Math.random(),
-                    name: `Pacote Arcade: ${pkg.qty}`,
-                    desc: pkg.bonus,
-                    price: pkg.price,
-                    img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
-                });
-                updateCartBadge();
-                showToast('Fichas/Passaporte adicionados!', '🕹️');
-            });
+            const pkg = arcadePackages[index];
+            cart.push({ cartId: Date.now(), name: `Arcade: ${pkg.qty}`, desc: pkg.bonus, price: pkg.price, img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80" });
+            updateCartBadge();
+            showToast('Fichas adicionadas!', '🕹️');
         }
 
         function renderCart() {
             const container = document.querySelector('#main-content #cart-content');
             if (!container) return;
-
             if (cart.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 text-zinc-500 space-y-2">
-                        <div class="text-4xl opacity-40">🛒</div>
-                        <p class="font-bold text-xs">Seu pedido está vazio.</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="text-center py-10 text-zinc-500"><div class="text-4xl opacity-40">🛒</div><p class="font-bold text-xs mt-2">Seu pedido está vazio.</p></div>`;
                 return;
             }
 
             let subtotal = 0;
             let itemsHTML = '<div class="space-y-2.5">';
-
             cart.forEach(item => {
                 subtotal += item.price;
                 itemsHTML += `
-                    <div class="p-3 rounded-2xl bg-[#161b22] border border-[#30363d] flex items-center justify-between">
+                    <div class="p-3 rounded-2xl bg-[#161b22] border border-[#30363d] flex justify-between items-center">
                         <div class="flex items-center gap-3">
                             <img src="${item.img}" class="w-10 h-10 rounded-lg object-cover">
-                            <div>
-                                <h4 class="font-bold text-xs text-zinc-100">${item.name}</h4>
-                                <div class="text-emerald-400 text-xs font-black">R$ ${formatPrice(item.price)}</div>
-                            </div>
+                            <div><h4 class="font-bold text-xs text-zinc-100">${item.name}</h4><div class="text-emerald-400 text-xs font-black">R$ ${formatPrice(item.price)}</div></div>
                         </div>
                         <button onclick="removeFromCart(${item.cartId})" class="text-zinc-500 hover:text-red-400 p-1">✕</button>
                     </div>
@@ -1877,74 +1117,203 @@
             const discountValue = subtotal * appliedDiscount;
             const finalTotal = Math.max(0, subtotal - discountValue);
 
-            const summaryHTML = `
+            container.innerHTML = itemsHTML + `
                 <div class="bg-[#161b22] border border-[#30363d] p-4 rounded-2xl space-y-3 mt-3">
-                    ${appliedDiscount > 0 ? `
-                        <div class="flex justify-between items-center text-xs text-zinc-400">
-                            <span>Subtotal:</span>
-                            <span>R$ ${formatPrice(subtotal)}</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs text-pink-400 font-bold">
-                            <span>Desconto Cupom (${Math.round(appliedDiscount * 100)}%):</span>
-                            <span>- R$ ${formatPrice(discountValue)}</span>
-                        </div>
-                    ` : ''}
-                    <div class="flex justify-between items-center text-zinc-100">
-                        <span class="text-xs font-bold uppercase text-zinc-400">Total do Pedido</span>
-                        <span class="text-xl font-black text-emerald-400">R$ ${formatPrice(finalTotal)}</span>
-                    </div>
-                    <button onclick="checkAuthAndRun(() => openPixModal(${finalTotal}))" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black py-3.5 rounded-xl uppercase tracking-wider text-xs flex items-center justify-center gap-2">
-                        <span>PAGAR COM PIX</span>
-                        <span>❖</span>
-                    </button>
+                    ${appliedDiscount > 0 ? `<div class="flex justify-between text-pink-400 text-xs font-bold"><span>Desconto:</span><span>- R$ ${formatPrice(discountValue)}</span></div>` : ''}
+                    <div class="flex justify-between text-zinc-100"><span class="text-xs font-bold uppercase text-zinc-400">Total do Pedido</span><span class="text-xl font-black text-emerald-400">R$ ${formatPrice(finalTotal)}</span></div>
+                    <button onclick="checkAuthAndRun(() => openPixModal(${finalTotal}))" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black py-3.5 rounded-xl uppercase text-xs">PAGAR COM PIX ❖</button>
                 </div>
             `;
-
-            container.innerHTML = itemsHTML + summaryHTML;
         }
 
-        function removeFromCart(cartId) {
-            cart = cart.filter(i => i.cartId !== cartId);
-            updateCartBadge();
-            renderCart();
-        }
-
-        function openPixModal(total) {
-            document.getElementById('pix-total-value').textContent = `R$ ${formatPrice(total)}`;
-            document.getElementById('pix-modal').classList.remove('hidden');
-        }
-
+        function removeFromCart(cartId) { cart = cart.filter(i => i.cartId !== cartId); updateCartBadge(); renderCart(); }
+        function openPixModal(total) { document.getElementById('pix-total-value').textContent = `R$ ${formatPrice(total)}`; document.getElementById('pix-modal').classList.remove('hidden'); }
         function closePixModal() { document.getElementById('pix-modal').classList.add('hidden'); }
-
-        function copyPixKey() {
-            navigator.clipboard.writeText(pixKey);
-            showToast('Chave Pix copiada!', '📋');
+        function copyPixKey() { navigator.clipboard.writeText(pixKey); showToast('Chave Pix copiada!', '📋'); }
+        
+        function setDeliveryMode(mode) {
+            deliveryMode = mode;
+            document.getElementById('mode-motoboy-btn').className = mode === 'motoboy' ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center' : 'bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center';
+            document.getElementById('mode-retirada-btn').className = mode === 'retirada' ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-400 p-2.5 rounded-xl text-xs font-bold text-center' : 'bg-[#0d1117] border border-[#30363d] text-zinc-400 p-2.5 rounded-xl text-xs font-bold text-center';
         }
 
         function confirmPaymentAndClear() {
-            const clientName = currentUser ? currentUser.name : 'Cliente';
-            
-            const totalVal = parseFloat(document.getElementById('pix-total-value').textContent.replace('R$', '').replace(',', '.'));
-            ordersLog.push({ client: clientName, total: totalVal, mode: deliveryMode, date: new Date().toLocaleString() });
+            ordersLog.push({ client: currentUser.name, total: parseFloat(document.getElementById('pix-total-value').textContent.replace('R$', '').replace(',', '.')), mode: deliveryMode, date: new Date().toLocaleString() });
             localStorage.setItem('az_orders_log', JSON.stringify(ordersLog));
-
             closePixModal();
-            
-            if (deliveryMode === 'motoboy') {
-                showToast(`Pedido Pix confirmado! Abrindo rastreamento...`, '🛵');
-                openTrackingModal(clientName);
-            } else {
-                showToast(`Pedido confirmado para retirada na loja!`, '🏪');
-            }
-
-            cart = []; appliedDiscount = 0;
-            updateCartBadge(); renderCart();
+            if (deliveryMode === 'motoboy') { showToast(`Pedido Pix confirmado!`, '🛵'); openTrackingModal(currentUser.name); } 
+            else { showToast(`Pedido confirmado para retirada!`, '🏪'); }
+            cart = []; appliedDiscount = 0; updateCartBadge(); renderCart();
         }
 
-        window.onload = function() {
-            updateUserUI();
-            changeTab('menu');
+        function applyPromoCode() {
+            const input = document.getElementById('promo-code-input'); if (!input) return;
+            const code = input.value.trim().toUpperCase();
+            if (code === 'ARCADE10') { appliedDiscount = 0.10; showToast('10% OFF aplicado!', '🎟️'); }
+            else if (code === 'FICHASGRATIS') { cart.push({ cartId: Date.now(), name: "5 Fichas Grátis", price: 0, img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80" }); updateCartBadge(); showToast('Fichas grátis adicionadas!', '🎁'); }
+            else { showToast('Cupom inválido!', '⚠️'); }
+            input.value = ''; renderCart();
+        }
+
+        // RASTREAMENTO & ROLETA
+        let trackAnimLoop = null;
+        function openTrackingModal(name) {
+            document.getElementById('track-client-name').textContent = name;
+            document.getElementById('tracking-modal').classList.remove('hidden');
+            const canvas = document.getElementById('trackingCanvas'); if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let motoX = 30;
+            if (trackAnimLoop) clearInterval(trackAnimLoop);
+            trackAnimLoop = setInterval(() => {
+                ctx.clearRect(0, 0, 350, 170);
+                ctx.fillStyle = '#21262d'; ctx.fillRect(20, 80, 310, 20);
+                ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(30, 90, 12, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(320, 90, 12, 0, Math.PI * 2); ctx.fill();
+                motoX += 1.5; if (motoX > 320) motoX = 30;
+                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(motoX, 90, 8, 0, Math.PI * 2); ctx.fill();
+            }, 40);
+        }
+        function closeTrackingModal() { if (trackAnimLoop) clearInterval(trackAnimLoop); document.getElementById('tracking-modal').classList.add('hidden'); }
+
+        function openRouletteModal() { document.getElementById('roulette-modal').classList.remove('hidden'); setTimeout(drawRoulettePizza, 100); }
+        function closeRouletteModal() { document.getElementById('roulette-modal').classList.add('hidden'); }
+        function drawRoulettePizza() {
+            const canvas = document.getElementById('rouletteCanvas'); if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 220, 220);
+            ctx.beginPath(); ctx.fillStyle = '#22c55e'; ctx.moveTo(110, 110); ctx.arc(110, 110, 105, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#161b22'; ctx.beginPath(); ctx.arc(110, 110, 25, 0, Math.PI * 2); ctx.fill();
+        }
+        function spinWheel() { showToast('Ganhou 10% OFF!', '🎉'); appliedDiscount = 0.10; closeRouletteModal(); }
+
+        // MINIGAMES
+        function setDifficulty(d) { currentDifficulty = d; updateDiffBadgeUI(); showToast(`Dificuldade: ${d.toUpperCase()}`, '🎮'); }
+        function updateDiffBadgeUI() {
+            const badge = document.getElementById('diff-badge');
+            if (badge) badge.textContent = currentDifficulty === 'hard' ? '🔴 DIFÍCIL' : currentDifficulty === 'normal' ? '🟡 NORMAL' : '🟢 FÁCIL';
+        }
+
+        function initVolleyGame() {
+            clearAllGameLoops(); const arena = document.getElementById('game-arena');
+            arena.innerHTML = `<div class="w-full flex justify-between text-xs font-black mb-1"><span class="text-cyan-400">Pts: <b id="v-score">0</b></span></div><canvas id="vC" width="300" height="240" class="border border-purple-500 rounded-xl bg-[#0d1117] w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="vP(-15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">◀</button><button onclick="vJ()" class="w-1/3 bg-purple-600 py-2 text-white rounded">PULO</button><button onclick="vP(15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">▶</button></div>`;
+            const ctx = document.getElementById('vC').getContext('2d');
+            let pX=50, pY=200, pVy=0, mX=220, mY=200, mVy=0, bX=150, bY=80, bVx=2, bVy=0, score=0;
+            activeGameLoop = setInterval(() => {
+                ctx.clearRect(0, 0, 300, 240);
+                pY += pVy; if (pY < 200) pVy += 0.5; else { pY = 200; pVy = 0; }
+                let s = currentDifficulty === 'hard' ? 4.5 : currentDifficulty === 'normal' ? 3 : 1.5;
+                if (bX > 150) { if (mX < bX - 5) mX += s; else if (mX > bX + 5) mX -= s; if (bY < 140 && mY === 200 && Math.random() < 0.1) mVy = -8; }
+                mX = Math.max(160, Math.min(280, mX));
+                mY += mVy; if (mY < 200) mVy += 0.5; else { mY = 200; mVy = 0; }
+                bX += bVx; bY += bVy; bVy += 0.2;
+                if (bY <= 10) { bY = 10; bVy *= -0.5; } if (bX <= 10 || bX >= 290) bVx *= -0.8;
+                if (bX >= 145 && bX <= 155 && bY >= 150) { bVx *= -0.8; bVy = -2; }
+                if (bY >= 225) { 
+                    if (bX < 150) { clearAllGameLoops(); saveScore('volley', score); } 
+                    else { score += 100; document.getElementById('v-score').textContent = score; bX = 50; bY = 80; bVx = 2; bVy = 0; }
+                }
+                if (Math.hypot(bX - pX, bY - pY) < 24) { bVy = -6; bVx = (bX - pX) * 0.4; }
+                if (Math.hypot(bX - mX, bY - mY) < 24) { bVy = -6; bVx = (bX - mX) * 0.4; }
+                ctx.fillStyle = '#a855f7'; ctx.fillRect(148, 150, 4, 90);
+                ctx.fillStyle = '#06b6d4'; ctx.beginPath(); ctx.arc(pX, pY, 16, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(mX, mY, 16, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(bX, bY, 8, 0, Math.PI * 2); ctx.fill();
+            }, 30);
+            window.vP = (dx) => { pX = Math.max(20, Math.min(130, pX + dx)); };
+            window.vJ = () => { if (pY === 200) pVy = -8; };
+        }
+
+        let pStep=1, pDir=50, pHgt=50, pPwr=50, pD=3, penScore=0;
+        function initPenaltyGame() {
+            clearAllGameLoops(); const arena = document.getElementById('game-arena');
+            pStep=1; pDir=50; pHgt=50; pPwr=50; penScore=0;
+            arena.innerHTML = `<div class="w-full flex justify-between text-xs font-black mb-1"><span class="text-pink-400">Pts: <b id="pen-score">0</b></span></div><div class="relative w-full h-40 border-4 border-white bg-green-800 overflow-hidden"><div class="absolute top-2 left-10 right-10 h-20 bg-zinc-900 border-4"></div><div id="gk" class="absolute top-6 left-[132px] w-8 h-12 bg-purple-600 transition-all duration-300 z-10"></div><div id="pb" class="absolute bottom-4 left-[138px] w-6 h-6 bg-white rounded-full z-20 transition-all duration-500"></div></div><div class="mt-2 space-y-1"><div class="h-2 bg-zinc-800 relative"><div id="b1" class="absolute h-full bg-cyan-500 w-[10px]"></div></div><div class="h-2 bg-zinc-800 relative"><div id="b2" class="absolute h-full bg-yellow-500 w-[10px]"></div></div><div class="h-2 bg-zinc-800 relative"><div id="b3" class="h-full bg-pink-500" style="width:50%"></div></div></div><button onclick="lPen()" id="pBtn" class="w-full bg-pink-600 text-white py-2 rounded-xl mt-2 text-xs font-bold">FIXAR CANTO</button>`;
+            startPenLoop();
+        }
+
+        function startPenLoop() {
+            if (activeGameLoop) clearInterval(activeGameLoop);
+            document.getElementById('pBtn').disabled = false;
+            document.getElementById('pBtn').textContent = 'FIXAR CANTO';
+            document.getElementById('gk').style.left = '132px';
+            document.getElementById('pb').style.left = '138px';
+            document.getElementById('pb').style.top = '130px';
+            pStep = 1;
+            activeGameLoop = setInterval(() => {
+                let inc = currentDifficulty === 'hard' ? 6 : currentDifficulty === 'normal' ? 4 : 2;
+                if (pStep === 1) { pDir += pD * inc; if (pDir > 90 || pDir < 10) pD *= -1; document.getElementById('b1').style.left = pDir + '%'; }
+                if (pStep === 2) { pHgt += pD * inc; if (pHgt > 90 || pHgt < 10) pD *= -1; document.getElementById('b2').style.left = pHgt + '%'; }
+                if (pStep === 3) { pPwr += pD * inc; if (pPwr > 90 || pPwr < 10) pD *= -1; document.getElementById('b3').style.width = pPwr + '%'; }
+            }, 30);
+        }
+
+        window.lPen = () => {
+            if (pStep === 1) { pStep = 2; document.getElementById('pBtn').textContent = 'FIXAR ALTURA'; return; }
+            if (pStep === 2) { pStep = 3; document.getElementById('pBtn').textContent = 'CHUTAR!'; return; }
+            if (pStep === 3) { 
+                pStep = 4; clearInterval(activeGameLoop); document.getElementById('pBtn').disabled = true;
+                const bX = 30 + (pDir / 100) * 240, bY = 80 - (pHgt / 100) * 50;
+                let gX = 132; if (Math.random() < (currentDifficulty === 'hard' ? 0.7 : 0.4)) gX = bX - 15; else gX = Math.random() > 0.5 ? 50 : 200;
+                document.getElementById('gk').style.left = gX + 'px';
+                document.getElementById('pb').style.left = bX + 'px';
+                document.getElementById('pb').style.top = bY + 'px';
+                setTimeout(() => {
+                    if (Math.abs(bX - (gX + 15)) < 25 && Math.abs(bY - 50) < 30) {
+                        saveScore('penalty', penScore);
+                    } else {
+                        penScore += 100;
+                        document.getElementById('pen-score').textContent = penScore;
+                        setTimeout(startPenLoop, 1500);
+                    }
+                }, 600);
+            }
         };
+
+        function initPixelRacerGame() {
+            clearAllGameLoops(); const arena = document.getElementById('game-arena');
+            arena.innerHTML = `<div class="w-full flex justify-between font-black mb-1"><span class="text-yellow-400">Pts: <b id="racer-score">0</b></span></div><canvas id="rC" width="300" height="240" class="border border-yellow-500 rounded-xl bg-zinc-900 w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="rP(-25)" class="w-1/2 bg-zinc-800 py-2 text-white font-bold rounded">◀</button><button onclick="rP(25)" class="w-1/2 bg-zinc-800 py-2 text-white font-bold rounded">▶</button></div>`;
+            const ctx = document.getElementById('rC').getContext('2d');
+            let cX=135, obs=[], sc=0, speed=currentDifficulty==='hard'?6:4;
+            activeGameLoop = setInterval(() => {
+                ctx.clearRect(0, 0, 300, 240);
+                if (Math.random() < (0.05 + (sc / 5000))) obs.push({ x: 30 + Math.random() * 210, y: -20 });
+                ctx.fillStyle = '#ef4444';
+                obs.forEach((o, i) => {
+                    o.y += speed; ctx.fillRect(o.x, o.y, 30, 20);
+                    if (o.y > 180 && o.y < 220 && Math.abs(o.x - cX) < 25) { clearAllGameLoops(); saveScore('racer', sc); }
+                    if (o.y > 240) { obs.splice(i, 1); sc += 10; document.getElementById('racer-score').textContent = sc; if (sc % 50 === 0 && speed < 15) speed += 0.5; }
+                });
+                ctx.fillStyle = '#38bdf8'; ctx.fillRect(cX, 190, 30, 40);
+            }, 30);
+            window.rP = (dx) => cX = Math.max(20, Math.min(250, cX + dx));
+        }
+
+        function initSpaceInvadersGame() {
+            clearAllGameLoops(); const arena = document.getElementById('game-arena');
+            arena.innerHTML = `<div class="w-full flex justify-between font-black mb-1"><span class="text-cyan-400">Onda: <b id="si-wave">1</b></span><span class="text-yellow-400">Pts: <b id="si-score">0</b></span></div><canvas id="sC" width="300" height="240" class="border border-cyan-500 rounded-xl bg-black w-full"></canvas><div class="flex gap-2 mt-2"><button onclick="sP(-15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">◀</button><button onclick="sF()" class="w-1/3 bg-cyan-600 py-2 text-white rounded">ATIRAR</button><button onclick="sP(15)" class="w-1/3 bg-zinc-800 py-2 text-white rounded">▶</button></div>`;
+            const ctx = document.getElementById('sC').getContext('2d');
+            let sX=135, las=[], ali=[], score=0, wave=1, baseSpeed=currentDifficulty==='hard'?2:1;
+            function spawnWave() { ali = []; for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) ali.push({ x: 30 + c * 40, y: 20 + r * 25, a: true }); }
+            spawnWave();
+            activeGameLoop = setInterval(() => {
+                ctx.clearRect(0, 0, 300, 240);
+                ctx.fillStyle = '#22d3ee'; ctx.fillRect(sX, 210, 30, 15);
+                ctx.fillStyle = '#facc15'; las.forEach((l, i) => { l.y -= 7; ctx.fillRect(l.x, l.y, 4, 10); if (l.y < 0) las.splice(i, 1); });
+                let dead = true;
+                ali.forEach(a => {
+                    if (a.a) {
+                        dead = false; a.y += baseSpeed * 0.15; ctx.fillStyle = '#a855f7'; ctx.fillRect(a.x, a.y, 20, 15);
+                        las.forEach((l, i) => { if (l.x > a.x && l.x < a.x + 20 && l.y > a.y && l.y < a.y + 15) { a.a = false; las.splice(i, 1); score += 20; document.getElementById('si-score').textContent = score; } });
+                        if (a.y > 190) { clearAllGameLoops(); saveScore('invaders', score); }
+                    }
+                });
+                if (dead) { wave++; baseSpeed += 0.5; document.getElementById('si-wave').textContent = wave; spawnWave(); }
+            }, 30);
+            window.sP = (dx) => sX = Math.max(10, Math.min(260, sX + dx));
+            window.sF = () => las.push({ x: sX + 13, y: 200 });
+        }
+
+        window.onload = () => { updateUserUI(); checkStoreStatusUI(); changeTab('menu'); };
     </script>
 </body>
 </html>
