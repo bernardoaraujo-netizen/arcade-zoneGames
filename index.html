@@ -20,6 +20,17 @@
         
         button, a, .clickable { transition: transform 0.1s ease, filter 0.1s ease; }
         button:active, a:active, .clickable:active { transform: scale(0.95) !important; filter: brightness(1.2); }
+
+        .pizza-wheel {
+            background: conic-gradient(
+                #ef4444 0deg 60deg,
+                #3b82f6 60deg 120deg,
+                #10b981 120deg 180deg,
+                #f59e0b 180deg 240deg,
+                #8b5cf6 240deg 300deg,
+                #ec4899 300deg 360deg
+            );
+        }
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden pb-24 bg-[#0d1117]">
@@ -37,35 +48,35 @@
 
             <div class="text-center space-y-2">
                 <div class="text-3xl">🕹️</div>
-                <h3 class="text-xl font-semibold text-white tracking-tight">Sign in to ArcadeZone</h3>
+                <h3 class="text-xl font-semibold text-white tracking-tight">Entrar na ArcadeZone</h3>
             </div>
             
             <div class="space-y-3 pt-2">
                 <div>
-                    <label class="block text-xs font-medium text-zinc-300 mb-1">Username or email address</label>
-                    <input type="email" id="login-email" class="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">E-mail ou Usuário</label>
+                    <input type="email" id="login-email" autocomplete="off" value="" class="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500" placeholder="seu-email@exemplo.com">
                 </div>
                 <div>
                     <div class="flex justify-between items-center mb-1">
-                        <label class="text-xs font-medium text-zinc-300">Password</label>
-                        <a href="#" onclick="showToast('Entre em contato com o suporte!', 'ℹ️')" class="text-[11px] text-blue-400 hover:underline">Forgot password?</a>
+                        <label class="text-xs font-medium text-zinc-300">Senha</label>
+                        <a href="#" onclick="showToast('Entre em contato com o suporte!', 'ℹ️')" class="text-[11px] text-blue-400 hover:underline">Esqueceu a senha?</a>
                     </div>
-                    <input type="password" id="login-pass" class="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    <input type="password" id="login-pass" autocomplete="new-password" value="" class="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
                 </div>
 
                 <button onclick="handleLogin()" class="w-full bg-[#238636] hover:bg-[#2ea043] text-white font-semibold py-2 rounded-lg text-xs transition-colors shadow">
-                    Sign in
+                    Entrar
                 </button>
 
                 <div class="relative flex py-2 items-center">
                     <div class="flex-grow border-t border-[#30363d]"></div>
-                    <span class="flex-shrink mx-3 text-[11px] text-zinc-500">or</span>
+                    <span class="flex-shrink mx-3 text-[11px] text-zinc-500">ou</span>
                     <div class="flex-grow border-t border-[#30363d]"></div>
                 </div>
 
                 <button onclick="openGooglePicker()" class="w-full bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-white font-medium py-2 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors">
                     <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.1 0-5.74-2.09-6.68-4.91H1.36v3.13C3.33 21.3 7.38 24 12 24z"/><path fill="#FBBC05" d="M5.32 14.27c-.24-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.6H1.36C.49 8.33 0 10.11 0 12s.49 3.67 1.36 5.4l3.96-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.38 0 3.33 2.7 1.36 6.6l3.96 3.13c.94-2.82 3.58-4.98 6.68-4.98z"/></svg>
-                    Continue with Google
+                    Continuar com Google
                 </button>
             </div>
         </div>
@@ -78,33 +89,21 @@
             
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.1 0-5.74-2.09-6.68-4.91H1.36v3.13C3.33 21.3 7.38 24 12 24z"/><path fill="#FBBC05" d="M5.32 14.27c-.24-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.6H1.36C.49 8.33 0 10.11 0 12s.49 3.67 1.36 5.4l3.96-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.38 0 3.33 2.7 1.36 6.6l3.96 3.13c.94-2.82 3.58-4.98 6.68-4.98z"/></svg>
-                <span class="text-xs font-semibold text-zinc-300">Fazer Login com o Google</span>
+                <span class="text-xs font-semibold text-zinc-300">Entrar com o Google</span>
             </div>
 
             <div class="space-y-1">
-                <h2 class="text-2xl font-bold text-white tracking-tight">Escolha uma conta</h2>
+                <h2 class="text-xl font-bold text-white tracking-tight">Digite seu e-mail do Google</h2>
                 <p class="text-xs text-zinc-400">Prosseguir para <span class="text-blue-400 font-semibold">ArcadeZone</span></p>
             </div>
 
-            <div class="space-y-2 pt-2 border-t border-[#30363d]">
-                <button onclick="confirmSocialAccount('bernardo.araujo@pinhais.pr.gov.br')" class="w-full text-left p-3 hover:bg-[#21262d] rounded-xl flex items-center justify-between transition-colors border border-transparent hover:border-[#30363d]">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm">B</div>
-                        <div>
-                            <div class="text-xs font-bold text-white">Bernardo de Lara Araujo</div>
-                            <div class="text-[11px] text-zinc-400">bernardo.araujo@pinhais.pr.gov.br</div>
-                        </div>
-                    </div>
-                </button>
-
-                <button onclick="confirmSocialAccount('bernardo.lara.araujo@escola.pr.gov.br')" class="w-full text-left p-3 hover:bg-[#21262d] rounded-xl flex items-center justify-between transition-colors border border-transparent hover:border-[#30363d]">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm">B</div>
-                        <div>
-                            <div class="text-xs font-bold text-white">BERNARDO DE LARA ARAUJO</div>
-                            <div class="text-[11px] text-zinc-400">bernardo.lara.araujo@escola.pr.gov.br</div>
-                        </div>
-                    </div>
+            <div class="space-y-3 pt-2 border-t border-[#30363d]">
+                <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">E-mail Google</label>
+                    <input type="email" id="google-user-email" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500" placeholder="seu-email@gmail.com" autocomplete="off">
+                </div>
+                <button onclick="confirmSocialAccount()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow">
+                    Entrar com Google
                 </button>
             </div>
         </div>
@@ -115,7 +114,7 @@
         <div class="bg-[#161b22] border border-[#30363d] rounded-2xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeUserProfileModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
 
-            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-2xl font-black flex items-center justify-center mx-auto shadow-lg" id="profile-avatar">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-2xl font-black flex items-center justify-center mx-auto shadow-lg overflow-hidden border border-purple-400/30" id="profile-avatar">
                 👤
             </div>
 
@@ -123,6 +122,10 @@
                 <h3 id="profile-name" class="text-base font-bold text-white">Nome do Usuário</h3>
                 <p id="profile-email" class="text-xs text-zinc-400">email@exemplo.com</p>
             </div>
+
+            <button onclick="closeUserProfileModal(); changeTab('profile');" class="w-full bg-blue-600/30 border border-blue-500 hover:bg-blue-600/50 text-blue-300 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
+                ✏️ Editar Perfil Completo
+            </button>
 
             <div id="admin-panel-btn-container" class="hidden">
                 <button onclick="closeUserProfileModal(); openAdminModal();" class="w-full bg-purple-600/30 border border-purple-500 hover:bg-purple-600/50 text-purple-300 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
@@ -179,24 +182,30 @@
         </div>
     </div>
 
-    <!-- Modal Roleta 24h -->
+    <!-- Modal Roleta 24h Estilo Pizza -->
     <div id="roulette-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative">
+        <div class="bg-[#161b22] border border-[#30363d] rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl">
             <button onclick="closeRouletteModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
-            <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase">🎰 ROLETA 24H</h3>
-            <p class="text-xs text-zinc-400">Gire 1x a cada 24 horas e ganhe descontos e brindes!</p>
+            <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 uppercase">🎰 ROLETA DA SORTE</h3>
+            <p class="text-xs text-zinc-400">Gire 1x a cada 24 horas e ganhe prêmios instantâneos!</p>
             
-            <div class="relative w-48 h-48 mx-auto my-3 flex items-center justify-center">
-                <div class="absolute -top-3 z-20 text-yellow-400 text-3xl font-black">▼</div>
-                <div id="roulette-wheel" class="w-full h-full rounded-full border-4 border-yellow-500/60 bg-gradient-to-tr from-purple-950 via-indigo-900 to-zinc-950 flex flex-col items-center justify-center text-center p-4 transition-transform">
-                    <span id="wheel-display-icon" class="text-4xl mb-1">🎰</span>
-                    <span id="wheel-display-text" class="text-[10px] font-black text-yellow-300 uppercase">Girar Agora</span>
+            <div class="relative w-56 h-56 mx-auto my-3 flex items-center justify-center">
+                <div class="absolute -top-3 z-30 text-yellow-400 text-3xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">▼</div>
+                
+                <div id="roulette-wheel" class="w-full h-full rounded-full border-4 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] pizza-wheel relative flex items-center justify-center overflow-hidden shadow-2xl">
+                    <div class="w-12 h-12 rounded-full bg-[#161b22] border-2 border-amber-400 z-20 flex items-center justify-center text-xs shadow-inner font-bold text-amber-300">
+                        AZ
+                    </div>
                 </div>
+            </div>
+
+            <div id="wheel-result-box" class="bg-[#0d1117] py-2 px-3 rounded-xl border border-[#30363d] min-h-[38px] flex items-center justify-center">
+                <span id="wheel-display-text" class="text-xs font-bold text-yellow-300">Boa Sorte! Clique em Girar.</span>
             </div>
 
             <div id="roulette-timer-info" class="text-xs font-mono text-yellow-400 font-bold bg-[#0d1117] py-2 px-3 rounded-xl border border-[#30363d] hidden"></div>
 
-            <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs">GIRAR ROLETA!</button>
+            <button id="spin-btn" onclick="spinWheel()" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-black py-3 rounded-xl uppercase text-xs shadow-lg">GIRAR ROLETA!</button>
         </div>
     </div>
 
@@ -214,7 +223,7 @@
 
             <div class="text-left space-y-1">
                 <label class="block text-xs font-bold text-zinc-300 uppercase">Nome ou Nº da Mesa</label>
-                <input type="text" id="client-name" placeholder="Ex: Bernardo - Mesa 02" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                <input type="text" id="client-name" placeholder="Ex: Cliente - Mesa 02" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
             </div>
 
             <div class="space-y-1 text-left">
@@ -243,7 +252,7 @@
             
             <div class="flex items-center gap-2">
                 <button onclick="handleUserBtnClick()" id="user-btn" class="bg-[#21262d] border border-[#30363d] text-zinc-300 p-2 rounded-full text-xs font-bold flex items-center gap-1">
-                    👤 <span id="user-btn-label" class="hidden sm:inline">Entrar</span>
+                    <span id="user-header-avatar">👤</span> <span id="user-btn-label" class="hidden sm:inline">Entrar</span>
                 </button>
 
                 <a href="https://www.instagram.com/arcade_zoneoficial" target="_blank" rel="noopener noreferrer" class="bg-pink-500/20 border border-pink-500/40 text-pink-400 hover:text-white p-2 rounded-full transition-all">
@@ -266,8 +275,9 @@
             <button onclick="changeTab('menu')" id="nav-menu" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-cyan-400"><span class="text-lg">🍔</span><span class="text-[10px] font-bold">Lanches</span></button>
             <button onclick="changeTab('lan')" id="nav-lan" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-purple-400"><span class="text-lg">🖥️</span><span class="text-[10px] font-bold">Lan</span></button>
             <button onclick="changeTab('arcade')" id="nav-arcade" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-yellow-400"><span class="text-lg">🕹️</span><span class="text-[10px] font-bold">Fichas</span></button>
-            <button onclick="changeTab('jukebox')" id="nav-jukebox" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-indigo-400"><span class="text-lg">🎵</span><span class="text-[10px] font-bold">Jukebox</span></button>
+            <button onclick="changeTab('reviews')" id="nav-reviews" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-yellow-400"><span class="text-lg">⭐</span><span class="text-[10px] font-bold">Avaliações</span></button>
             <button onclick="changeTab('games')" id="nav-games" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-pink-400"><span class="text-lg">🎮</span><span class="text-[10px] font-bold">Games</span></button>
+            <button onclick="changeTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-blue-400"><span class="text-lg">👤</span><span class="text-[10px] font-bold">Perfil</span></button>
             <button onclick="changeTab('cart')" id="nav-cart" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-emerald-400 relative">
                 <span class="text-lg">🛒</span><span class="text-[10px] font-bold">Pedido</span>
                 <span id="cart-badge" class="hidden absolute top-0.5 right-1 bg-pink-500 text-white text-[10px] font-black h-4 w-4 rounded-full flex items-center justify-center">0</span>
@@ -290,25 +300,34 @@
             <div id="menu-list" class="space-y-3"></div>
         </div>
 
-        <!-- Aba Jukebox -->
-        <div id="tpl-jukebox" class="space-y-4">
-            <div class="bg-gradient-to-r from-indigo-950/60 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/30 text-center">
-                <h2 class="text-base font-black text-indigo-300">🎵 JUKEBOX DA SEMANA</h2>
-                <p class="text-[11px] text-zinc-400 mt-0.5">Sugira sua música ou vote na favorita para tocar na casa!</p>
+        <!-- Aba Avaliações dos Clientes -->
+        <div id="tpl-reviews" class="space-y-4">
+            <div class="bg-gradient-to-r from-amber-950/60 to-yellow-950/40 p-4 rounded-2xl border border-amber-500/30 text-center">
+                <h2 class="text-base font-black text-amber-300">⭐ AVALIAÇÕES DOS CLIENTES</h2>
+                <p class="text-[11px] text-zinc-400 mt-0.5">Veja o que o pessoal está achando da nossa Arena e deixe sua nota!</p>
             </div>
 
-            <div class="bg-[#161b22] border border-[#30363d] p-3.5 rounded-2xl space-y-2">
-                <span class="text-xs font-bold text-zinc-300 uppercase block">➕ Adicionar Música (Máx 5)</span>
-                <div class="flex gap-2">
-                    <input type="text" id="song-input" placeholder="Nome da música e artista" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                    <button onclick="addSongSuggestion()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-3 py-2 rounded-xl flex-shrink-0">ENVIAR</button>
+            <!-- Form para Criar Avaliação -->
+            <div class="bg-[#161b22] border border-[#30363d] p-4 rounded-2xl space-y-3">
+                <span class="text-xs font-bold text-zinc-200 uppercase block">Deixe sua Avaliação:</span>
+                
+                <div class="flex items-center gap-1 text-2xl" id="star-rating-select">
+                    <button type="button" onclick="setRating(1)" class="star-btn text-zinc-600 hover:text-yellow-400">★</button>
+                    <button type="button" onclick="setRating(2)" class="star-btn text-zinc-600 hover:text-yellow-400">★</button>
+                    <button type="button" onclick="setRating(3)" class="star-btn text-zinc-600 hover:text-yellow-400">★</button>
+                    <button type="button" onclick="setRating(4)" class="star-btn text-zinc-600 hover:text-yellow-400">★</button>
+                    <button type="button" onclick="setRating(5)" class="star-btn text-zinc-600 hover:text-yellow-400">★</button>
                 </div>
+
+                <textarea id="review-comment-input" rows="2" placeholder="Escreva o que achou do pedido, dos jogos ou do atendimento..." class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl p-3 text-xs text-white focus:outline-none focus:border-amber-500 resize-none"></textarea>
+
+                <button onclick="submitReview()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-600 text-black font-black py-2.5 rounded-xl text-xs uppercase shadow">
+                    Publicar Avaliação
+                </button>
             </div>
 
-            <div class="space-y-2">
-                <h3 class="text-xs font-bold uppercase text-zinc-400">Votação em Andamento:</h3>
-                <div id="jukebox-list" class="space-y-2"></div>
-            </div>
+            <!-- Lista de Avaliações -->
+            <div class="space-y-3" id="reviews-feed-list"></div>
         </div>
 
         <!-- Aba Minigames estilo Pou -->
@@ -386,6 +405,16 @@
             <div class="space-y-3" id="arcade-packages"></div>
         </div>
 
+        <!-- Aba Perfil do Usuário -->
+        <div id="tpl-profile" class="space-y-5">
+            <div class="bg-gradient-to-r from-blue-950/50 to-indigo-950/40 p-4 rounded-2xl border border-blue-500/30 text-center">
+                <h2 class="text-lg font-black text-blue-300">👤 SEU PERFIL DE JOGADOR</h2>
+                <p class="text-xs text-blue-200/70">Personalize seu nome e sua foto de perfil!</p>
+            </div>
+
+            <div id="profile-tab-content"></div>
+        </div>
+
         <!-- Aba Carrinho -->
         <div id="tpl-cart" class="space-y-4">
             <h2 class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-500 uppercase text-center">Resumo do Pedido</h2>
@@ -413,15 +442,18 @@
         let appliedDiscount = 0;
         let currentDifficulty = 'easy';
         let storeIsOpen = true;
+        let currentReviewStars = 5;
         const pixKey = "f882100@gmail.com";
 
-        // State LocalStorage
-        let currentUser = JSON.parse(localStorage.getItem('az_user')) || null;
+        // Estado do Usuário: Visitante / Cliente Padrão (Sem Admin por padrão ao carregar)
+        let savedUser = JSON.parse(localStorage.getItem('az_user'));
+        let currentUser = (savedUser && savedUser.isAdmin) ? { name: "Cliente Visitante", email: "cliente@arcadezone.com", isAdmin: false, photo: null } : (savedUser || { name: "Cliente Visitante", email: "cliente@arcadezone.com", isAdmin: false, photo: null });
+
         let usersLog = JSON.parse(localStorage.getItem('az_users_log')) || [];
         let ordersLog = JSON.parse(localStorage.getItem('az_orders_log')) || [];
-        let jukeboxSongs = JSON.parse(localStorage.getItem('az_jukebox')) || [
-            { id: 1, name: "Synthwave Gamer - Cyberpunk Night", votes: 8 },
-            { id: 2, name: "Lo-Fi Gaming - Chill Beats", votes: 5 }
+        let reviewsList = JSON.parse(localStorage.getItem('az_reviews')) || [
+            { id: 1, name: "Matheus Gamer", photo: null, stars: 5, comment: "O Pixel Cheese Burger tava bom demais! E a Lan House tem um ping perfeito.", likes: 12, dislikes: 0, date: "Ontem às 19:40" },
+            { id: 2, name: "Ana Clara", photo: null, stars: 4, comment: "Lugar muito top, só achei a batata um pouco salgada, mas o mascote roxo é irado!", likes: 5, dislikes: 1, date: "Hoje às 14:15" }
         ];
 
         // Web Audio API
@@ -556,7 +588,7 @@
 
         // Auth System
         function handleUserBtnClick() {
-            if (currentUser) {
+            if (currentUser && currentUser.email !== 'cliente@arcadezone.com') {
                 openUserProfileModal();
             } else {
                 openLoginModal();
@@ -572,7 +604,13 @@
             if (!currentUser) return;
             document.getElementById('profile-name').textContent = currentUser.name;
             document.getElementById('profile-email').textContent = currentUser.email;
-            document.getElementById('profile-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+            
+            const avatarEl = document.getElementById('profile-avatar');
+            if (currentUser.photo) {
+                avatarEl.innerHTML = `<img src="${currentUser.photo}" class="w-full h-full object-cover">`;
+            } else {
+                avatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
+            }
 
             const adminBtn = document.getElementById('admin-panel-btn-container');
             if (currentUser.isAdmin) adminBtn.classList.remove('hidden'); else adminBtn.classList.add('hidden');
@@ -595,18 +633,24 @@
         }
 
         function logoutUser() {
-            currentUser = null;
-            localStorage.removeItem('az_user');
+            currentUser = { name: "Cliente Visitante", email: "cliente@arcadezone.com", isAdmin: false, photo: null };
+            localStorage.setItem('az_user', JSON.stringify(currentUser));
             closeUserProfileModal();
             updateUserUI();
-            showToast('Você saiu da sua conta.', '🚪');
+            if (currentTab === 'profile') changeTab('menu');
+            showToast('Sua conta foi desconectada.', '🚪');
         }
 
-        function confirmSocialAccount(emailVal) {
-            const email = emailVal ? emailVal.trim() : '';
-            if (!email) { showToast('Digite um e-mail válido!', '⚠️'); return; }
+        function confirmSocialAccount() {
+            const inputEl = document.getElementById('google-user-email');
+            const email = inputEl ? inputEl.value.trim() : '';
 
-            currentUser = { name: email.split('@')[0], email: email, isAdmin: (email === 'f882100@gmail.com') };
+            if (!email || !email.includes('@')) { 
+                showToast('Digite um e-mail válido!', '⚠️'); 
+                return; 
+            }
+
+            currentUser = { name: email.split('@')[0], email: email, isAdmin: (email === 'f882100@gmail.com'), photo: null };
             localStorage.setItem('az_user', JSON.stringify(currentUser));
 
             if (!usersLog.some(u => u.email === email)) {
@@ -617,6 +661,7 @@
             showToast(`Logado como ${currentUser.name}!`, '🌐');
             closeGooglePicker();
             updateUserUI();
+            if (inputEl) inputEl.value = '';
         }
 
         function handleLogin() {
@@ -626,7 +671,7 @@
             if (!email || !pass) { showToast('Preencha o e-mail e a senha!', '⚠️'); return; }
 
             if (email === 'f882100@gmail.com' && pass === 'lordello051') {
-                currentUser = { name: "Bernardo Admin", email: email, isAdmin: true };
+                currentUser = { name: "Bernardo Admin", email: email, isAdmin: true, photo: null };
                 localStorage.setItem('az_user', JSON.stringify(currentUser));
                 showToast('👑 Modo Desenvolvedor Ativado!', '🛠️');
                 closeLoginModal();
@@ -635,7 +680,7 @@
                 return;
             }
 
-            currentUser = { name: email.split('@')[0], email: email, isAdmin: false };
+            currentUser = { name: email.split('@')[0], email: email, isAdmin: false, photo: null };
             localStorage.setItem('az_user', JSON.stringify(currentUser));
             
             if (!usersLog.some(u => u.email === email)) {
@@ -650,11 +695,228 @@
 
         function updateUserUI() {
             const lbl = document.getElementById('user-btn-label');
-            if (currentUser) {
+            const headerAvatar = document.getElementById('user-header-avatar');
+            if (currentUser && currentUser.email !== 'cliente@arcadezone.com') {
                 lbl.textContent = currentUser.isAdmin ? "👑 Dev/Admin" : currentUser.name;
+                if (currentUser.photo) {
+                    headerAvatar.innerHTML = `<img src="${currentUser.photo}" class="w-4 h-4 rounded-full object-cover inline-block">`;
+                } else {
+                    headerAvatar.textContent = "👤";
+                }
             } else {
                 lbl.textContent = "Entrar";
+                headerAvatar.textContent = "👤";
             }
+        }
+
+        // FUNÇÕES DE AVALIAÇÕES
+        function renderReviewsTab() {
+            setRating(5);
+            renderReviewsFeed();
+        }
+
+        function setRating(stars) {
+            currentReviewStars = stars;
+            const buttons = document.querySelectorAll('#star-rating-select button');
+            buttons.forEach((btn, idx) => {
+                btn.className = idx < stars ? 'star-btn text-yellow-400' : 'star-btn text-zinc-600';
+            });
+        }
+
+        function submitReview() {
+            if (!currentUser || currentUser.email === 'cliente@arcadezone.com') {
+                showToast('Faça login para publicar uma avaliação!', '⚠️');
+                openLoginModal();
+                return;
+            }
+
+            const commentInput = document.getElementById('review-comment-input');
+            const comment = commentInput ? commentInput.value.trim() : '';
+
+            if (!comment) {
+                showToast('Escreva seu comentário sobre a experiência!', '⚠️');
+                return;
+            }
+
+            const newReview = {
+                id: Date.now(),
+                name: currentUser.name,
+                photo: currentUser.photo,
+                stars: currentReviewStars,
+                comment: comment,
+                likes: 0,
+                dislikes: 0,
+                date: "Agora mesmo"
+            };
+
+            reviewsList.unshift(newReview);
+            localStorage.setItem('az_reviews', JSON.stringify(reviewsList));
+
+            if (commentInput) commentInput.value = '';
+            setRating(5);
+            renderReviewsFeed();
+            showToast('Avaliação enviada com sucesso!', '⭐');
+        }
+
+        function renderReviewsFeed() {
+            const feedContainer = document.getElementById('reviews-feed-list');
+            if (!feedContainer) return;
+
+            feedContainer.innerHTML = '';
+
+            if (reviewsList.length === 0) {
+                feedContainer.innerHTML = `<div class="text-center py-6 text-zinc-500 text-xs font-bold">Nenhuma avaliação ainda. Seja o primeiro a comentar!</div>`;
+                return;
+            }
+
+            reviewsList.forEach(review => {
+                const starsHTML = '★'.repeat(review.stars) + '☆'.repeat(5 - review.stars);
+                const avatarHTML = review.photo 
+                    ? `<img src="${review.photo}" class="w-9 h-9 rounded-full object-cover border border-[#30363d]">`
+                    : `<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-600 font-bold text-black flex items-center justify-center text-xs">${review.name.charAt(0).toUpperCase()}</div>`;
+
+                feedContainer.innerHTML += `
+                    <div class="bg-[#161b22] border border-[#30363d] p-3.5 rounded-2xl space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                ${avatarHTML}
+                                <div>
+                                    <div class="text-xs font-bold text-white">${review.name}</div>
+                                    <div class="text-[10px] text-zinc-500">${review.date}</div>
+                                </div>
+                            </div>
+                            <div class="text-yellow-400 text-xs tracking-widest font-bold">${starsHTML}</div>
+                        </div>
+
+                        <p class="text-xs text-zinc-300 leading-relaxed">${review.comment}</p>
+
+                        <div class="pt-2 border-t border-[#30363d] flex items-center justify-between text-[11px] text-zinc-400">
+                            <span class="text-[10px]">Achou útil este comentário?</span>
+                            <div class="flex items-center gap-3">
+                                <button onclick="reactReview(${review.id}, 'like')" class="hover:text-emerald-400 flex items-center gap-1 font-bold">
+                                    👍 <span>${review.likes}</span>
+                                </button>
+                                <button onclick="reactReview(${review.id}, 'dislike')" class="hover:text-red-400 flex items-center gap-1 font-bold">
+                                    👎 <span>${review.dislikes}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function reactReview(id, type) {
+            const review = reviewsList.find(r => r.id === id);
+            if (!review) return;
+
+            if (type === 'like') review.likes++;
+            if (type === 'dislike') review.dislikes++;
+
+            localStorage.setItem('az_reviews', JSON.stringify(reviewsList));
+            renderReviewsFeed();
+            showToast(type === 'like' ? 'Você marcou como útil!' : 'Você marcou como não útil.', '👍');
+        }
+
+        // FUNÇÕES DA ABA PERFIL
+        function renderProfileTab() {
+            const container = document.querySelector('#main-content #profile-tab-content');
+            if (!container) return;
+
+            if (!currentUser || currentUser.email === 'cliente@arcadezone.com') {
+                container.innerHTML = `
+                    <div class="bg-[#161b22] border border-[#30363d] p-6 rounded-2xl text-center space-y-3">
+                        <div class="text-4xl">🔐</div>
+                        <h3 class="text-base font-bold text-white">Você é um Visitante</h3>
+                        <p class="text-xs text-zinc-400">Faça login para salvar suas preferências e personalizar seu nome/foto.</p>
+                        <button onclick="openLoginModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase">
+                            Fazer Login
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="bg-[#161b22] border border-[#30363d] p-5 rounded-2xl space-y-4">
+                    <div class="text-center space-y-2">
+                        <div class="relative w-20 h-20 mx-auto">
+                            <div id="tab-profile-avatar" class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-3xl font-black flex items-center justify-center shadow-lg overflow-hidden border-2 border-purple-400/40">
+                                ${currentUser.photo ? `<img src="${currentUser.photo}" class="w-full h-full object-cover">` : currentUser.name.charAt(0).toUpperCase()}
+                            </div>
+                            <label for="avatar-input" class="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full cursor-pointer shadow-lg text-xs border border-[#161b22]" title="Alterar Foto">
+                                📷
+                            </label>
+                            <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event)">
+                        </div>
+                        <p class="text-[10px] text-zinc-400">Clique na câmera para enviar uma foto do PC ou celular</p>
+                    </div>
+
+                    <div class="space-y-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-300 mb-1 uppercase">Seu Nome de Exibição</label>
+                            <input type="text" id="edit-profile-name" value="${currentUser.name}" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-1 uppercase">Seu E-mail (Somente Leitura)</label>
+                            <input type="email" value="${currentUser.email}" disabled class="w-full bg-[#0d1117]/60 border border-[#30363d] rounded-xl px-3 py-2 text-xs text-zinc-500 cursor-not-allowed">
+                        </div>
+
+                        <button onclick="saveProfileChanges()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase transition-colors shadow">
+                            💾 Salvar Alterações
+                        </button>
+                    </div>
+
+                    ${currentUser.isAdmin ? `
+                        <div class="pt-2 border-t border-[#30363d]">
+                            <button onclick="openAdminModal()" class="w-full bg-purple-600/30 border border-purple-500 hover:bg-purple-600/50 text-purple-300 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
+                                🛠️ Abrir Modo Desenvolvedor
+                            </button>
+                        </div>
+                    ` : ''}
+
+                    <div class="pt-2 border-t border-[#30363d]">
+                        <button onclick="logoutUser()" class="w-full bg-red-600/20 border border-red-500/50 hover:bg-red-600/40 text-red-400 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
+                            🚪 Sair da Conta
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function uploadProfilePhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Escolha uma imagem de até 2MB!', '⚠️');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentUser.photo = e.target.result;
+                localStorage.setItem('az_user', JSON.stringify(currentUser));
+                updateUserUI();
+                renderProfileTab();
+                showToast('Foto de perfil atualizada!', '🖼️');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveProfileChanges() {
+            const newName = document.getElementById('edit-profile-name').value.trim();
+            if (!newName) {
+                showToast('O nome não pode ficar vazio!', '⚠️');
+                return;
+            }
+
+            currentUser.name = newName;
+            localStorage.setItem('az_user', JSON.stringify(currentUser));
+            updateUserUI();
+            renderProfileTab();
+            showToast('Perfil atualizado com sucesso!', '✨');
         }
 
         function renderAdminData() {
@@ -679,8 +941,9 @@
             if (tabName === 'cart') renderCart();
             if (tabName === 'arcade') renderArcade();
             if (tabName === 'lan') attachLanEvents();
-            if (tabName === 'jukebox') renderJukebox();
             if (tabName === 'games') updateDiffBadgeUI();
+            if (tabName === 'profile') renderProfileTab();
+            if (tabName === 'reviews') renderReviewsTab();
         }
 
         function filterMenu(cat) {
@@ -722,57 +985,6 @@
                 cart.push({ ...item, cartId: Date.now() + Math.random() });
                 updateCartBadge();
                 showToast(`${item.name} adicionado ao pedido!`, '🍔');
-            }
-        }
-
-        // JUKEBOX
-        function renderJukebox() {
-            const container = document.querySelector('#main-content #jukebox-list');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const sorted = [...jukeboxSongs].sort((a, b) => b.votes - a.votes);
-
-            sorted.forEach((song, idx) => {
-                const isWinner = idx === 0;
-                const borderClass = isWinner ? 'border-yellow-500/80 bg-gradient-to-r from-yellow-950/30 to-zinc-900' : 'border-[#30363d] bg-[#161b22]';
-                container.innerHTML += `
-                    <div class="p-3 rounded-2xl border ${borderClass} flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <span class="text-xs font-black ${isWinner ? 'text-yellow-400' : 'text-zinc-500'}">#${idx + 1}</span>
-                            <div>
-                                <div class="text-xs font-bold text-zinc-100">${song.name}</div>
-                                <div class="text-[10px] text-indigo-400 font-bold">${song.votes} Votos ${isWinner ? '🏆 (Tocando em 1º)' : ''}</div>
-                            </div>
-                        </div>
-                        <button onclick="voteSong(${song.id})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-3 py-1.5 rounded-xl">👍 VOTAR</button>
-                    </div>
-                `;
-            });
-        }
-
-        function addSongSuggestion() {
-            const input = document.getElementById('song-input');
-            if (!input) return;
-            const songName = input.value.trim();
-
-            if (!songName) { showToast('Digite o nome da música!', '⚠️'); return; }
-            if (jukeboxSongs.length >= 5) { showToast('Limite de 5 músicas na semana atingido!', '⚠️'); return; }
-
-            jukeboxSongs.push({ id: Date.now(), name: songName, votes: 1 });
-            localStorage.setItem('az_jukebox', JSON.stringify(jukeboxSongs));
-            input.value = '';
-            renderJukebox();
-            showToast('Música enviada para a votação!', '🎵');
-        }
-
-        function voteSong(id) {
-            const song = jukeboxSongs.find(s => s.id === id);
-            if (song) {
-                song.votes++;
-                localStorage.setItem('az_jukebox', JSON.stringify(jukeboxSongs));
-                renderJukebox();
-                showToast(`Voto registrado em "${song.name}"!`, '🎵');
             }
         }
 
@@ -987,10 +1199,10 @@
         }
 
         // GAME 2: PÊNALTI ESTILO WORLD CUP (3 BARRAS DE TRAVA)
-        let penStep = 1; // 1: Canto, 2: Altura, 3: Força, 4: Executando
-        let penDirVal = 50;  // 0 (esq) a 100 (dir)
-        let penHgtVal = 50;  // 0 (rasteiro) a 100 (gaveta)
-        let penPwrVal = 50;  // 0 (fraco) a 100 (forte)
+        let penStep = 1;
+        let penDirVal = 50;
+        let penHgtVal = 50;
+        let penPwrVal = 50;
         let penDirInc = 3, penHgtInc = 3, penPwrInc = 3;
         let penAnimLoop = null;
 
@@ -1009,29 +1221,22 @@
                     <span class="text-yellow-400 font-bold" id="pen-step-info">Passo 1/3: Escolha o Canto</span>
                 </div>
 
-                <!-- Campo de Futebol de Pênalti Estilo World Cup -->
                 <div id="penalty-field" class="relative w-full h-48 border-4 border-white bg-gradient-to-b from-green-800 to-green-950 rounded-t-xl mx-auto overflow-hidden shadow-2xl">
-                    <!-- Gol de Futebol -->
                     <div class="absolute top-2 left-[30px] right-[30px] h-24 border-4 border-white bg-zinc-900/60 rounded-t-sm flex items-center justify-center">
-                        <!-- Rede Traçada -->
                         <div class="w-full h-full border-r border-b border-zinc-700/50 bg-[radial-gradient(#30363d_1px,transparent_1px)] [background-size:8px_8px]"></div>
                     </div>
 
-                    <!-- Goleiro Mascote -->
                     <div id="gk-body" class="absolute top-10 left-[132px] w-9 h-14 bg-purple-600 border-2 border-purple-300 rounded-md flex flex-col items-center justify-between p-0.5 transition-all duration-300 z-10 shadow-lg">
                         <div class="w-5 h-5 rounded-full bg-purple-300 text-[9px] flex items-center justify-center font-bold">👾</div>
                         <div class="w-full flex justify-between px-0.5"><span class="w-2 h-2 bg-yellow-400 rounded-full"></span><span class="w-2 h-2 bg-yellow-400 rounded-full"></span></div>
                     </div>
 
-                    <!-- Ponto e Bola de Pênalti Centralizada -->
                     <div class="absolute bottom-6 left-[142px] w-4 h-2 bg-white/40 rounded-full"></div>
                     <div id="penalty-ball" class="absolute bottom-6 left-[138px] w-6 h-6 rounded-full bg-white border-2 border-black transition-all duration-500 shadow-md z-20"></div>
 
-                    <!-- Jogador Chutador de Costas -->
                     <div id="kicker-player" class="absolute bottom-1 left-[138px] w-6 h-8 bg-blue-600 border border-blue-300 rounded-t-md z-10"></div>
                 </div>
 
-                <!-- 3 Barras Trava-Clique Estilo Flash Game -->
                 <div class="space-y-2 my-2 text-left w-full">
                     <div>
                         <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>1. Canto / Direção:</span><span id="pen-dir-lbl" class="text-cyan-400">Centro</span></div>
@@ -1120,11 +1325,9 @@
 
             if (btn) { btn.disabled = true; btn.classList.add('opacity-50'); }
 
-            // Destino Final da Bola baseado na trava das 3 barras
-            const ballX = 35 + ((penDirVal / 100) * 210); // 35px a 245px
-            const ballY = 80 - ((penHgtVal / 100) * 55);   // Altura no gol
+            const ballX = 35 + ((penDirVal / 100) * 210);
+            const ballY = 80 - ((penHgtVal / 100) * 55);
 
-            // Pulo Inteligente do Goleiro
             let gkTargetX = 132;
             const rand = Math.random();
 
@@ -1175,7 +1378,7 @@
             changeTab('cart');
         }
 
-        // ROLETA 24H
+        // ROLETA DA SORTE ESTILO PIZZA
         let rouletteTimerInterval = null;
 
         function openRouletteModal() {
@@ -1215,20 +1418,17 @@
         }
 
         const roulettePrizes = [
-            { icon: "🎁", label: "5% OFF no Pedido", discount: 0.05, isWin: true, toast: "Ganhou 5% de desconto no carrinho!" },
-            { icon: "🎉", label: "10% OFF!", discount: 0.10, isWin: true, toast: "Ganhou 10% de desconto no carrinho!" },
             { icon: "💥", label: "15% OFF VIP!", discount: 0.15, isWin: true, toast: "Ganhou 15% de desconto VIP!" },
-            { icon: "🥤", label: "Refri Lata Grátis", discount: 0, isWin: true, addDrink: true, toast: "Ganhou 1 Refri Lata Grátis!" },
-            { icon: "🍟", label: "Fritas Grátis", discount: 0, isWin: true, addFries: true, toast: "Ganhou 1 Porção de Batata Grátis!" },
-            { icon: "🕹️", label: "+5 Fichas Grátis", discount: 0, isWin: true, addTokens: true, toast: "Ganhou 5 Fichas de Arcade Grátis!" },
-            { icon: "🎺", label: "Tente Novamente", discount: 0, isWin: false, toast: "Que pena! Tente novamente amanhã!" },
-            { icon: "😅", label: "Bateu na Trave!", discount: 0, isWin: false, toast: "Bateu na trave! Tente novamente!" }
+            { icon: "🎉", label: "10% OFF!", discount: 0.10, isWin: true, toast: "Ganhou 10% de desconto!" },
+            { icon: "🎁", label: "5% OFF no Pedido", discount: 0.05, isWin: true, toast: "Ganhou 5% de desconto!" },
+            { icon: "🥤", label: "1 Refri Grátis", discount: 0, isWin: true, addDrink: true, toast: "Ganhou 1 Refri Lata Grátis!" },
+            { icon: "🕹️", label: "5 Fichas Grátis", discount: 0, isWin: true, addTokens: true, toast: "Ganhou 5 Fichas de Arcade Grátis!" },
+            { icon: "😅", label: "Ganhou Nada 😅", discount: 0, isWin: false, toast: "Que pena! Ganhou nada desta vez!" }
         ];
 
         function spinWheel() {
             const wheel = document.getElementById('roulette-wheel');
             const btn = document.getElementById('spin-btn');
-            const displayIcon = document.getElementById('wheel-display-icon');
             const displayText = document.getElementById('wheel-display-text');
             
             btn.disabled = true;
@@ -1236,7 +1436,8 @@
 
             localStorage.setItem('az_roulette_last', Date.now().toString());
 
-            const prize = roulettePrizes[Math.floor(Math.random() * roulettePrizes.length)];
+            const prizeIndex = Math.floor(Math.random() * roulettePrizes.length);
+            const prize = roulettePrizes[prizeIndex];
 
             let tickCount = 0;
             const tickInterval = setInterval(() => {
@@ -1245,14 +1446,14 @@
                 if (tickCount > 25) clearInterval(tickInterval);
             }, 120);
 
+            const degreesPerSlice = 360 / roulettePrizes.length;
+            const targetDegree = (360 * 5) + (360 - (prizeIndex * degreesPerSlice));
+
             wheel.classList.add('wheel-spin');
-            wheel.style.transform = 'rotate(1800deg)';
+            wheel.style.transform = `rotate(${targetDegree}deg)`;
 
             setTimeout(() => {
-                wheel.classList.remove('wheel-spin');
-                wheel.style.transform = 'rotate(0deg)';
-                displayIcon.textContent = prize.icon;
-                displayText.textContent = prize.label;
+                displayText.textContent = `${prize.icon} ${prize.label}`;
 
                 if (prize.isWin) {
                     playWinFanfare();
@@ -1278,16 +1479,6 @@
                         desc: "Ganhado na Roleta 24h",
                         price: 0,
                         img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"
-                    });
-                    updateCartBadge();
-                }
-                if (prize.addFries) {
-                    cart.push({
-                        cartId: Date.now() + Math.random(),
-                        name: "Prêmio Roleta: Porção de Batatas Grátis",
-                        desc: "Ganhado na Roleta 24h",
-                        price: 0,
-                        img: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=300&q=80"
                     });
                     updateCartBadge();
                 }
@@ -1473,6 +1664,12 @@
 
         function openPixModal(total) {
             document.getElementById('pix-total-value').textContent = `R$ ${formatPrice(total)}`;
+            
+            const nameInput = document.getElementById('client-name');
+            if (nameInput) {
+                nameInput.value = (currentUser && currentUser.email !== 'cliente@arcadezone.com') ? currentUser.name : '';
+            }
+
             document.getElementById('pix-modal').classList.remove('hidden');
         }
 
