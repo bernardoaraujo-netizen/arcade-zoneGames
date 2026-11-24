@@ -1,28 +1,45 @@
-// game/js/main.js - Motor AAA Estilo GTA V/VI:
+// game/js/main.js - Motor AAA Estilo GTA V/VI (Completo e Corrigido):
+// Transição Limpa Menu -> Vinheta -> Loading -> Mundo Aberto 3D,
 // Configurações em Tempo Real [O] (Volume 200%, Sensibilidade, FOV, Inverter Y, Gráficos),
 // Drops Magnéticos de Dinheiro dos NPCs, Interiores Entráveis, Hitboxes 3D,
 // Atropelamentos, Vida/Wasted, Explosão de Carros, Nitro, Granadas [G], Rádio [R] e Ciclo Dia/Noite
 
 window.startRockstarIntro = function() {
+    const menuScreen = document.getElementById('vc-menu-screen');
     const introScreen = document.getElementById('vc-intro-screen');
+    const loadingScreen = document.getElementById('vc-loading-screen');
     const gameHud = document.getElementById('vc-game-hud');
 
-    introScreen.classList.remove('hidden');
-    gameHud.classList.add('hidden');
+    if (menuScreen) menuScreen.classList.add('hidden');
+    if (gameHud) gameHud.classList.add('hidden');
+    if (introScreen) introScreen.classList.remove('hidden');
 
-    if (window.VCSoundFX) VCSoundFX.playSynthChord();
+    if (window.VCSoundFX && typeof VCSoundFX.playSynthChord === 'function') {
+        VCSoundFX.playSynthChord();
+    }
 
     setTimeout(() => {
-        introScreen.classList.add('hidden');
-        VCLoadingScreen.start(() => {
-            gameHud.classList.remove('hidden');
+        if (introScreen) introScreen.classList.add('hidden');
+
+        const launchWorld = () => {
+            if (menuScreen) menuScreen.classList.add('hidden');
+            if (introScreen) introScreen.classList.add('hidden');
+            if (loadingScreen) loadingScreen.classList.add('hidden');
+            if (gameHud) gameHud.classList.remove('hidden');
             initViceCityEngine();
-        });
-    }, 1800);
+        };
+
+        if (window.VCLoadingScreen && typeof VCLoadingScreen.start === 'function') {
+            VCLoadingScreen.start(launchWorld);
+        } else {
+            launchWorld();
+        }
+    }, 1500);
 };
 
 function initViceCityEngine() {
     const mount = document.getElementById('vc-canvas-mount');
+    if (!mount) return;
     mount.innerHTML = '';
 
     // =========================================================================
@@ -69,7 +86,6 @@ function initViceCityEngine() {
         quality: 'high'
     };
 
-    // Intercepta AudioContext para aplicar o amplificador de volume (até 200%) em todos os sons
     let masterGainNode = null;
     if (window.VCSoundFX && window.VCSoundFX.ctx) {
         try {
@@ -399,7 +415,6 @@ function initViceCityEngine() {
         group.position.set(x, 0.32, z);
 
         if (type === 'cash') {
-            // Maço de notas verdes + cinta dourada + halo brilhante no chão
             const billStack = new THREE.Mesh(
                 new THREE.BoxGeometry(0.75, 0.24, 0.42),
                 new THREE.MeshBasicMaterial({ color: 0x10b981 })
@@ -429,7 +444,6 @@ function initViceCityEngine() {
     }
 
     function dropNPCLoot(x, z, baseCash = 80) {
-        // Todo NPC morto dropa maço de dinheiro (e ocasionalmente colete ou kit médico)
         const amount = baseCash + Math.floor(Math.random() * 65);
         spawnPickup(x, z, 'cash', amount);
         if (Math.random() < 0.22) {
@@ -814,7 +828,6 @@ function initViceCityEngine() {
         const k = e.key.toLowerCase();
         keys[k] = true;
 
-        // Tecla [O] ou [P] abre/fecha o Menu de Configurações
         if (k === 'o' || k === 'p') {
             e.preventDefault();
             toggleSettingsModal();
@@ -1503,7 +1516,6 @@ function initViceCityEngine() {
             const collectorPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
             const dist = collectorPos.distanceTo(pk.mesh.position);
 
-            // Atração magnética quando o jogador chega a menos de 5.5m
             if (dist < 5.5 && dist > 0.1) {
                 pk.mesh.position.x = THREE.MathUtils.lerp(pk.mesh.position.x, collectorPos.x, 0.14);
                 pk.mesh.position.z = THREE.MathUtils.lerp(pk.mesh.position.z, collectorPos.z, 0.14);
