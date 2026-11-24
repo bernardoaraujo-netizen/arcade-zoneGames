@@ -1,47 +1,20 @@
-// game/js/main.js - Engine PC Completo: Mapa com Cursor Livre (M), Mira Só com Arma e Roleta GTA (TAB)
+// game/js/main.js - Engine PC Completo: Tela de Loading ArcadeCity, Mapa com Cursor Livre (M), Mira Só com Arma e Roleta GTA (TAB)
 
 window.startRockstarIntro = function() {
     const introScreen = document.getElementById('vc-intro-screen');
-    const loadScreen = document.getElementById('vc-loading-screen');
     const gameHud = document.getElementById('vc-game-hud');
 
     introScreen.classList.remove('hidden');
-    loadScreen.classList.add('hidden');
     gameHud.classList.add('hidden');
 
     if (window.VCSoundFX) VCSoundFX.playSynthChord();
 
     setTimeout(() => {
         introScreen.classList.add('hidden');
-        loadScreen.classList.remove('hidden');
-        if (window.VCTextures) VCTextures.renderLoadingArt('vc-loading-art');
-
-        let pct = 0;
-        const bar = document.getElementById('vc-load-bar');
-        const pctText = document.getElementById('vc-load-pct');
-        const statusText = document.getElementById('vc-load-status');
-        const msgs = [
-            "Construindo distritos de Ocean Beach, Downtown & Pontes...",
-            "Carregando interiores de lojas e casas compráveis...",
-            "Configurando controles de PC, Roleta de Armas e GPS...",
-            "Populando Vice City com +5.000 NPCs e frota V8..."
-        ];
-
-        const timer = setInterval(() => {
-            pct += 25;
-            if (bar) bar.style.width = `${pct}%`;
-            if (pctText) pctText.textContent = `${pct}%`;
-            if (statusText && msgs[(pct / 25) - 1]) statusText.textContent = msgs[(pct / 25) - 1];
-
-            if (pct >= 100) {
-                clearInterval(timer);
-                setTimeout(() => {
-                    loadScreen.classList.add('hidden');
-                    gameHud.classList.remove('hidden');
-                    initViceCityEngine();
-                }, 400);
-            }
-        }, 420);
+        VCLoadingScreen.start(() => {
+            gameHud.classList.remove('hidden');
+            initViceCityEngine();
+        });
     }, 1800);
 };
 
@@ -167,7 +140,6 @@ function initViceCityEngine() {
         const wType = weapons[idx].type;
         Object.keys(weaponModels3D).forEach(k => weaponModels3D[k].visible = (k === wType));
 
-        // Se trocou para Punhos, desativa a mira automaticamente
         if (wType === 'melee') {
             isAiming = false;
             document.getElementById('vc-crosshair').classList.add('hidden');
@@ -178,7 +150,6 @@ function initViceCityEngine() {
         document.getElementById('vc-weapon-wheel').classList.add('hidden');
         showGameToast(`Equipado: ${weapons[idx].name}`);
 
-        // Retoma trava de câmera no PC após clicar na roleta
         if (document.pointerLockElement !== mount) {
             try { mount.requestPointerLock(); } catch (e) {}
         }
@@ -383,7 +354,7 @@ function initViceCityEngine() {
                     playerCash += 4500;
                     wantedStars = 0;
                     VCSoundFX.playSynthChord();
-                    notifySiteDiscount(0.15, "Missão Vice City Concluída");
+                    notifySiteDiscount(0.15, "Missão ArcadeCity Concluída");
                     document.getElementById('vc-mission-text').textContent = "Missão Concluída! (+15% OFF liberado no site!)";
                     speakVC("Mission passed! Respect plus!", "Missão cumprida! Respeito aumentado!", 0.9, 1.0);
                     showGameToast('🏆 MISSÃO CONCLUÍDA! +$4.500 e 15% OFF!');
@@ -614,7 +585,7 @@ function initViceCityEngine() {
         ctx.beginPath(); ctx.arc(mapPx, mapPz, 6, 0, Math.PI * 2); ctx.fill();
     }
 
-    speakVC("Welcome to Vice City! Press M to open the map and set a GPS route, or hold TAB for weapons.", "Bem-vindo a Vice City! Aperte M para abrir o mapa e marcar o GPS, ou segure TAB para armas.", 0.9, 1.0);
+    speakVC("Welcome to ArcadeCity! Press M to open the map and set a GPS route, or hold TAB for weapons.", "Bem-vindo a ArcadeCity! Aperte M para abrir o mapa e marcar o GPS, ou segure TAB para armas.", 0.9, 1.0);
     updateHUD();
 
     let tick = 0;
