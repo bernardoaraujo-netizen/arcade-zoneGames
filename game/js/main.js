@@ -1,4 +1,4 @@
-// game/js/main.js - Engine PC Completo: Tela de Loading ArcadeCity, Mapa com Cursor Livre (M), Mira Só com Arma e Roleta GTA (TAB)
+// game/js/main.js - Engine PC Completo: Câmera 360° + Vertical Livre (Olhar Cima/Baixo), Mapa (M), Mira Só com Arma e Roleta GTA (TAB)
 
 window.startRockstarIntro = function() {
     const introScreen = document.getElementById('vc-intro-screen');
@@ -44,7 +44,6 @@ function initViceCityEngine() {
         return mapOpen || wheelOpen;
     }
 
-    // Trava o cursor do mouse ao clicar na área 3D (somente se Mapa e Roleta estiverem fechados)
     mount.onclick = () => {
         if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
             mount.requestPointerLock();
@@ -116,7 +115,8 @@ function initViceCityEngine() {
     let activeStoreInterior = null;
     let clerkSurrendered = false;
     let gpsWaypoint = null;
-    let camYaw = 0, camPitch = 0.25;
+    let camYaw = 0;
+    let camPitch = 0.12; // Ângulo vertical livre (-0.65 olhar pra cima até +0.85 olhar pra baixo)
     let gameMinutes = 17 * 60 + 16;
     let missionStage = 1;
     const bullets = [];
@@ -134,7 +134,6 @@ function initViceCityEngine() {
         window.vcToastTimer = setTimeout(() => el.classList.add('hidden'), 3500);
     }
 
-    // Seleção na Roleta de Armas (TAB ou 1-4)
     window.selectVCWeapon = (idx) => {
         currentWeaponIdx = idx;
         const wType = weapons[idx].type;
@@ -155,7 +154,6 @@ function initViceCityEngine() {
         }
     };
 
-    // Abrir / Fechar Mapa Geral (Tecla M) -> Libera o ponteiro do mouse imediatamente!
     window.toggleFullMap = (forceState) => {
         const mapEl = document.getElementById('vc-full-map');
         if (!mapEl) return;
@@ -207,13 +205,11 @@ function initViceCityEngine() {
             `<span class="text-cyan-300">${'★'.repeat(wantedStars)}</span><span class="text-zinc-600">${'☆'.repeat(6 - wantedStars)}</span>`;
     }
 
-    // Todos os Comandos de Teclado para PC
     const keys = {};
     window.onkeydown = (e) => {
         const k = e.key.toLowerCase();
         keys[k] = true;
 
-        // TAB: Abre Roleta de Armas e libera o ponteiro do mouse para clicar
         if (e.key === 'Tab') {
             e.preventDefault();
             const wheel = document.getElementById('vc-weapon-wheel');
@@ -226,19 +222,16 @@ function initViceCityEngine() {
             }
         }
 
-        // M: Abre/Fecha Mapa e libera o ponteiro do mouse
         if (k === 'm') {
             e.preventDefault();
             toggleFullMap();
         }
 
-        // Teclas numéricas 1 a 4 para troca rápida de arma
         if (k === '1') selectVCWeapon(0);
         if (k === '2') selectVCWeapon(1);
         if (k === '3') selectVCWeapon(2);
         if (k === '4') selectVCWeapon(3);
 
-        // Espaço: Pulo do Personagem ou Suspensão Hidráulica do Carro
         if (e.code === 'Space') {
             e.preventDefault();
             if (inVehicle && inVehicle.hopY <= 0.01) {
@@ -248,10 +241,8 @@ function initViceCityEngine() {
             }
         }
 
-        // H: Buzina do Carro
         if (k === 'h' && inVehicle) VCSoundFX.playCarHorn();
 
-        // F: Entrar / Roubar / Sair do Veículo
         if (k === 'f' && !activeStoreInterior) {
             if (inVehicle) {
                 inVehicle.doorOpenTimer = 28;
@@ -264,6 +255,7 @@ function initViceCityEngine() {
                     if (playerChar.mesh.position.distanceTo(v.mesh.position) < 4.5) {
                         v.doorOpenTimer = 28;
                         inVehicle = v;
+                        camYaw = v.angle;
                         playerChar.mesh.visible = false;
                         isAiming = false;
                         document.getElementById('vc-crosshair').classList.add('hidden');
@@ -276,7 +268,6 @@ function initViceCityEngine() {
             }
         }
 
-        // E: Entrar/Assaltar Lojas, Comprar Casas e Missões
         if (k === 'e' && !inVehicle) {
             if (activeStoreInterior) {
                 if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, 7.0)) < 3.0) {
@@ -374,7 +365,6 @@ function initViceCityEngine() {
         }
     };
 
-    // Botão Direito: MIRA APENAS SE ESTIVER SEGURANDO UMA ARMA DE FOGO (currentWeaponIdx > 0)
     mount.onmousedown = (e) => {
         if (isAnyOverlayOpen()) return;
         if (e.button === 2 && !inVehicle && currentWeaponIdx > 0) {
@@ -393,10 +383,11 @@ function initViceCityEngine() {
         }
     };
 
+    // Movimento livre do mouse: Horizontal (camYaw) e Vertical completo para cima e para baixo (camPitch)
     window.onmousemove = (e) => {
         if (document.pointerLockElement === mount && !isAnyOverlayOpen()) {
             camYaw -= e.movementX * 0.004;
-            camPitch = Math.max(0.08, Math.min(0.65, camPitch + e.movementY * 0.003));
+            camPitch = Math.max(-0.65, Math.min(0.85, camPitch + e.movementY * 0.0038));
         }
     };
 
@@ -636,7 +627,6 @@ function initViceCityEngine() {
             VCModels.updateCarAnimation(inVehicle, inVehicle.speed, steerInput);
 
             playerChar.mesh.position.copy(inVehicle.mesh.position);
-            camYaw = inVehicle.angle;
         } else {
             const isRunning = keys['shift'];
             const moveSpeed = isRunning ? 0.30 : 0.16;
@@ -775,20 +765,28 @@ function initViceCityEngine() {
             else promptEl.classList.add('hidden');
         }
 
+        // Órbita 3D completa da Câmera (Horizontal 360° + Vertical Livre para Cima e para Baixo)
         const distCam = activeStoreInterior ? 4.2 : (isAiming ? 3.5 : (inVehicle ? 9.8 : 6.4));
-        const heightCam = activeStoreInterior ? 2.2 : (isAiming ? 2.1 : (inVehicle ? 4.4 : 2.9));
+        const baseHeight = activeStoreInterior ? 2.0 : (isAiming ? 1.85 : (inVehicle ? 3.4 : 2.3));
         const sideOffset = isAiming ? 0.95 : 0;
 
+        const horizDist = distCam * Math.cos(camPitch * 0.75);
+        const vertOffset = distCam * Math.sin(camPitch);
+        const camY = Math.max(0.45, targetPos.y + baseHeight + vertOffset);
+
         const desiredCamPos = new THREE.Vector3(
-            targetPos.x + Math.sin(camYaw) * distCam + Math.cos(camYaw) * sideOffset,
-            targetPos.y + heightCam + Math.sin(camPitch) * 1.8,
-            targetPos.z + Math.cos(camYaw) * distCam - Math.sin(camYaw) * sideOffset
+            targetPos.x + Math.sin(camYaw) * horizDist + Math.cos(camYaw) * sideOffset,
+            camY,
+            targetPos.z + Math.cos(camYaw) * horizDist - Math.sin(camYaw) * sideOffset
         );
-        camera.position.lerp(desiredCamPos, 0.22);
+        camera.position.lerp(desiredCamPos, 0.25);
+
+        // Ponto de visão acompanha a inclinação vertical (olhar para o céu/prédios ou para o chão)
+        const lookAtY = targetPos.y + 1.55 - Math.sin(camPitch) * 6.5;
         camera.lookAt(
-            targetPos.x - Math.sin(camYaw) * 5 + Math.cos(camYaw) * sideOffset,
-            targetPos.y + 1.55,
-            targetPos.z - Math.cos(camYaw) * 5 - Math.sin(camYaw) * sideOffset
+            targetPos.x - Math.sin(camYaw) * 6 + Math.cos(camYaw) * sideOffset,
+            lookAtY,
+            targetPos.z - Math.cos(camYaw) * 6 - Math.sin(camYaw) * sideOffset
         );
 
         drawRadar();
