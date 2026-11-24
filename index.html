@@ -6,14 +6,12 @@
     <title>ArcadeZone - Hamburgueria, Lan House & Arcade</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Three.js para o GTA Vice City 3D -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .toast {
-            position: fixed; top: 1rem; right: 1rem; z-index: 120;
+            position: fixed; top: 1rem; right: 1rem; z-index: 100;
             padding: 1rem; border-radius: 0.75rem; background: #161b22; border: 1px solid #30363d;
             transform: translateX(150%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -33,16 +31,6 @@
                 #ec4899 300deg 360deg
             );
         }
-
-        .vc-hud-text {
-            font-family: 'Arial Black', Impact, sans-serif;
-            text-shadow: 2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
-        }
-        @keyframes pulseLogo {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px #ec4899); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 30px #06b6d4); }
-        }
-        .rockstar-anim { animation: pulseLogo 2s infinite ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden pb-24 bg-[#0d1117]">
@@ -279,7 +267,7 @@
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="max-w-4xl mx-auto p-4" id="main-content"></main>
+    <main class="max-w-md mx-auto p-4" id="main-content"></main>
 
     <!-- Navegação Inferior -->
     <nav class="fixed bottom-0 left-0 right-0 bg-[#161b22]/90 backdrop-blur-lg border-t border-[#30363d] px-2 py-2 z-40">
@@ -288,7 +276,7 @@
             <button onclick="changeTab('lan')" id="nav-lan" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-purple-400"><span class="text-lg">🖥️</span><span class="text-[10px] font-bold">Lan</span></button>
             <button onclick="changeTab('arcade')" id="nav-arcade" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-yellow-400"><span class="text-lg">🕹️</span><span class="text-[10px] font-bold">Fichas</span></button>
             <button onclick="changeTab('reviews')" id="nav-reviews" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-yellow-400"><span class="text-lg">⭐</span><span class="text-[10px] font-bold">Avaliações</span></button>
-            <button onclick="changeTab('games')" id="nav-games" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-pink-400"><span class="text-lg">🌴</span><span class="text-[10px] font-bold">GTA 3D</span></button>
+            <button onclick="changeTab('games')" id="nav-games" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-pink-400"><span class="text-lg">🎮</span><span class="text-[10px] font-bold">Games</span></button>
             <button onclick="changeTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-blue-400"><span class="text-lg">👤</span><span class="text-[10px] font-bold">Perfil</span></button>
             <button onclick="changeTab('cart')" id="nav-cart" class="nav-btn flex flex-col items-center p-2 rounded-xl opacity-50 text-emerald-400 relative">
                 <span class="text-lg">🛒</span><span class="text-[10px] font-bold">Pedido</span>
@@ -301,7 +289,7 @@
     <div id="templates" class="hidden">
         
         <!-- Aba Lanches -->
-        <div id="tpl-menu" class="max-w-md mx-auto space-y-4">
+        <div id="tpl-menu" class="space-y-4">
             <div class="flex flex-wrap gap-2 pb-1 text-xs font-bold" id="menu-categories">
                 <button onclick="filterMenu('all')" class="cat-btn active bg-cyan-500 text-black px-3.5 py-2 rounded-xl flex-shrink-0">Todos</button>
                 <button onclick="filterMenu('combos')" class="cat-btn bg-[#161b22] border border-[#30363d] text-zinc-300 px-3.5 py-2 rounded-xl flex-shrink-0">🔥 Combos & Brindes</button>
@@ -313,12 +301,13 @@
         </div>
 
         <!-- Aba Avaliações dos Clientes -->
-        <div id="tpl-reviews" class="max-w-md mx-auto space-y-4">
+        <div id="tpl-reviews" class="space-y-4">
             <div class="bg-gradient-to-r from-amber-950/60 to-yellow-950/40 p-4 rounded-2xl border border-amber-500/30 text-center">
                 <h2 class="text-base font-black text-amber-300">⭐ AVALIAÇÕES DOS CLIENTES</h2>
                 <p class="text-[11px] text-zinc-400 mt-0.5">Veja o que o pessoal está achando da nossa Arena e deixe sua nota!</p>
             </div>
 
+            <!-- Form para Criar Avaliação -->
             <div class="bg-[#161b22] border border-[#30363d] p-4 rounded-2xl space-y-3">
                 <span class="text-xs font-bold text-zinc-200 uppercase block">Deixe sua Avaliação:</span>
                 
@@ -337,40 +326,43 @@
                 </button>
             </div>
 
+            <!-- Lista de Avaliações -->
             <div class="space-y-3" id="reviews-feed-list"></div>
         </div>
 
-        <!-- Aba GTA VICE CITY 3D (EXCLUSIVO PARA PC) -->
-        <div id="tpl-games" class="space-y-3">
-            <div class="bg-gradient-to-r from-pink-950/70 via-purple-950/60 to-cyan-950/70 p-3.5 rounded-2xl border border-pink-500/40 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-                <div>
-                    <h2 class="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400 uppercase">🌴 GRAND THEFT ARCADE: VICE 3D</h2>
-                    <p class="text-[10px] text-zinc-300 mt-0.5">
-                        <b>WASD</b> Andar/Dirigir • <b>F</b> Roubar/Entrar Carro • <b>Botão Dir.</b> Mirar • <b>Clique Esq.</b> Atirar • <b>TAB</b> Roda de Armas • <b>E</b> Assaltar Loja • <b>M</b> Mapa
-                    </p>
+        <!-- Aba Minigames estilo Pou -->
+        <div id="tpl-games" class="space-y-4">
+            <div class="bg-gradient-to-r from-purple-950/50 to-pink-950/40 p-4 rounded-2xl border border-purple-500/30 text-center relative">
+                <div id="diff-badge" class="absolute top-2 right-2 bg-green-500/20 border border-green-500 text-green-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase">🟢 FÁCIL</div>
+                <h2 class="text-base font-black text-purple-300">🎮 DESAFIE O MASCOTE DE CRISTAL</h2>
+                <p class="text-[11px] text-zinc-400 mt-0.5">Jogue no PC ou Telemóvel!</p>
+            </div>
+
+            <div class="bg-[#161b22] border border-[#30363d] p-2.5 rounded-2xl flex items-center justify-between">
+                <span class="text-xs font-bold text-zinc-400">Dificuldade:</span>
+                <div class="flex gap-1">
+                    <button onclick="setDifficulty('easy')" id="diff-easy" class="diff-btn bg-green-500/20 border border-green-500 text-green-400 px-3 py-1 rounded-xl text-xs font-bold">Fácil</button>
+                    <button onclick="setDifficulty('normal')" id="diff-normal" class="diff-btn bg-[#21262d] border border-[#30363d] text-zinc-400 px-3 py-1 rounded-xl text-xs font-bold">Normal</button>
+                    <button onclick="setDifficulty('hard')" id="diff-hard" class="diff-btn bg-[#21262d] border border-[#30363d] text-zinc-400 px-3 py-1 rounded-xl text-xs font-bold">Difícil</button>
                 </div>
-                <button onclick="startRockstarIntro()" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:brightness-110 text-white font-black px-4 py-2 rounded-xl text-xs uppercase shadow-lg">
-                    ▶ INICIAR JOGO (PC)
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="initVolleyGame()" class="bg-[#161b22] border border-[#30363d] p-3 rounded-2xl font-bold text-xs text-purple-300 hover:border-purple-500 flex flex-col items-center gap-1">
+                    <span class="text-2xl">🏐</span><span>Pou Vôlei Arcade</span>
+                </button>
+                <button onclick="initPenaltyGame()" class="bg-[#161b22] border border-[#30363d] p-3 rounded-2xl font-bold text-xs text-pink-300 hover:border-pink-500 flex flex-col items-center gap-1">
+                    <span class="text-2xl">⚽</span><span>Pênalti do Mascote</span>
                 </button>
             </div>
 
-            <!-- Viewport Principal do Jogo 3D -->
-            <div id="gta-viewport" class="relative w-full h-[540px] bg-black rounded-2xl border-2 border-pink-500/50 overflow-hidden shadow-2xl select-none" oncontextmenu="return false;">
-                <div class="w-full h-full flex flex-col items-center justify-center text-center p-6 bg-[radial-gradient(circle_at_center,#3b0764_0%,#090d16_100%)]">
-                    <div class="text-6xl mb-3">🌴🚓🔫</div>
-                    <h3 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400 uppercase tracking-wider">ARCADE VICE CITY 3D</h3>
-                    <p class="text-xs text-zinc-300 max-w-lg mt-2 leading-relaxed">
-                        Mundo aberto dinâmico em 3D com trânsito vivo, pedestres, fauna da praia, roubo de lojas com balconistas rendidos, perseguição policial de 6 estrelas, roda de armas, missões e dublagem em inglês com legendas em PT-BR!
-                    </p>
-                    <button onclick="startRockstarIntro()" class="mt-6 bg-cyan-500 hover:bg-cyan-400 text-black font-black px-8 py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-[0_0_25px_rgba(6,182,212,0.6)]">
-                        JOGAR AGORA
-                    </button>
-                </div>
+            <div id="game-arena" class="bg-zinc-950 border border-[#30363d] rounded-2xl p-3 text-center min-h-[320px] flex flex-col items-center justify-center relative overflow-hidden">
+                <p class="text-xs text-zinc-500">Escolha um jogo acima para desafiar o Mascote Roxo!</p>
             </div>
         </div>
 
         <!-- Aba Lan House -->
-        <div id="tpl-lan" class="max-w-md mx-auto space-y-5">
+        <div id="tpl-lan" class="space-y-5">
             <div class="bg-gradient-to-r from-purple-950/40 to-indigo-950/30 p-4 rounded-2xl border border-purple-500/30">
                 <h2 class="text-lg font-black text-purple-300">🖥️ MAPA DA ARENA GAMER</h2>
                 <p class="text-xs text-purple-200/70">Escolha a sua estação, console ou simulador!</p>
@@ -403,7 +395,7 @@
         </div>
 
         <!-- Aba Arcade -->
-        <div id="tpl-arcade" class="max-w-md mx-auto space-y-5">
+        <div id="tpl-arcade" class="space-y-5">
             <div class="text-center bg-gradient-to-b from-yellow-950/40 to-zinc-900 border border-yellow-500/30 rounded-3xl p-5">
                 <div class="text-3xl mb-1">🕹️</div>
                 <h2 class="text-zinc-300 font-black uppercase text-sm">Recarga de Fichas & Fliperamas</h2>
@@ -414,7 +406,7 @@
         </div>
 
         <!-- Aba Perfil do Usuário -->
-        <div id="tpl-profile" class="max-w-md mx-auto space-y-5">
+        <div id="tpl-profile" class="space-y-5">
             <div class="bg-gradient-to-r from-blue-950/50 to-indigo-950/40 p-4 rounded-2xl border border-blue-500/30 text-center">
                 <h2 class="text-lg font-black text-blue-300">👤 SEU PERFIL DE JOGADOR</h2>
                 <p class="text-xs text-blue-200/70">Personalize seu nome e sua foto de perfil!</p>
@@ -424,7 +416,7 @@
         </div>
 
         <!-- Aba Carrinho -->
-        <div id="tpl-cart" class="max-w-md mx-auto space-y-4">
+        <div id="tpl-cart" class="space-y-4">
             <h2 class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-500 uppercase text-center">Resumo do Pedido</h2>
 
             <div class="bg-[#161b22] border border-[#30363d] p-3.5 rounded-2xl space-y-2">
@@ -448,10 +440,12 @@
         let selectedSeat = null;
         let selectedLanOption = null;
         let appliedDiscount = 0;
+        let currentDifficulty = 'easy';
         let storeIsOpen = true;
         let currentReviewStars = 5;
         const pixKey = "f882100@gmail.com";
 
+        // Estado do Usuário: Visitante / Cliente Padrão (Sem Admin por padrão ao carregar)
         let savedUser = JSON.parse(localStorage.getItem('az_user'));
         let currentUser = (savedUser && savedUser.isAdmin) ? { name: "Cliente Visitante", email: "cliente@arcadezone.com", isAdmin: false, photo: null } : (savedUser || { name: "Cliente Visitante", email: "cliente@arcadezone.com", isAdmin: false, photo: null });
 
@@ -473,12 +467,29 @@
         function playWheelTickSound() {
             try {
                 const ctx = getAudioContext();
-                const osc = ctx.createOscillator(); const gain = ctx.createGain();
-                osc.type = 'square'; osc.frequency.setValueAtTime(800, ctx.currentTime);
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
                 gain.gain.setValueAtTime(0.05, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
                 osc.connect(gain); gain.connect(ctx.destination);
                 osc.start(); osc.stop(ctx.currentTime + 0.03);
+            } catch (e) {}
+        }
+
+        function playWhistleSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(2200, ctx.currentTime);
+                osc.frequency.setValueAtTime(2400, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.4);
             } catch (e) {}
         }
 
@@ -487,7 +498,8 @@
                 const ctx = getAudioContext();
                 const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, idx) => {
-                    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.08));
                     gain.gain.setValueAtTime(0.2, ctx.currentTime + (idx * 0.08));
@@ -504,7 +516,8 @@
                 const ctx = getAudioContext();
                 const notes = [466.16, 440.00, 415.30, 392.00];
                 notes.forEach((freq, idx) => {
-                    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.25));
                     if (idx === 3) osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + (idx * 0.25) + 0.6);
@@ -520,7 +533,8 @@
         function playClickSound() {
             try {
                 const ctx = getAudioContext();
-                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(600, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.05);
@@ -574,9 +588,13 @@
 
         // Auth System
         function handleUserBtnClick() {
-            if (currentUser && currentUser.email !== 'cliente@arcadezone.com') openUserProfileModal();
-            else openLoginModal();
+            if (currentUser && currentUser.email !== 'cliente@arcadezone.com') {
+                openUserProfileModal();
+            } else {
+                openLoginModal();
+            }
         }
+
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
         function openGooglePicker() { closeLoginModal(); document.getElementById('google-picker-modal').classList.remove('hidden'); }
@@ -586,11 +604,17 @@
             if (!currentUser) return;
             document.getElementById('profile-name').textContent = currentUser.name;
             document.getElementById('profile-email').textContent = currentUser.email;
+            
             const avatarEl = document.getElementById('profile-avatar');
-            if (currentUser.photo) avatarEl.innerHTML = `<img src="${currentUser.photo}" class="w-full h-full object-cover">`;
-            else avatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
+            if (currentUser.photo) {
+                avatarEl.innerHTML = `<img src="${currentUser.photo}" class="w-full h-full object-cover">`;
+            } else {
+                avatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
+            }
+
             const adminBtn = document.getElementById('admin-panel-btn-container');
             if (currentUser.isAdmin) adminBtn.classList.remove('hidden'); else adminBtn.classList.add('hidden');
+
             document.getElementById('user-profile-modal').classList.remove('hidden');
         }
 
@@ -620,13 +644,20 @@
         function confirmSocialAccount() {
             const inputEl = document.getElementById('google-user-email');
             const email = inputEl ? inputEl.value.trim() : '';
-            if (!email || !email.includes('@')) { showToast('Digite um e-mail válido!', '⚠️'); return; }
+
+            if (!email || !email.includes('@')) { 
+                showToast('Digite um e-mail válido!', '⚠️'); 
+                return; 
+            }
+
             currentUser = { name: email.split('@')[0], email: email, isAdmin: (email === 'f882100@gmail.com'), photo: null };
             localStorage.setItem('az_user', JSON.stringify(currentUser));
+
             if (!usersLog.some(u => u.email === email)) {
                 usersLog.push({ email: email, date: new Date().toLocaleString() });
                 localStorage.setItem('az_users_log', JSON.stringify(usersLog));
             }
+
             showToast(`Logado como ${currentUser.name}!`, '🌐');
             closeGooglePicker();
             updateUserUI();
@@ -636,6 +667,7 @@
         function handleLogin() {
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
+
             if (!email || !pass) { showToast('Preencha o e-mail e a senha!', '⚠️'); return; }
 
             if (email === 'f882100@gmail.com' && pass === 'lordello051') {
@@ -650,10 +682,12 @@
 
             currentUser = { name: email.split('@')[0], email: email, isAdmin: false, photo: null };
             localStorage.setItem('az_user', JSON.stringify(currentUser));
+            
             if (!usersLog.some(u => u.email === email)) {
                 usersLog.push({ email: email, date: new Date().toLocaleString() });
                 localStorage.setItem('az_users_log', JSON.stringify(usersLog));
             }
+
             showToast(`Bem-vindo, ${currentUser.name}!`, '👤');
             closeLoginModal();
             updateUserUI();
@@ -664,123 +698,236 @@
             const headerAvatar = document.getElementById('user-header-avatar');
             if (currentUser && currentUser.email !== 'cliente@arcadezone.com') {
                 lbl.textContent = currentUser.isAdmin ? "👑 Dev/Admin" : currentUser.name;
-                if (currentUser.photo) headerAvatar.innerHTML = `<img src="${currentUser.photo}" class="w-4 h-4 rounded-full object-cover inline-block">`;
-                else headerAvatar.textContent = "👤";
+                if (currentUser.photo) {
+                    headerAvatar.innerHTML = `<img src="${currentUser.photo}" class="w-4 h-4 rounded-full object-cover inline-block">`;
+                } else {
+                    headerAvatar.textContent = "👤";
+                }
             } else {
                 lbl.textContent = "Entrar";
                 headerAvatar.textContent = "👤";
             }
         }
 
-        // AVALIAÇÕES
-        function renderReviewsTab() { setRating(5); renderReviewsFeed(); }
+        // FUNÇÕES DE AVALIAÇÕES
+        function renderReviewsTab() {
+            setRating(5);
+            renderReviewsFeed();
+        }
+
         function setRating(stars) {
             currentReviewStars = stars;
-            document.querySelectorAll('#star-rating-select button').forEach((btn, idx) => {
+            const buttons = document.querySelectorAll('#star-rating-select button');
+            buttons.forEach((btn, idx) => {
                 btn.className = idx < stars ? 'star-btn text-yellow-400' : 'star-btn text-zinc-600';
             });
         }
+
         function submitReview() {
             if (!currentUser || currentUser.email === 'cliente@arcadezone.com') {
-                showToast('Faça login para publicar uma avaliação!', '⚠️'); openLoginModal(); return;
+                showToast('Faça login para publicar uma avaliação!', '⚠️');
+                openLoginModal();
+                return;
             }
+
             const commentInput = document.getElementById('review-comment-input');
             const comment = commentInput ? commentInput.value.trim() : '';
-            if (!comment) { showToast('Escreva seu comentário sobre a experiência!', '⚠️'); return; }
 
-            reviewsList.unshift({
-                id: Date.now(), name: currentUser.name, photo: currentUser.photo,
-                stars: currentReviewStars, comment: comment, likes: 0, dislikes: 0, date: "Agora mesmo"
-            });
+            if (!comment) {
+                showToast('Escreva seu comentário sobre a experiência!', '⚠️');
+                return;
+            }
+
+            const newReview = {
+                id: Date.now(),
+                name: currentUser.name,
+                photo: currentUser.photo,
+                stars: currentReviewStars,
+                comment: comment,
+                likes: 0,
+                dislikes: 0,
+                date: "Agora mesmo"
+            };
+
+            reviewsList.unshift(newReview);
             localStorage.setItem('az_reviews', JSON.stringify(reviewsList));
+
             if (commentInput) commentInput.value = '';
-            setRating(5); renderReviewsFeed(); showToast('Avaliação enviada com sucesso!', '⭐');
+            setRating(5);
+            renderReviewsFeed();
+            showToast('Avaliação enviada com sucesso!', '⭐');
         }
+
         function renderReviewsFeed() {
-            const feedContainer = document.getElementById('reviews-feed-list'); if (!feedContainer) return;
+            const feedContainer = document.getElementById('reviews-feed-list');
+            if (!feedContainer) return;
+
             feedContainer.innerHTML = '';
+
+            if (reviewsList.length === 0) {
+                feedContainer.innerHTML = `<div class="text-center py-6 text-zinc-500 text-xs font-bold">Nenhuma avaliação ainda. Seja o primeiro a comentar!</div>`;
+                return;
+            }
+
             reviewsList.forEach(review => {
                 const starsHTML = '★'.repeat(review.stars) + '☆'.repeat(5 - review.stars);
                 const avatarHTML = review.photo 
                     ? `<img src="${review.photo}" class="w-9 h-9 rounded-full object-cover border border-[#30363d]">`
                     : `<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-600 font-bold text-black flex items-center justify-center text-xs">${review.name.charAt(0).toUpperCase()}</div>`;
+
                 feedContainer.innerHTML += `
                     <div class="bg-[#161b22] border border-[#30363d] p-3.5 rounded-2xl space-y-2">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2.5">${avatarHTML}<div><div class="text-xs font-bold text-white">${review.name}</div><div class="text-[10px] text-zinc-500">${review.date}</div></div></div>
+                            <div class="flex items-center gap-2.5">
+                                ${avatarHTML}
+                                <div>
+                                    <div class="text-xs font-bold text-white">${review.name}</div>
+                                    <div class="text-[10px] text-zinc-500">${review.date}</div>
+                                </div>
+                            </div>
                             <div class="text-yellow-400 text-xs tracking-widest font-bold">${starsHTML}</div>
                         </div>
+
                         <p class="text-xs text-zinc-300 leading-relaxed">${review.comment}</p>
+
                         <div class="pt-2 border-t border-[#30363d] flex items-center justify-between text-[11px] text-zinc-400">
-                            <span class="text-[10px]">Achou útil?</span>
+                            <span class="text-[10px]">Achou útil este comentário?</span>
                             <div class="flex items-center gap-3">
-                                <button onclick="reactReview(${review.id}, 'like')" class="hover:text-emerald-400 flex items-center gap-1 font-bold">👍 <span>${review.likes}</span></button>
-                                <button onclick="reactReview(${review.id}, 'dislike')" class="hover:text-red-400 flex items-center gap-1 font-bold">👎 <span>${review.dislikes}</span></button>
+                                <button onclick="reactReview(${review.id}, 'like')" class="hover:text-emerald-400 flex items-center gap-1 font-bold">
+                                    👍 <span>${review.likes}</span>
+                                </button>
+                                <button onclick="reactReview(${review.id}, 'dislike')" class="hover:text-red-400 flex items-center gap-1 font-bold">
+                                    👎 <span>${review.dislikes}</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                 `;
             });
         }
+
         function reactReview(id, type) {
-            const review = reviewsList.find(r => r.id === id); if (!review) return;
-            if (type === 'like') review.likes++; if (type === 'dislike') review.dislikes++;
-            localStorage.setItem('az_reviews', JSON.stringify(reviewsList)); renderReviewsFeed();
+            const review = reviewsList.find(r => r.id === id);
+            if (!review) return;
+
+            if (type === 'like') review.likes++;
+            if (type === 'dislike') review.dislikes++;
+
+            localStorage.setItem('az_reviews', JSON.stringify(reviewsList));
+            renderReviewsFeed();
+            showToast(type === 'like' ? 'Você marcou como útil!' : 'Você marcou como não útil.', '👍');
         }
 
-        // PERFIL
+        // FUNÇÕES DA ABA PERFIL
         function renderProfileTab() {
-            const container = document.querySelector('#main-content #profile-tab-content'); if (!container) return;
+            const container = document.querySelector('#main-content #profile-tab-content');
+            if (!container) return;
+
             if (!currentUser || currentUser.email === 'cliente@arcadezone.com') {
-                container.innerHTML = `<div class="bg-[#161b22] border border-[#30363d] p-6 rounded-2xl text-center space-y-3"><div class="text-4xl">🔐</div><h3 class="text-base font-bold text-white">Você é um Visitante</h3><p class="text-xs text-zinc-400">Faça login para personalizar seu perfil.</p><button onclick="openLoginModal()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs uppercase">Fazer Login</button></div>`;
+                container.innerHTML = `
+                    <div class="bg-[#161b22] border border-[#30363d] p-6 rounded-2xl text-center space-y-3">
+                        <div class="text-4xl">🔐</div>
+                        <h3 class="text-base font-bold text-white">Você é um Visitante</h3>
+                        <p class="text-xs text-zinc-400">Faça login para salvar suas preferências e personalizar seu nome/foto.</p>
+                        <button onclick="openLoginModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase">
+                            Fazer Login
+                        </button>
+                    </div>
+                `;
                 return;
             }
+
             container.innerHTML = `
                 <div class="bg-[#161b22] border border-[#30363d] p-5 rounded-2xl space-y-4">
                     <div class="text-center space-y-2">
                         <div class="relative w-20 h-20 mx-auto">
-                            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-3xl font-black flex items-center justify-center shadow-lg overflow-hidden border-2 border-purple-400/40">
+                            <div id="tab-profile-avatar" class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-3xl font-black flex items-center justify-center shadow-lg overflow-hidden border-2 border-purple-400/40">
                                 ${currentUser.photo ? `<img src="${currentUser.photo}" class="w-full h-full object-cover">` : currentUser.name.charAt(0).toUpperCase()}
                             </div>
-                            <label for="avatar-input" class="absolute bottom-0 right-0 bg-blue-600 text-white p-1.5 rounded-full cursor-pointer text-xs">📷</label>
+                            <label for="avatar-input" class="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full cursor-pointer shadow-lg text-xs border border-[#161b22]" title="Alterar Foto">
+                                📷
+                            </label>
                             <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event)">
                         </div>
+                        <p class="text-[10px] text-zinc-400">Clique na câmera para enviar uma foto do PC ou celular</p>
                     </div>
+
                     <div class="space-y-3 pt-2">
-                        <div><label class="block text-xs font-bold text-zinc-300 mb-1 uppercase">Nome</label><input type="text" id="edit-profile-name" value="${currentUser.name}" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white"></div>
-                        <button onclick="saveProfileChanges()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs uppercase">💾 Salvar Alterações</button>
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-300 mb-1 uppercase">Seu Nome de Exibição</label>
+                            <input type="text" id="edit-profile-name" value="${currentUser.name}" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-1 uppercase">Seu E-mail (Somente Leitura)</label>
+                            <input type="email" value="${currentUser.email}" disabled class="w-full bg-[#0d1117]/60 border border-[#30363d] rounded-xl px-3 py-2 text-xs text-zinc-500 cursor-not-allowed">
+                        </div>
+
+                        <button onclick="saveProfileChanges()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase transition-colors shadow">
+                            💾 Salvar Alterações
+                        </button>
                     </div>
-                    ${currentUser.isAdmin ? `<button onclick="openAdminModal()" class="w-full bg-purple-600/30 border border-purple-500 text-purple-300 font-bold py-2.5 rounded-xl text-xs uppercase">🛠️ Abrir Modo Desenvolvedor</button>` : ''}
-                    <button onclick="logoutUser()" class="w-full bg-red-600/20 border border-red-500/50 text-red-400 font-bold py-2.5 rounded-xl text-xs uppercase">🚪 Sair da Conta</button>
+
+                    ${currentUser.isAdmin ? `
+                        <div class="pt-2 border-t border-[#30363d]">
+                            <button onclick="openAdminModal()" class="w-full bg-purple-600/30 border border-purple-500 hover:bg-purple-600/50 text-purple-300 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
+                                🛠️ Abrir Modo Desenvolvedor
+                            </button>
+                        </div>
+                    ` : ''}
+
+                    <div class="pt-2 border-t border-[#30363d]">
+                        <button onclick="logoutUser()" class="w-full bg-red-600/20 border border-red-500/50 hover:bg-red-600/40 text-red-400 font-bold py-2.5 rounded-xl text-xs uppercase transition-colors">
+                            🚪 Sair da Conta
+                        </button>
+                    </div>
                 </div>
             `;
         }
+
         function uploadProfilePhoto(event) {
-            const file = event.target.files[0]; if (!file) return;
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Escolha uma imagem de até 2MB!', '⚠️');
+                return;
+            }
+
             const reader = new FileReader();
-            reader.onload = function(e) { currentUser.photo = e.target.result; localStorage.setItem('az_user', JSON.stringify(currentUser)); updateUserUI(); renderProfileTab(); };
+            reader.onload = function(e) {
+                currentUser.photo = e.target.result;
+                localStorage.setItem('az_user', JSON.stringify(currentUser));
+                updateUserUI();
+                renderProfileTab();
+                showToast('Foto de perfil atualizada!', '🖼️');
+            };
             reader.readAsDataURL(file);
         }
+
         function saveProfileChanges() {
-            const newName = document.getElementById('edit-profile-name').value.trim(); if (!newName) return;
-            currentUser.name = newName; localStorage.setItem('az_user', JSON.stringify(currentUser)); updateUserUI(); renderProfileTab(); showToast('Perfil salvo!', '✨');
-        }
-        function renderAdminData() {
-            const uList = document.getElementById('admin-users-list'); const oList = document.getElementById('admin-orders-list');
-            uList.innerHTML = usersLog.length ? usersLog.map(u => `<div>• ${u.email} (${u.date})</div>`).join('') : '<div>Nenhum registro.</div>';
-            oList.innerHTML = ordersLog.length ? ordersLog.map(o => `<div>• <b>${o.client}</b> - R$ ${formatPrice(o.total)} (${o.date})</div>`).join('') : '<div>Nenhum pedido.</div>';
+            const newName = document.getElementById('edit-profile-name').value.trim();
+            if (!newName) {
+                showToast('O nome não pode ficar vazio!', '⚠️');
+                return;
+            }
+
+            currentUser.name = newName;
+            localStorage.setItem('az_user', JSON.stringify(currentUser));
+            updateUserUI();
+            renderProfileTab();
+            showToast('Perfil atualizado com sucesso!', '✨');
         }
 
-        // CONTROLE DE ABAS & LIMPEZA DO ENGINE 3D
-        let gta3DLoop = null;
-        function stopGTA3D() {
-            if (gta3DLoop) cancelAnimationFrame(gta3DLoop);
-            gta3DLoop = null;
-            if (window.speechSynthesis) window.speechSynthesis.cancel();
+        function renderAdminData() {
+            const uList = document.getElementById('admin-users-list');
+            const oList = document.getElementById('admin-orders-list');
+            
+            uList.innerHTML = usersLog.length ? usersLog.map(u => `<div>• ${u.email} <span class="text-[9px] text-zinc-600">(${u.date})</span></div>`).join('') : '<div>Nenhum cliente registrado ainda.</div>';
+            oList.innerHTML = ordersLog.length ? ordersLog.map(o => `<div>• <b>${o.client}</b> - R$ ${formatPrice(o.total)} <span class="text-[9px] text-zinc-600">(${o.date})</span></div>`).join('') : '<div>Nenhum pedido efetuado no Pix ainda.</div>';
         }
 
         function changeTab(tabName) {
-            stopGTA3D();
             currentTab = tabName;
             const mainContent = document.getElementById('main-content');
             const template = document.getElementById(`tpl-${tabName}`).cloneNode(true);
@@ -794,6 +941,7 @@
             if (tabName === 'cart') renderCart();
             if (tabName === 'arcade') renderArcade();
             if (tabName === 'lan') attachLanEvents();
+            if (tabName === 'games') updateDiffBadgeUI();
             if (tabName === 'profile') renderProfileTab();
             if (tabName === 'reviews') renderReviewsTab();
         }
@@ -808,18 +956,24 @@
         }
 
         function renderMenu() {
-            const container = document.querySelector('#main-content #menu-list'); if (!container) return;
+            const container = document.querySelector('#main-content #menu-list');
+            if (!container) return;
             container.innerHTML = '';
             const list = activeCategory === 'all' ? menuItems : menuItems.filter(i => i.cat === activeCategory);
+
             list.forEach(item => {
                 const borderClass = item.highlight ? 'border-purple-500/80 bg-gradient-to-r from-purple-950/30 to-zinc-900' : 'border-[#30363d] bg-[#161b22]';
                 container.innerHTML += `
                     <div class="p-3 rounded-2xl border ${borderClass} flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
                             <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover border border-[#30363d] flex-shrink-0">
-                            <div><h4 class="font-bold text-xs text-zinc-100">${item.name}</h4><p class="text-[10px] text-zinc-400 leading-tight mt-0.5">${item.desc}</p><div class="text-cyan-400 font-black text-xs mt-1">R$ ${formatPrice(item.price)}</div></div>
+                            <div>
+                                <h4 class="font-bold text-xs text-zinc-100">${item.name}</h4>
+                                <p class="text-[10px] text-zinc-400 leading-tight mt-0.5">${item.desc}</p>
+                                <div class="text-cyan-400 font-black text-xs mt-1">R$ ${formatPrice(item.price)}</div>
+                            </div>
                         </div>
-                        <button onclick="addToCart(${item.id})" class="bg-[#21262d] hover:bg-cyan-500 hover:text-black text-white font-bold text-xs px-3 py-2 rounded-xl flex-shrink-0">+ ADD</button>
+                        <button onclick="addToCart(${item.id})" class="bg-[#21262d] hover:bg-cyan-500 hover:text-black text-white font-bold text-xs px-3 py-2 rounded-xl transition-colors flex-shrink-0">+ ADD</button>
                     </div>
                 `;
             });
@@ -827,888 +981,437 @@
 
         function addToCart(id) {
             const item = menuItems.find(i => i.id === id);
-            if (item) { cart.push({ ...item, cartId: Date.now() + Math.random() }); updateCartBadge(); showToast(`${item.name} adicionado!`, '🍔'); }
-        }
-
-        // =========================================================================
-        // MOTOR COMPLETO DO GTA: ARCADE VICE CITY 3D (PC EDITION)
-        // =========================================================================
-        function speakEnglishWithSubtitle(enText, ptSub, pitch = 1.0, rate = 1.05) {
-            const subBox = document.getElementById('vc-subtitle-box');
-            const subText = document.getElementById('vc-subtitle-text');
-            if (subBox && subText) {
-                subText.textContent = ptSub;
-                subBox.classList.remove('hidden');
-                clearTimeout(window.subTimeout);
-                window.subTimeout = setTimeout(() => subBox.classList.add('hidden'), 4200);
-            }
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utter = new SpeechSynthesisUtterance(enText);
-                utter.lang = 'en-US';
-                utter.pitch = pitch;
-                utter.rate = rate;
-                window.speechSynthesis.speak(utter);
+            if (item) {
+                cart.push({ ...item, cartId: Date.now() + Math.random() });
+                updateCartBadge();
+                showToast(`${item.name} adicionado ao pedido!`, '🍔');
             }
         }
 
-        function playGunshotSound(type) {
-            try {
-                const ctx = getAudioContext();
-                const bufferSize = ctx.sampleRate * (type === 'shotgun' ? 0.35 : 0.14);
-                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.04));
-                const noise = ctx.createBufferSource();
-                noise.buffer = buffer;
-
-                const filter = ctx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(type === 'shotgun' ? 650 : 1200, ctx.currentTime);
-
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(type === 'shotgun' ? 0.5 : 0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (type === 'shotgun' ? 0.35 : 0.14));
-
-                noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-                noise.start();
-            } catch (e) {}
+        // DIFICULDADES
+        function setDifficulty(diff) {
+            currentDifficulty = diff;
+            updateDiffBadgeUI();
+            showToast(`Dificuldade definida: ${diff.toUpperCase()}`, '🎮');
         }
 
-        function playViceSynthChord() {
-            try {
-                const ctx = getAudioContext();
-                const freqs = [220, 277.18, 329.63, 415.30]; // Amaj7 retrô
-                freqs.forEach((f, i) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.12);
-                    gain.gain.setValueAtTime(0.08, ctx.currentTime + i * 0.12);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 1.2);
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + i * 0.12);
-                    osc.stop(ctx.currentTime + i * 0.12 + 1.2);
-                });
-            } catch (e) {}
-        }
-
-        function startRockstarIntro() {
-            stopGTA3D();
-            const vp = document.getElementById('gta-viewport');
-            if (!vp) return;
-            playViceSynthChord();
-
-            // 1. Vinheta Rockstar Games / ArcadeZone North
-            vp.innerHTML = `
-                <div class="w-full h-full bg-black flex flex-col items-center justify-center text-center p-6">
-                    <div class="rockstar-anim bg-gradient-to-br from-pink-500 via-purple-600 to-cyan-500 p-1 rounded-3xl shadow-2xl mb-4">
-                        <div class="bg-black px-8 py-6 rounded-[22px] border border-white/20">
-                            <div class="text-5xl font-black italic tracking-tighter text-white">R<span class="text-pink-500">★</span></div>
-                            <div class="text-[10px] font-black tracking-[0.3em] text-cyan-400 uppercase mt-1">ARCADEZONE NORTH</div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-zinc-400 tracking-widest uppercase animate-pulse">Presents</p>
-                </div>
-            `;
-
-            // 2. Tela de Loading Clássica Vice City
-            setTimeout(() => {
-                vp.innerHTML = `
-                    <div class="w-full h-full bg-gradient-to-br from-[#2e0249] via-[#570a57] to-[#a91079] flex flex-col justify-between p-8 relative">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="text-4xl font-black italic text-cyan-300 drop-shadow-[3px_3px_0_#000]">GRAND THEFT ARCADE</div>
-                                <div class="text-5xl font-black italic text-pink-400 drop-shadow-[4px_4px_0_#000] -mt-2">VICE 3D</div>
-                            </div>
-                            <div class="text-6xl drop-shadow-lg">🌴🚁</div>
-                        </div>
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-xs font-black text-pink-200 uppercase">
-                                <span id="vc-load-text">Carregando Ocean Beach & Malha Viária...</span>
-                                <span id="vc-load-pct">0%</span>
-                            </div>
-                            <div class="w-full h-3.5 bg-black/70 rounded-full p-0.5 border border-pink-400/50">
-                                <div id="vc-load-bar" class="h-full bg-gradient-to-r from-cyan-400 to-pink-500 rounded-full transition-all duration-200" style="width: 5%"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                let pct = 0;
-                const steps = [
-                    "Carregando Ocean Beach & Palmeiras Neon...",
-                    "Sincronizando Trânsito e Pedestres...",
-                    "Preparando Arsenal e Lojas Roubáveis...",
-                    "Conectando Rádio V-Rock & Dublagem EN-US..."
-                ];
-                const loadInt = setInterval(() => {
-                    pct += 25;
-                    const bar = document.getElementById('vc-load-bar');
-                    const txt = document.getElementById('vc-load-text');
-                    const pctEl = document.getElementById('vc-load-pct');
-                    if (bar) bar.style.width = `${pct}%`;
-                    if (pctEl) pctEl.textContent = `${pct}%`;
-                    if (txt && steps[(pct/25)-1]) txt.textContent = steps[(pct/25)-1];
-
-                    if (pct >= 100) {
-                        clearInterval(loadInt);
-                        setTimeout(launchViceCity3DWorld, 400);
-                    }
-                }, 450);
-            }, 2200);
-        }
-
-        function launchViceCity3DWorld() {
-            const vp = document.getElementById('gta-viewport');
-            if (!vp || typeof THREE === 'undefined') return;
-
-            vp.innerHTML = `
-                <div id="vc-canvas-mount" class="w-full h-full relative cursor-crosshair"></div>
-
-                <!-- Retícula de Mira (Visível ao segurar Botão Direito) -->
-                <div id="vc-crosshair" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20">
-                    <div class="w-7 h-7 rounded-full border-2 border-pink-400 flex items-center justify-center shadow-[0_0_10px_#ec4899]">
-                        <div class="w-1.5 h-1.5 bg-cyan-300 rounded-full"></div>
-                    </div>
-                </div>
-
-                <!-- HUD Superior Direito Estilo GTA Vice City (Idêntico à referência) -->
-                <div class="absolute top-3 right-3 z-20 flex items-start gap-3 pointer-events-none">
-                    <div class="text-right space-y-0.5 leading-none">
-                        <div id="vc-clock" class="vc-hud-text text-lg text-cyan-300">17:16</div>
-                        <div id="vc-cash" class="vc-hud-text text-xl text-emerald-400">$00000500</div>
-                        <div class="flex justify-end gap-3 text-base vc-hud-text">
-                            <span class="text-blue-400">🛡️ <b id="vc-armor">100</b></span>
-                            <span class="text-pink-400">❤️ <b id="vc-health">100</b></span>
-                        </div>
-                        <div id="vc-stars" class="text-base tracking-widest drop-shadow-[2px_2px_0_#000] pt-0.5">
-                            ☆☆☆☆☆☆
-                        </div>
-                    </div>
-                    <!-- Quadrado Verde da Arma Equipada -->
-                    <div class="flex flex-col items-center">
-                        <div class="w-14 h-14 bg-emerald-700/85 border-2 border-emerald-300 rounded-lg flex items-center justify-center text-3xl shadow-lg" id="vc-weapon-icon">
-                            👊
-                        </div>
-                        <span id="vc-ammo" class="vc-hud-text text-[11px] text-white mt-0.5">∞</span>
-                    </div>
-                </div>
-
-                <!-- Banner de Missão Ativa -->
-                <div class="absolute top-3 left-3 z-20 bg-black/70 border border-pink-500/40 px-3 py-2 rounded-xl max-w-[230px] pointer-events-none">
-                    <div class="text-[10px] font-black text-pink-400 uppercase">📋 Missão Atual</div>
-                    <div id="vc-mission-text" class="text-[11px] text-white font-bold leading-tight mt-0.5">Vá até o marcador rosa [V] ou assalte uma loja [🏪]!</div>
-                </div>
-
-                <!-- Radar Circular no Canto Inferior Esquerdo -->
-                <div class="absolute bottom-3 left-3 z-20 pointer-events-none">
-                    <div class="relative w-28 h-28 rounded-full border-4 border-zinc-800 bg-black/80 overflow-hidden shadow-2xl">
-                        <canvas id="vc-radar" width="112" height="112"></canvas>
-                        <div class="absolute top-0.5 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] font-black px-1 rounded">N</div>
-                    </div>
-                </div>
-
-                <!-- Aviso de Interação Dinâmica (Carro / Loja / Missão) -->
-                <div id="vc-action-prompt" class="hidden absolute top-1/3 left-1/2 -translate-x-1/2 bg-black/85 border border-cyan-400 text-cyan-300 px-4 py-1.5 rounded-xl text-xs font-black uppercase z-20 shadow-lg">
-                    Pressione [E] para interagir
-                </div>
-
-                <!-- Legendas PT-BR Estilo Vice City -->
-                <div id="vc-subtitle-box" class="hidden absolute bottom-4 left-36 right-36 bg-black/80 border border-white/10 px-4 py-2 rounded-xl text-center z-20 pointer-events-none">
-                    <p id="vc-subtitle-text" class="text-xs font-bold text-amber-300 drop-shadow"></p>
-                </div>
-
-                <!-- Roda de Armas (Weapon Wheel - Segurar TAB) -->
-                <div id="vc-weapon-wheel" class="hidden absolute inset-0 bg-black/70 backdrop-blur-sm z-30 flex items-center justify-center">
-                    <div class="relative w-64 h-64 rounded-full border-4 border-pink-500/60 bg-zinc-900/90 flex items-center justify-center shadow-2xl">
-                        <div class="text-center">
-                            <div class="text-xs font-black text-cyan-400 uppercase">ARSENAL</div>
-                            <div class="text-[10px] text-zinc-400">Clique para equipar</div>
-                        </div>
-                        <button onclick="selectVCWeapon(0)" class="absolute top-3 left-1/2 -translate-x-1/2 bg-zinc-800 hover:bg-pink-600 p-3 rounded-2xl border border-white/20 text-center">
-                            <div class="text-2xl">👊</div><div class="text-[9px] font-bold text-white">Punhos</div>
-                        </button>
-                        <button onclick="selectVCWeapon(1)" class="absolute right-3 top-1/2 -translate-y-1/2 bg-zinc-800 hover:bg-pink-600 p-3 rounded-2xl border border-white/20 text-center">
-                            <div class="text-2xl">🔫</div><div class="text-[9px] font-bold text-white">Pistola 9mm</div>
-                        </button>
-                        <button onclick="selectVCWeapon(2)" class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-zinc-800 hover:bg-pink-600 p-3 rounded-2xl border border-white/20 text-center">
-                            <div class="text-2xl">🧨</div><div class="text-[9px] font-bold text-white">Uzi Mac-10</div>
-                        </button>
-                        <button onclick="selectVCWeapon(3)" class="absolute left-3 top-1/2 -translate-y-1/2 bg-zinc-800 hover:bg-pink-600 p-3 rounded-2xl border border-white/20 text-center">
-                            <div class="text-2xl">💥</div><div class="text-[9px] font-bold text-white">Escopeta</div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Mapa Geral da Cidade (Tecla M) -->
-                <div id="vc-full-map" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-30 flex flex-col items-center justify-center p-4">
-                    <div class="flex justify-between items-center w-full max-w-md mb-2">
-                        <span class="text-sm font-black text-pink-400 uppercase">🗺️ MAPA DE VICE CITY</span>
-                        <button onclick="toggleFullMap(false)" class="text-xs bg-zinc-800 px-3 py-1 rounded-lg text-white font-bold">Fechar [M]</button>
-                    </div>
-                    <canvas id="vc-bigmap-canvas" width="360" height="360" class="border-2 border-cyan-400 rounded-2xl bg-[#161b22]"></canvas>
-                    <div class="flex gap-4 text-[10px] text-zinc-300 mt-2 font-bold">
-                        <span>🔵 Você</span><span>🩷 Missão [V]</span><span>🟡 Lojas Roubáveis</span><span>🔴 Polícia</span>
-                    </div>
-                </div>
-            `;
-
-            const mount = document.getElementById('vc-canvas-mount');
-            const w = mount.clientWidth || 760;
-            const h = mount.clientHeight || 540;
-
-            // Cena 3D Pôr-do-sol Vice City
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x3b0764);
-            scene.fog = new THREE.FogExp2(0x4c1d95, 0.011);
-
-            const camera = new THREE.PerspectiveCamera(62, w / h, 0.1, 250);
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(w, h);
-            mount.appendChild(renderer.domElement);
-
-            // Iluminação Neon Tropical
-            scene.add(new THREE.AmbientLight(0xfce7f3, 0.65));
-            const sunLight = new THREE.DirectionalLight(0xf472b6, 0.9);
-            sunLight.position.set(40, 60, -30);
-            scene.add(sunLight);
-
-            // Chão: Asfalto da Cidade + Areia da Praia + Oceano
-            const roadGround = new THREE.Mesh(new THREE.PlaneGeometry(180, 180), new THREE.MeshLambertMaterial({ color: 0x1f2937 }));
-            roadGround.rotation.x = -Math.PI / 2;
-            scene.add(roadGround);
-
-            const beachGround = new THREE.Mesh(new THREE.PlaneGeometry(50, 180), new THREE.MeshLambertMaterial({ color: 0xfde047 }));
-            beachGround.rotation.x = -Math.PI / 2;
-            beachGround.position.set(65, 0.03, 0);
-            scene.add(beachGround);
-
-            const oceanGround = new THREE.Mesh(new THREE.PlaneGeometry(60, 180), new THREE.MeshPhongMaterial({ color: 0x06b6d4 }));
-            oceanGround.rotation.x = -Math.PI / 2;
-            oceanGround.position.set(115, 0.02, 0);
-            scene.add(oceanGround);
-
-            // Faixas Amarelas das Avenidas
-            for (let i = -70; i <= 40; i += 28) {
-                const lineZ = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 170), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
-                lineZ.rotation.x = -Math.PI / 2;
-                lineZ.position.set(i, 0.04, 0);
-                scene.add(lineZ);
-            }
-
-            // Prédios Estilo Art Deco Vice City
-            const buildings = [];
-            const artDecoColors = [0xf472b6, 0x22d3ee, 0xc084fc, 0xfbbf24, 0xfb7185];
-            for (let x = -56; x <= 28; x += 28) {
-                for (let z = -60; z <= 60; z += 30) {
-                    if (Math.abs(x) < 16 && Math.abs(z) < 16) continue;
-                    const bh = 10 + Math.random() * 18;
-                    const bMesh = new THREE.Mesh(
-                        new THREE.BoxGeometry(14, bh, 14),
-                        new THREE.MeshLambertMaterial({ color: artDecoColors[Math.floor(Math.random() * artDecoColors.length)] })
-                    );
-                    bMesh.position.set(x, bh / 2, z);
-                    scene.add(bMesh);
-                    buildings.push({ x, z, half: 7.5 });
-                }
-            }
-
-            // Palmeiras na Praia
-            for (let z = -70; z <= 70; z += 22) {
-                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.4, 6), new THREE.MeshLambertMaterial({ color: 0x78350f }));
-                trunk.position.set(46, 3, z);
-                scene.add(trunk);
-                const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 1.8, 6), new THREE.MeshLambertMaterial({ color: 0x10b981 }));
-                leaves.position.set(46, 6.2, z);
-                scene.add(leaves);
-            }
-
-            // Fauna na Praia (Jacarés e Flamingos)
-            const animals = [];
-            for (let i = 0; i < 4; i++) {
-                const gator = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.35, 2.4), new THREE.MeshLambertMaterial({ color: 0x15803d }));
-                gator.position.set(58 + Math.random() * 15, 0.2, -50 + i * 32);
-                scene.add(gator);
-                animals.push({ mesh: gator, dir: 1 });
-            }
-
-            // Lojas Roubáveis (Marcadores Rosa/Amarelo)
-            const stores = [
-                { name: "Joalheria Ocean Drive", x: -28, z: -30, robbed: false, cash: 1200 },
-                { name: "Conveniência Vice 24h", x: 0, z: 30, robbed: false, cash: 850 },
-                { name: "Clube Malibu", x: 28, z: -30, robbed: false, cash: 2500 }
-            ];
-            stores.forEach(st => {
-                const ring = new THREE.Mesh(new THREE.RingGeometry(1.4, 2.0, 24), new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide }));
-                ring.rotation.x = -Math.PI / 2;
-                ring.position.set(st.x, 0.08, st.z + 8.5);
-                st.marker = ring;
-                scene.add(ring);
-            });
-
-            // Marcador de Missão [V]
-            const missionZone = { x: 14, z: -45, stage: 1 };
-            const missionMarker = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.2, 24), new THREE.MeshBasicMaterial({ color: 0xec4899 }));
-            missionMarker.position.set(missionZone.x, 0.1, missionZone.z);
-            scene.add(missionMarker);
-
-            // Personagem Jogador (Estilo Tommy Vercetti: Camisa Ciano e Calça Jeans)
-            const playerGroup = new THREE.Group();
-            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.45), new THREE.MeshLambertMaterial({ color: 0x06b6d4 }));
-            torso.position.y = 1.2;
-            playerGroup.add(torso);
-            const legs = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.8, 0.4), new THREE.MeshLambertMaterial({ color: 0x1e3a8a }));
-            legs.position.y = 0.4;
-            playerGroup.add(legs);
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.45), new THREE.MeshLambertMaterial({ color: 0xfdba74 }));
-            head.position.y = 1.95;
-            playerGroup.add(head);
-            scene.add(playerGroup);
-
-            // Frota de Veículos Dirigíveis na Cidade
-            const vehicles = [];
-            const carConfigs = [
-                { name: "Infernus Neon", color: 0xec4899, x: -14, z: -10, maxSpeed: 0.65 },
-                { name: "Cheetah Vice", color: 0xfacc15, x: 14, z: 12, maxSpeed: 0.60 },
-                { name: "Banshee Turbo", color: 0x22d3ee, x: -42, z: 20, maxSpeed: 0.58 },
-                { name: "Viatura VCPD", color: 0x111827, x: 14, z: -25, maxSpeed: 0.55, isCopCar: true }
-            ];
-            carConfigs.forEach(cfg => {
-                const carG = new THREE.Group();
-                const cBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.65, 3.6), new THREE.MeshPhongMaterial({ color: cfg.color }));
-                cBody.position.y = 0.5;
-                carG.add(cBody);
-                const cRoof = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.45, 1.8), new THREE.MeshPhongMaterial({ color: 0x0f172a }));
-                cRoof.position.set(0, 0.95, -0.2);
-                carG.add(cRoof);
-                carG.position.set(cfg.x, 0, cfg.z);
-                scene.add(carG);
-                vehicles.push({ mesh: carG, name: cfg.name, maxSpeed: cfg.maxSpeed, speed: 0, angle: 0, aiDir: 1, isCopCar: cfg.isCopCar });
-            });
-
-            // Pedestres / NPCs Dinâmicos
-            const peds = [];
-            const pedColors = [0xf43f5e, 0xa855f7, 0x10b981, 0xf97316, 0x3b82f6];
-            for (let i = 0; i < 14; i++) {
-                const pG = new THREE.Group();
-                const pBody = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.4, 0.4), new THREE.MeshLambertMaterial({ color: pedColors[i % pedColors.length] }));
-                pBody.position.y = 0.7;
-                pG.add(pBody);
-                const pHead = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshLambertMaterial({ color: 0xfed7aa }));
-                pHead.position.y = 1.65;
-                pG.add(pHead);
-                pG.position.set(-45 + Math.random() * 80, 0, -55 + Math.random() * 110);
-                scene.add(pG);
-                peds.push({ mesh: pG, angle: Math.random() * Math.PI * 2, panic: false, alive: true });
-            }
-
-            // Viaturas Policiais de Perseguição
-            const copUnits = [];
-            function spawnCopCar() {
-                if (copUnits.length >= 4) return;
-                const cG = new THREE.Group();
-                const b = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.65, 3.6), new THREE.MeshPhongMaterial({ color: 0x090d16 }));
-                b.position.y = 0.5;
-                cG.add(b);
-                const sR = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.25, 0.3), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-                sR.position.set(-0.35, 0.95, 0);
-                cG.add(sR);
-                const sB = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.25, 0.3), new THREE.MeshBasicMaterial({ color: 0x3b82f6 }));
-                sB.position.set(0.35, 0.95, 0);
-                cG.add(sB);
-
-                cG.position.set(playerGroup.position.x + 35, 0, playerGroup.position.z + 35);
-                scene.add(cG);
-                copUnits.push({ mesh: cG, sR, sB });
-            }
-
-            // Estado do Jogador & Arsenal
-            const weapons = [
-                { name: "Punhos", icon: "👊", ammo: "∞", range: 3, damage: 35, type: "melee" },
-                { name: "Pistola 9mm", icon: "🔫", ammo: 84, range: 35, damage: 60, type: "pistol" },
-                { name: "Uzi Mac-10", icon: "🧨", ammo: 240, range: 30, damage: 45, type: "uzi" },
-                { name: "Escopeta", icon: "💥", ammo: 32, range: 18, damage: 120, type: "shotgun" }
-            ];
-            let currentWeaponIdx = 0;
-            let playerCash = 500;
-            let playerHealth = 100;
-            let playerArmor = 100;
-            let wantedStars = 0;
-            let inVehicle = null;
-            let isAiming = false;
-            let playerAngle = 0;
-            let gameMinutes = 17 * 60 + 16;
-            const bullets = [];
-
-            // Função de Troca de Arma
-            window.selectVCWeapon = (idx) => {
-                currentWeaponIdx = idx;
-                document.getElementById('vc-weapon-icon').textContent = weapons[idx].icon;
-                document.getElementById('vc-ammo').textContent = weapons[idx].ammo;
-                document.getElementById('vc-weapon-wheel').classList.add('hidden');
-                showToast(`Equipado: ${weapons[idx].name}`, weapons[idx].icon);
-            };
-
-            window.toggleFullMap = (forceState) => {
-                const mapEl = document.getElementById('vc-full-map');
-                if (!mapEl) return;
-                const show = forceState !== undefined ? forceState : mapEl.classList.contains('hidden');
-                mapEl.classList.toggle('hidden', !show);
-                if (show) drawBigMap();
-            };
-
-            function updateHUD() {
-                const cashEl = document.getElementById('vc-cash');
-                const starsEl = document.getElementById('vc-stars');
-                const hpEl = document.getElementById('vc-health');
-                const arEl = document.getElementById('vc-armor');
-                if (cashEl) cashEl.textContent = `$${String(playerCash).padStart(8, '0')}`;
-                if (hpEl) hpEl.textContent = Math.max(0, Math.round(playerHealth));
-                if (arEl) arEl.textContent = Math.max(0, Math.round(playerArmor));
-                if (starsEl) {
-                    starsEl.innerHTML = `<span class="text-cyan-300">${'★'.repeat(wantedStars)}</span><span class="text-zinc-600">${'☆'.repeat(6 - wantedStars)}</span>`;
-                }
-            }
-
-            // Controles de Teclado & Mouse (PC)
-            const keys = {};
-            window.onkeydown = (e) => {
-                const k = e.key.toLowerCase();
-                keys[k] = true;
-
-                if (e.key === 'Tab') {
-                    e.preventDefault();
-                    document.getElementById('vc-weapon-wheel').classList.remove('hidden');
-                }
-                if (k === 'm') toggleFullMap();
-                if (k === '1') selectVCWeapon(0);
-                if (k === '2') selectVCWeapon(1);
-                if (k === '3') selectVCWeapon(2);
-                if (k === '4') selectVCWeapon(3);
-
-                // Entrar / Roubar ou Sair de Veículo [F]
-                if (k === 'f') {
-                    if (inVehicle) {
-                        playerGroup.position.set(inVehicle.mesh.position.x - 2.2, 0, inVehicle.mesh.position.z);
-                        playerGroup.visible = true;
-                        inVehicle = null;
-                        showToast('Saiu do veículo', '🚶');
-                    } else {
-                        for (let v of vehicles) {
-                            if (playerGroup.position.distanceTo(v.mesh.position) < 4.5) {
-                                inVehicle = v;
-                                playerGroup.visible = false;
-                                speakEnglishWithSubtitle("Hey! That's my car, man!", "Ei! Esse carro é meu, cara!", 1.2, 1.1);
-                                if (v.isCopCar && wantedStars < 2) { wantedStars = 2; spawnCopCar(); }
-                                showToast(`Dirigindo: ${v.name}`, '🏎️');
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // Assaltar Loja ou Iniciar Missão [E]
-                if (k === 'e') {
-                    // Checar Lojas
-                    for (let st of stores) {
-                        if (playerGroup.position.distanceTo(st.marker.position) < 4.5 && !st.robbed) {
-                            st.robbed = true;
-                            st.marker.material.color.setHex(0x52525b);
-                            playerCash += st.cash;
-                            wantedStars = Math.min(6, wantedStars + 2);
-                            spawnCopCar();
-                            spawnCopCar();
-                            speakEnglishWithSubtitle("Take all the money! Please don't shoot!", "Leve todo o dinheiro! Por favor, não atire!", 1.35, 1.15);
-                            showToast(`💰 Assalto concluído! +$${st.cash}`, '🏪');
-                            updateHUD();
-                            return;
-                        }
-                    }
-
-                    // Checar Missão [V]
-                    if (playerGroup.position.distanceTo(missionMarker.position) < 4.5) {
-                        if (missionZone.stage === 1) {
-                            missionZone.stage = 2;
-                            missionMarker.position.set(-42, 0.1, 45);
-                            wantedStars = Math.min(6, wantedStars + 2);
-                            spawnCopCar();
-                            document.getElementById('vc-mission-text').textContent = "Leve a maleta até o esconderijo no marcador rosa! Despiste a polícia!";
-                            speakEnglishWithSubtitle("Get the package to the safehouse, Tommy! Watch out for the cops!", "Leve o pacote até o esconderijo, Tommy! Cuidado com os tiras!", 0.85, 1.0);
-                        } else {
-                            missionZone.stage = 1;
-                            missionMarker.position.set(14, 0.1, -45);
-                            playerCash += 3000;
-                            wantedStars = 0;
-                            appliedDiscount = 0.15;
-                            document.getElementById('vc-mission-text').textContent = "Missão Concluída! (+15% OFF no site!)";
-                            speakEnglishWithSubtitle("Mission passed! Respect plus!", "Missão cumprida! Respeito aumentado!", 0.9, 1.0);
-                            showToast('🏆 MISSÃO CONCLUÍDA! +$3000 e 15% OFF no carrinho!', '🌴');
-                            updateHUD();
-                        }
-                    }
-                }
-            };
-
-            window.onkeyup = (e) => {
-                keys[e.key.toLowerCase()] = false;
-                if (e.key === 'Tab') document.getElementById('vc-weapon-wheel').classList.add('hidden');
-            };
-
-            mount.onmousedown = (e) => {
-                if (e.button === 2) {
-                    isAiming = true;
-                    document.getElementById('vc-crosshair').classList.remove('hidden');
-                }
-                if (e.button === 0 && !inVehicle) {
-                    fireWeapon();
-                }
-            };
-
-            window.onmouseup = (e) => {
-                if (e.button === 2) {
-                    isAiming = false;
-                    document.getElementById('vc-crosshair').classList.add('hidden');
-                }
-            };
-
-            mount.onmousemove = (e) => {
-                if (isAiming) {
-                    playerAngle -= e.movementX * 0.006;
-                }
-            };
-
-            function fireWeapon() {
-                const wpn = weapons[currentWeaponIdx];
-                if (wpn.type === 'melee') {
-                    // Soco corpo-a-corpo
-                    peds.forEach(p => {
-                        if (p.alive && playerGroup.position.distanceTo(p.mesh.position) < 2.8) {
-                            p.alive = false;
-                            p.mesh.rotation.x = Math.PI / 2;
-                            playerCash += 45;
-                            updateHUD();
-                            speakEnglishWithSubtitle("Ouch! What is wrong with you?!", "Ai! Qual é o seu problema?!", 1.2, 1.1);
-                        }
-                    });
-                    return;
-                }
-
-                if (wpn.ammo <= 0) return;
-                wpn.ammo--;
-                document.getElementById('vc-ammo').textContent = wpn.ammo;
-                playGunshotSound(wpn.type);
-
-                const bMesh = new THREE.Mesh(new THREE.SphereGeometry(0.18), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
-                bMesh.position.set(playerGroup.position.x, 1.3, playerGroup.position.z);
-                scene.add(bMesh);
-                bullets.push({ mesh: bMesh, angle: playerAngle, life: 40 });
-
-                // Pânico nos NPCs próximos e alerta policial
-                peds.forEach(p => {
-                    if (p.alive && playerGroup.position.distanceTo(p.mesh.position) < 22) {
-                        p.panic = true;
-                    }
-                });
-                if (wantedStars === 0 && Math.random() < 0.35) {
-                    wantedStars = 1;
-                    spawnCopCar();
-                    speakEnglishWithSubtitle("Shots fired! All units respond!", "Tiros disparados! Todas as unidades respondam!", 0.85, 1.1);
-                    updateHUD();
-                }
-            }
-
-            // Desenho do Radar Circular e Mapa Grande
-            const radarCanvas = document.getElementById('vc-radar');
-            const rCtx = radarCanvas ? radarCanvas.getContext('2d') : null;
-
-            function drawRadar() {
-                if (!rCtx) return;
-                rCtx.clearRect(0, 0, 112, 112);
-                rCtx.fillStyle = '#0f172a';
-                rCtx.fillRect(0, 0, 112, 112);
-
-                const px = inVehicle ? inVehicle.mesh.position.x : playerGroup.position.x;
-                const pz = inVehicle ? inVehicle.mesh.position.z : playerGroup.position.z;
-
-                // Ruas no radar
-                rCtx.strokeStyle = '#334155';
-                rCtx.lineWidth = 4;
-                rCtx.strokeRect(56 - (px * 0.7) - 45, 56 - (pz * 0.7) - 45, 90, 90);
-
-                // Ícone Missão [V]
-                const mx = 56 + (missionMarker.position.x - px) * 0.8;
-                const mz = 56 + (missionMarker.position.z - pz) * 0.8;
-                rCtx.fillStyle = '#ec4899';
-                rCtx.font = 'bold 11px sans-serif';
-                rCtx.fillText('V', Math.max(10, Math.min(98, mx)), Math.max(14, Math.min(102, mz)));
-
-                // Lojas
-                stores.forEach(st => {
-                    if (!st.robbed) {
-                        const sx = 56 + (st.x - px) * 0.8;
-                        const sz = 56 + (st.z - pz) * 0.8;
-                        rCtx.fillStyle = '#facc15';
-                        rCtx.fillRect(sx - 3, sz - 3, 6, 6);
-                    }
-                });
-
-                // Polícia
-                copUnits.forEach(c => {
-                    const cx = 56 + (c.mesh.position.x - px) * 0.8;
-                    const cz = 56 + (c.mesh.position.z - pz) * 0.8;
-                    rCtx.fillStyle = '#ef4444';
-                    rCtx.beginPath(); rCtx.arc(cx, cz, 3.5, 0, Math.PI * 2); rCtx.fill();
-                });
-
-                // Jogador no centro
-                rCtx.fillStyle = '#06b6d4';
-                rCtx.beginPath(); rCtx.arc(56, 56, 4, 0, Math.PI * 2); rCtx.fill();
-            }
-
-            function drawBigMap() {
-                const bc = document.getElementById('vc-bigmap-canvas');
-                if (!bc) return;
-                const ctx = bc.getContext('2d');
-                ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, 360, 360);
-                ctx.fillStyle = '#fde047'; ctx.fillRect(260, 0, 45, 360);
-                ctx.fillStyle = '#06b6d4'; ctx.fillRect(305, 0, 55, 360);
-
-                const px = inVehicle ? inVehicle.mesh.position.x : playerGroup.position.x;
-                const pz = inVehicle ? inVehicle.mesh.position.z : playerGroup.position.z;
-
-                // Missão
-                ctx.fillStyle = '#ec4899'; ctx.font = 'bold 16px sans-serif';
-                ctx.fillText('V', 180 + missionMarker.position.x * 1.8, 180 + missionMarker.position.z * 1.8);
-
-                // Lojas
-                stores.forEach(st => {
-                    if (!st.robbed) {
-                        ctx.fillStyle = '#facc15';
-                        ctx.fillRect(180 + st.x * 1.8 - 4, 180 + st.z * 1.8 - 4, 8, 8);
-                    }
-                });
-
-                // Jogador
-                ctx.fillStyle = '#38bdf8';
-                ctx.beginPath(); ctx.arc(180 + px * 1.8, 180 + pz * 1.8, 6, 0, Math.PI * 2); ctx.fill();
-            }
-
-            // Introdução inicial dublada
-            speakEnglishWithSubtitle("Welcome back to Vice City! Grab a ride and make some cash.", "Bem-vindo de volta a Vice City! Pegue um carro e faça uma grana.", 0.9, 1.0);
-            updateHUD();
-
-            let tick = 0;
-            function gameLoop() {
-                gta3DLoop = requestAnimationFrame(gameLoop);
-                tick++;
-
-                // Relógio do Jogo
-                if (tick % 60 === 0) {
-                    gameMinutes = (gameMinutes + 1) % 1440;
-                    const hh = String(Math.floor(gameMinutes / 60)).padStart(2, '0');
-                    const mm = String(gameMinutes % 60).padStart(2, '0');
-                    const clk = document.getElementById('vc-clock');
-                    if (clk) clk.textContent = `${hh}:${mm}`;
-                }
-
-                // Movimento do Jogador (A pé ou no Carro)
-                if (inVehicle) {
-                    if (keys['w'] || keys['arrowup']) inVehicle.speed = Math.min(inVehicle.maxSpeed, inVehicle.speed + 0.025);
-                    else if (keys['s'] || keys['arrowdown']) inVehicle.speed = Math.max(-0.28, inVehicle.speed - 0.025);
-                    else inVehicle.speed *= 0.95;
-
-                    if (Math.abs(inVehicle.speed) > 0.01) {
-                        const turn = inVehicle.speed > 0 ? 0.045 : -0.045;
-                        if (keys['a'] || keys['arrowleft']) inVehicle.angle += turn;
-                        if (keys['d'] || keys['arrowright']) inVehicle.angle -= turn;
-                    }
-
-                    const nx = inVehicle.mesh.position.x - Math.sin(inVehicle.angle) * inVehicle.speed;
-                    const nz = inVehicle.mesh.position.z - Math.cos(inVehicle.angle) * inVehicle.speed;
-
-                    let hit = false;
-                    for (let b of buildings) {
-                        if (Math.abs(nx - b.x) < b.half + 1 && Math.abs(nz - b.z) < b.half + 1) { hit = true; break; }
-                    }
-                    if (!hit && Math.abs(nx) < 82 && Math.abs(nz) < 82) {
-                        inVehicle.mesh.position.x = nx;
-                        inVehicle.mesh.position.z = nz;
-                    } else {
-                        inVehicle.speed *= -0.4;
-                    }
-                    inVehicle.mesh.rotation.y = inVehicle.angle;
-                    playerGroup.position.copy(inVehicle.mesh.position);
-                    playerAngle = inVehicle.angle;
+        function updateDiffBadgeUI() {
+            const badge = document.getElementById('diff-badge');
+            if (badge) {
+                if (currentDifficulty === 'easy') {
+                    badge.className = 'absolute top-2 right-2 bg-green-500/20 border border-green-500 text-green-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase';
+                    badge.textContent = '🟢 FÁCIL';
+                } else if (currentDifficulty === 'normal') {
+                    badge.className = 'absolute top-2 right-2 bg-yellow-500/20 border border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase';
+                    badge.textContent = '🟡 NORMAL';
                 } else {
-                    const walkSpeed = 0.22;
-                    if (!isAiming) {
-                        if (keys['a'] || keys['arrowleft']) playerAngle += 0.055;
-                        if (keys['d'] || keys['arrowright']) playerAngle -= 0.055;
-                    }
-                    let moveStep = 0;
-                    if (keys['w'] || keys['arrowup']) moveStep = walkSpeed;
-                    if (keys['s'] || keys['arrowdown']) moveStep = -walkSpeed * 0.7;
-
-                    if (moveStep !== 0) {
-                        const nx = playerGroup.position.x - Math.sin(playerAngle) * moveStep;
-                        const nz = playerGroup.position.z - Math.cos(playerAngle) * moveStep;
-                        let hit = false;
-                        for (let b of buildings) {
-                            if (Math.abs(nx - b.x) < b.half + 0.6 && Math.abs(nz - b.z) < b.half + 0.6) { hit = true; break; }
-                        }
-                        if (!hit && Math.abs(nx) < 84 && Math.abs(nz) < 84) {
-                            playerGroup.position.x = nx;
-                            playerGroup.position.z = nz;
-                        }
-                    }
-                    playerGroup.rotation.y = playerAngle;
+                    badge.className = 'absolute top-2 right-2 bg-red-500/20 border border-red-500 text-red-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase';
+                    badge.textContent = '🔴 DIFÍCIL';
                 }
-
-                // Trânsito Autônomo dos Carros Vazios
-                vehicles.forEach(v => {
-                    if (v !== inVehicle) {
-                        v.mesh.position.z += 0.14 * v.aiDir;
-                        if (v.mesh.position.z > 75) { v.aiDir = -1; v.mesh.rotation.y = 0; }
-                        if (v.mesh.position.z < -75) { v.aiDir = 1; v.mesh.rotation.y = Math.PI; }
-                    }
-                });
-
-                // Pedestres Dinâmicos
-                peds.forEach(p => {
-                    if (!p.alive) return;
-                    const spd = p.panic ? 0.16 : 0.05;
-                    p.mesh.position.x += Math.sin(p.angle) * spd;
-                    p.mesh.position.z += Math.cos(p.angle) * spd;
-                    if (Math.abs(p.mesh.position.x) > 42 || Math.abs(p.mesh.position.z) > 75) p.angle += Math.PI;
-                });
-
-                // Projéteis & Impactos
-                for (let i = bullets.length - 1; i >= 0; i--) {
-                    const b = bullets[i];
-                    b.mesh.position.x -= Math.sin(b.angle) * 1.4;
-                    b.mesh.position.z -= Math.cos(b.angle) * 1.4;
-                    b.life--;
-
-                    peds.forEach(p => {
-                        if (p.alive && b.mesh.position.distanceTo(p.mesh.position) < 1.3) {
-                            p.alive = false;
-                            p.mesh.rotation.x = Math.PI / 2;
-                            playerCash += 65;
-                            wantedStars = Math.min(6, wantedStars + 1);
-                            spawnCopCar();
-                            updateHUD();
-                            b.life = 0;
-                        }
-                    });
-
-                    if (b.life <= 0) {
-                        scene.remove(b.mesh);
-                        bullets.splice(i, 1);
-                    }
-                }
-
-                // Perseguição Policial
-                const targetPos = inVehicle ? inVehicle.mesh.position : playerGroup.position;
-                copUnits.forEach(cop => {
-                    if (wantedStars > 0) {
-                        const dx = targetPos.x - cop.mesh.position.x;
-                        const dz = targetPos.z - cop.mesh.position.z;
-                        const cAng = Math.atan2(-dx, -dz);
-                        cop.mesh.rotation.y = cAng;
-                        const cSpd = 0.24 + (wantedStars * 0.03);
-                        cop.mesh.position.x -= Math.sin(cAng) * cSpd;
-                        cop.mesh.position.z -= Math.cos(cAng) * cSpd;
-
-                        const flash = Math.floor(tick / 8) % 2 === 0;
-                        cop.sR.visible = flash;
-                        cop.sB.visible = !flash;
-
-                        // Dano policial ao encostar
-                        if (cop.mesh.position.distanceTo(targetPos) < 2.6 && tick % 30 === 0) {
-                            if (playerArmor > 0) playerArmor = Math.max(0, playerArmor - 10);
-                            else playerHealth = Math.max(0, playerHealth - 15);
-                            updateHUD();
-
-                            if (playerHealth <= 0) {
-                                wantedStars = 0;
-                                playerHealth = 100;
-                                playerCash = Math.max(0, playerCash - 200);
-                                playerGroup.position.set(0, 0, 0);
-                                inVehicle = null;
-                                playerGroup.visible = true;
-                                speakEnglishWithSubtitle("Busted! You're going downtown!", "Preso! Você vai para a delegacia!", 0.85, 1.0);
-                                showToast('🚓 PRESO (BUSTED)! -$200 de fiança', '🚨');
-                                updateHUD();
-                            }
-                        }
-                    }
-                });
-
-                // Prompt contextual na tela
-                const promptEl = document.getElementById('vc-action-prompt');
-                if (promptEl) {
-                    let msg = "";
-                    if (!inVehicle) {
-                        for (let v of vehicles) {
-                            if (playerGroup.position.distanceTo(v.mesh.position) < 4.5) { msg = `Pressione [F] para roubar ${v.name}`; break; }
-                        }
-                    }
-                    for (let st of stores) {
-                        if (playerGroup.position.distanceTo(st.marker.position) < 4.5 && !st.robbed) { msg = `Pressione [E] para assaltar ${st.name}`; break; }
-                    }
-                    if (playerGroup.position.distanceTo(missionMarker.position) < 4.5) { msg = `Pressione [E] para falar com o Chefão [V]`; }
-
-                    if (msg) { promptEl.textContent = msg; promptEl.classList.remove('hidden'); }
-                    else { promptEl.classList.add('hidden'); }
-                }
-
-                // Câmera Terceira Pessoa / Zoom de Mira (Estilo GTA 6)
-                const distCam = isAiming ? 4.2 : (inVehicle ? 10.5 : 7.5);
-                const heightCam = isAiming ? 2.4 : (inVehicle ? 4.8 : 3.6);
-                const offsetX = isAiming ? Math.cos(playerAngle) * 1.1 : 0;
-                const offsetZ = isAiming ? -Math.sin(playerAngle) * 1.1 : 0;
-
-                const desiredCamPos = new THREE.Vector3(
-                    targetPos.x + Math.sin(playerAngle) * distCam + offsetX,
-                    targetPos.y + heightCam,
-                    targetPos.z + Math.cos(playerAngle) * distCam + offsetZ
-                );
-                camera.position.lerp(desiredCamPos, 0.16);
-                camera.lookAt(targetPos.x - Math.sin(playerAngle) * 4, targetPos.y + 1.5, targetPos.z - Math.cos(playerAngle) * 4);
-
-                drawRadar();
-                renderer.render(scene, camera);
             }
 
-            gameLoop();
+            document.querySelectorAll('.diff-btn').forEach(b => {
+                b.className = 'diff-btn bg-[#21262d] border border-[#30363d] text-zinc-400 px-3 py-1 rounded-xl text-xs font-bold';
+            });
+            const selected = document.getElementById(`diff-${currentDifficulty}`);
+            if (selected) {
+                if (currentDifficulty === 'easy') selected.className = 'diff-btn bg-green-500/20 border border-green-500 text-green-400 px-3 py-1 rounded-xl text-xs font-bold';
+                if (currentDifficulty === 'normal') selected.className = 'diff-btn bg-yellow-500/20 border border-yellow-500 text-yellow-400 px-3 py-1 rounded-xl text-xs font-bold';
+                if (currentDifficulty === 'hard') selected.className = 'diff-btn bg-red-500/20 border border-red-500 text-red-400 px-3 py-1 rounded-xl text-xs font-bold';
+            }
+        }
+
+        // GAME 1: POU VÔLEI REALISTA
+        let volleyLoop = null;
+        function initVolleyGame() {
+            const arena = document.getElementById('game-arena');
+            if (!arena) return;
+            if (volleyLoop) clearInterval(volleyLoop);
+
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+            arena.innerHTML = `
+                <div class="w-full flex justify-between items-center text-xs font-black mb-1 text-zinc-300">
+                    <span class="text-cyan-400">Você: <b id="p-score">0</b></span>
+                    <span class="text-yellow-400">Tempo: <b id="volley-timer">02:00</b></span>
+                    <span class="text-purple-400">Mascote: <b id="m-score">0</b></span>
+                </div>
+                <canvas id="volleyCanvas" width="300" height="240" class="border border-purple-500/40 rounded-xl bg-gradient-to-b from-purple-950/20 to-black w-full"></canvas>
+                
+                <div class="${isTouch ? 'flex' : 'hidden md:hidden flex'} justify-between w-full mt-2 gap-2">
+                    <button ontouchstart="movePlayer(-12)" onclick="movePlayer(-12)" class="w-1/3 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">◀️ ESQ</button>
+                    <button ontouchstart="jumpPlayer()" onclick="jumpPlayer()" class="w-1/3 bg-purple-600 border border-purple-500 py-2.5 rounded-xl font-black text-xs text-white">⬆️ PULAR</button>
+                    <button ontouchstart="movePlayer(12)" onclick="movePlayer(12)" class="w-1/3 bg-[#21262d] border border-[#30363d] py-2.5 rounded-xl font-black text-xs text-white">DIR ▶️</button>
+                </div>
+            `;
+
+            const canvas = document.getElementById('volleyCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let playerScore = 0, mascotScore = 0;
+            let gameTimeLeft = 120;
+            let isCountingDown = true;
+            let countdownVal = 3;
+            let pX = 50, pY = 200, pVy = 0;
+            let mX = 220, mY = 200, mVy = 0;
+            let bX = 50, bY = 80, bVx = 0, bVy = 0;
+            let serverSide = 'player';
+
+            const speedMult = currentDifficulty === 'easy' ? 1.5 : (currentDifficulty === 'normal' ? 2.8 : 4.5);
+
+            const matchTimer = setInterval(() => {
+                if (!isCountingDown && gameTimeLeft > 0) {
+                    gameTimeLeft--;
+                    const m = String(Math.floor(gameTimeLeft / 60)).padStart(2, '0');
+                    const s = String(gameTimeLeft % 60).padStart(2, '0');
+                    const timerEl = document.getElementById('volley-timer');
+                    if (timerEl) timerEl.textContent = `${m}:${s}`;
+
+                    if (gameTimeLeft <= 0) {
+                        clearInterval(matchTimer);
+                        clearInterval(volleyLoop);
+                        finishVolleyGame(playerScore, mascotScore);
+                    }
+                }
+            }, 1000);
+
+            function startCountdown(onComplete) {
+                isCountingDown = true;
+                countdownVal = 3;
+                playWhistleSound();
+                
+                const cInterval = setInterval(() => {
+                    if (countdownVal > 0) {
+                        ctx.clearRect(0, 0, 300, 240);
+                        drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY);
+                        ctx.fillStyle = '#facc15'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
+                        ctx.fillText(countdownVal, 150, 120);
+                        countdownVal--;
+                    } else {
+                        clearInterval(cInterval);
+                        ctx.clearRect(0, 0, 300, 240);
+                        drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY);
+                        ctx.fillStyle = '#22c55e'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center';
+                        ctx.fillText('COMEÇE!', 150, 120);
+                        setTimeout(() => {
+                            isCountingDown = false;
+                            if (serverSide === 'player') { bX = 50; bY = 80; bVx = 2; bVy = 1; }
+                            else { bX = 220; bY = 80; bVx = -2; bVy = 1; }
+                            if (onComplete) onComplete();
+                        }, 500);
+                    }
+                }, 700);
+            }
+
+            const keys = {};
+            window.onkeydown = (e) => { keys[e.key] = true; };
+            window.onkeyup = (e) => { keys[e.key] = false; };
+
+            startCountdown();
+
+            volleyLoop = setInterval(() => {
+                if (isCountingDown) return;
+
+                if (keys['ArrowLeft'] || keys['a'] || keys['A']) movePlayer(-4);
+                if (keys['ArrowRight'] || keys['d'] || keys['D']) movePlayer(4);
+                if ((keys['ArrowUp'] || keys['w'] || keys['W'] || keys[' ']) && pY === 200) jumpPlayer();
+
+                ctx.clearRect(0, 0, 300, 240);
+
+                pY += pVy;
+                if (pY < 200) pVy += 0.5; else { pY = 200; pVy = 0; }
+
+                let aiSpeed = speedMult;
+                if (bX > 148) {
+                    if (mX < bX - 5) mX += aiSpeed; else if (mX > bX + 5) mX -= aiSpeed;
+                    if (bY < 140 && mY === 200 && Math.random() < (currentDifficulty === 'hard' ? 0.4 : 0.1)) mVy = -8;
+                } else { if (mX < 230) mX += 1; }
+
+                mX = Math.max(162, Math.min(284, mX));
+
+                mY += mVy;
+                if (mY < 200) mVy += 0.5; else { mY = 200; mVy = 0; }
+
+                bX += bVx; bY += bVy; bVy += 0.22;
+
+                if (bY <= 10) { bY = 10; bVy *= -0.5; }
+
+                if (bX >= 142 && bX <= 154 && bY >= 150) {
+                    bVx *= -0.5; bVy += 1;
+                }
+
+                if (bY >= 225) {
+                    if (bX < 148) { mascotScore++; serverSide = 'player'; } 
+                    else { playerScore++; serverSide = 'mascot'; }
+
+                    const pEl = document.getElementById('p-score');
+                    const mEl = document.getElementById('m-score');
+                    if (pEl) pEl.textContent = playerScore;
+                    if (mEl) mEl.textContent = mascotScore;
+
+                    if (playerScore >= 7 || mascotScore >= 7) {
+                        clearInterval(matchTimer);
+                        clearInterval(volleyLoop);
+                        finishVolleyGame(playerScore, mascotScore);
+                        return;
+                    }
+
+                    pX = 50; pY = 200; mX = 220; mY = 200;
+                    startCountdown();
+                }
+
+                if (bX <= 8) { bX = 8; bVx *= -0.8; }
+                if (bX >= 292) { bX = 292; bVx *= -0.8; }
+
+                let distP = Math.hypot(bX - pX, bY - pY);
+                if (distP < 24) { bVy = -6.5; bVx = (bX - pX) * 0.45; }
+
+                let distM = Math.hypot(bX - mX, bY - mY);
+                if (distM < 24) { bVy = -6.5; bVx = (bX - mX) * 0.45; }
+
+                drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY);
+            }, 30);
+
+            window.movePlayer = (dx) => { pX = Math.max(16, Math.min(136, pX + dx)); };
+            window.jumpPlayer = () => { if (pY === 200) pVy = -8; };
+        }
+
+        function drawVolleyScene(ctx, pX, pY, mX, mY, bX, bY) {
+            ctx.fillStyle = '#a855f7'; ctx.fillRect(147, 150, 6, 90);
+            ctx.fillStyle = '#06b6d4'; ctx.beginPath(); ctx.arc(pX, pY, 16, 0, Math.PI * 2); ctx.fill();
+
+            if (currentDifficulty === 'easy') ctx.fillStyle = '#22c55e';
+            else if (currentDifficulty === 'normal') ctx.fillStyle = '#eab308';
+            else ctx.fillStyle = '#ef4444';
+
+            ctx.beginPath(); ctx.arc(mX, mY, 16, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(bX, bY, 8, 0, Math.PI * 2); ctx.fill();
+        }
+
+        function finishVolleyGame(pScore, mScore) {
+            if (pScore > mScore) {
+                appliedDiscount = 0.10;
+                showToast(`🎉 Você venceu por ${pScore}x${mScore}! Ganhou 10% OFF!`, '🏆');
+                renderApplyCouponBtn('ARCADE10');
+            } else {
+                showToast(`Mascote Roxo venceu por ${mScore}x${pScore}. Tente novamente!`, '⚽');
+            }
+        }
+
+        // GAME 2: PÊNALTI ESTILO WORLD CUP (3 BARRAS DE TRAVA)
+        let penStep = 1;
+        let penDirVal = 50;
+        let penHgtVal = 50;
+        let penPwrVal = 50;
+        let penDirInc = 3, penHgtInc = 3, penPwrInc = 3;
+        let penAnimLoop = null;
+
+        function initPenaltyGame() {
+            const arena = document.getElementById('game-arena');
+            if (!arena) return;
+            if (volleyLoop) clearInterval(volleyLoop);
+            if (penAnimLoop) clearInterval(penAnimLoop);
+
+            penStep = 1;
+            penDirVal = 50; penHgtVal = 50; penPwrVal = 50;
+
+            arena.innerHTML = `
+                <div class="w-full flex justify-between items-center text-xs font-black mb-1 text-zinc-300">
+                    <span class="text-pink-400">Pênalti do Mascote</span>
+                    <span class="text-yellow-400 font-bold" id="pen-step-info">Passo 1/3: Escolha o Canto</span>
+                </div>
+
+                <div id="penalty-field" class="relative w-full h-48 border-4 border-white bg-gradient-to-b from-green-800 to-green-950 rounded-t-xl mx-auto overflow-hidden shadow-2xl">
+                    <div class="absolute top-2 left-[30px] right-[30px] h-24 border-4 border-white bg-zinc-900/60 rounded-t-sm flex items-center justify-center">
+                        <div class="w-full h-full border-r border-b border-zinc-700/50 bg-[radial-gradient(#30363d_1px,transparent_1px)] [background-size:8px_8px]"></div>
+                    </div>
+
+                    <div id="gk-body" class="absolute top-10 left-[132px] w-9 h-14 bg-purple-600 border-2 border-purple-300 rounded-md flex flex-col items-center justify-between p-0.5 transition-all duration-300 z-10 shadow-lg">
+                        <div class="w-5 h-5 rounded-full bg-purple-300 text-[9px] flex items-center justify-center font-bold">👾</div>
+                        <div class="w-full flex justify-between px-0.5"><span class="w-2 h-2 bg-yellow-400 rounded-full"></span><span class="w-2 h-2 bg-yellow-400 rounded-full"></span></div>
+                    </div>
+
+                    <div class="absolute bottom-6 left-[142px] w-4 h-2 bg-white/40 rounded-full"></div>
+                    <div id="penalty-ball" class="absolute bottom-6 left-[138px] w-6 h-6 rounded-full bg-white border-2 border-black transition-all duration-500 shadow-md z-20"></div>
+
+                    <div id="kicker-player" class="absolute bottom-1 left-[138px] w-6 h-8 bg-blue-600 border border-blue-300 rounded-t-md z-10"></div>
+                </div>
+
+                <div class="space-y-2 my-2 text-left w-full">
+                    <div>
+                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>1. Canto / Direção:</span><span id="pen-dir-lbl" class="text-cyan-400">Centro</span></div>
+                        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden border border-zinc-700 relative">
+                            <div id="bar-dir-fill" class="bg-cyan-500 h-full absolute transition-all duration-75" style="width: 10%; left: 45%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>2. Altura do Chute:</span><span id="pen-hgt-lbl" class="text-yellow-400">Meia-altura</span></div>
+                        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden border border-zinc-700 relative">
+                            <div id="bar-hgt-fill" class="bg-yellow-400 h-full absolute transition-all duration-75" style="width: 10%; left: 45%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[10px] font-bold text-zinc-400"><span>3. Força da Batida:</span><span id="pen-pwr-lbl" class="text-pink-400">Média</span></div>
+                        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden border border-zinc-700">
+                            <div id="bar-pwr-fill" class="bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 h-full transition-all duration-75" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="lock-bar-btn" onclick="lockPenaltyStep()" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-2.5 rounded-xl uppercase text-xs shadow-lg">
+                    🎯 FIXAR CANTO (Passo 1/3)
+                </button>
+            `;
+
+            const speed = currentDifficulty === 'hard' ? 5 : (currentDifficulty === 'normal' ? 3.5 : 2);
+            penDirInc = speed; penHgtInc = speed; penPwrInc = speed;
+
+            penAnimLoop = setInterval(() => {
+                if (penStep === 1) {
+                    penDirVal += penDirInc;
+                    if (penDirVal >= 95 || penDirVal <= 5) penDirInc *= -1;
+
+                    const fill = document.getElementById('bar-dir-fill');
+                    const lbl = document.getElementById('pen-dir-lbl');
+                    if (fill) fill.style.left = `${penDirVal}%`;
+                    if (lbl) lbl.textContent = penDirVal < 35 ? 'Esquerda 👈' : (penDirVal > 65 ? 'Direita 👉' : 'Centro ☝️');
+                } else if (penStep === 2) {
+                    penHgtVal += penHgtInc;
+                    if (penHgtVal >= 95 || penHgtVal <= 5) penHgtInc *= -1;
+
+                    const fill = document.getElementById('bar-hgt-fill');
+                    const lbl = document.getElementById('pen-hgt-lbl');
+                    if (fill) fill.style.left = `${penHgtVal}%`;
+                    if (lbl) lbl.textContent = penHgtVal < 35 ? 'Rasteiro ⬇️' : (penHgtVal > 65 ? 'Gaveta ⬆️' : 'Meia-altura ➡️');
+                } else if (penStep === 3) {
+                    penPwrVal += penPwrInc;
+                    if (penPwrVal >= 95 || penPwrVal <= 5) penPwrInc *= -1;
+
+                    const fill = document.getElementById('bar-pwr-fill');
+                    const lbl = document.getElementById('pen-pwr-lbl');
+                    if (fill) fill.style.width = `${penPwrVal}%`;
+                    if (lbl) lbl.textContent = `${Math.round(penPwrVal)}% Potência`;
+                }
+            }, 30);
+        }
+
+        function lockPenaltyStep() {
+            const btn = document.getElementById('lock-bar-btn');
+            const info = document.getElementById('pen-step-info');
+
+            if (penStep === 1) {
+                penStep = 2;
+                if (btn) btn.textContent = '📐 FIXAR ALTURA (Passo 2/3)';
+                if (info) info.textContent = 'Passo 2/3: Escolha a Altura';
+                showToast(`Canto fixado!`, '🎯');
+            } else if (penStep === 2) {
+                penStep = 3;
+                if (btn) btn.textContent = '⚡ TRAVAR FORÇA E CHUTAR!';
+                if (info) info.textContent = 'Passo 3/3: Chute com Força!';
+                showToast(`Altura fixada!`, '📐');
+            } else if (penStep === 3) {
+                penStep = 4;
+                if (penAnimLoop) clearInterval(penAnimLoop);
+                executeWorldCupPenalty();
+            }
+        }
+
+        function executeWorldCupPenalty() {
+            const gk = document.getElementById('gk-body');
+            const ball = document.getElementById('penalty-ball');
+            const btn = document.getElementById('lock-bar-btn');
+
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-50'); }
+
+            const ballX = 35 + ((penDirVal / 100) * 210);
+            const ballY = 80 - ((penHgtVal / 100) * 55);
+
+            let gkTargetX = 132;
+            const rand = Math.random();
+
+            if (currentDifficulty === 'hard') {
+                if (rand < 0.75) gkTargetX = ballX - 18;
+                else gkTargetX = Math.random() < 0.5 ? 40 : 210;
+            } else if (currentDifficulty === 'normal') {
+                if (rand < 0.45) gkTargetX = ballX - 18;
+                else gkTargetX = Math.random() < 0.5 ? 40 : 210;
+            } else {
+                gkTargetX = Math.random() < 0.5 ? 40 : 210;
+            }
+
+            gk.style.left = `${gkTargetX}px`;
+            gk.style.transform = `translateY(${penHgtVal > 50 ? '-20px' : '0px'}) rotate(${gkTargetX < 132 ? -20 : 20}deg)`;
+
+            ball.style.left = `${ballX}px`;
+            ball.style.top = `${ballY}px`;
+            ball.style.transform = `scale(${0.5 + (penPwrVal / 200)})`;
+
+            setTimeout(() => {
+                const isSaved = Math.abs(ballX - (gkTargetX + 18)) < 28 && Math.abs(ballY - 40) < 30;
+
+                if (isSaved) {
+                    showToast(' O Mascote Goleiro defendeu o chute!', '⚽');
+                } else {
+                    appliedDiscount = 0.10;
+                    showToast('🎉 GOOOOOOLAZO! Você venceu o Mascote!', '⚽');
+                    renderApplyCouponBtn('ARCADE10');
+                }
+                setTimeout(() => initPenaltyGame(), 2200);
+            }, 600);
+        }
+
+        function renderApplyCouponBtn(code) {
+            const arena = document.getElementById('game-arena');
+            if (!arena) return;
+            arena.innerHTML += `
+                <button onclick="applyWinCoupon('${code}')" class="mt-3 w-full bg-emerald-500 text-black font-black py-2.5 rounded-xl text-xs uppercase tracking-wider">
+                    🎁 APLICAR CUPOM DE DESCONTO NO CARRINHO
+                </button>
+            `;
+        }
+
+        function applyWinCoupon(code) {
+            appliedDiscount = 0.10;
+            showToast('Cupom aplicado com sucesso no carrinho!', '🎟️');
+            changeTab('cart');
         }
 
         // ROLETA DA SORTE ESTILO PIZZA
         let rouletteTimerInterval = null;
+
         function openRouletteModal() {
             updateRouletteTimer();
             if (rouletteTimerInterval) clearInterval(rouletteTimerInterval);
             rouletteTimerInterval = setInterval(updateRouletteTimer, 1000);
+
             document.getElementById('roulette-modal').classList.remove('hidden');
         }
+
         function updateRouletteTimer() {
             const lastSpin = localStorage.getItem('az_roulette_last');
             const now = Date.now();
             const btn = document.getElementById('spin-btn');
             const timerInfo = document.getElementById('roulette-timer-info');
+
             if (lastSpin && (now - parseInt(lastSpin)) < 24 * 60 * 60 * 1000) {
                 const diff = (24 * 60 * 60 * 1000) - (now - parseInt(lastSpin));
                 const hours = Math.floor(diff / (1000 * 60 * 60));
                 const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                
                 timerInfo.classList.remove('hidden');
                 timerInfo.textContent = `⏳ Próximo giro em: ${hours}h ${mins}m ${secs}s`;
-                btn.disabled = true; btn.classList.add('opacity-50');
+                btn.disabled = true;
+                btn.classList.add('opacity-50');
             } else {
-                timerInfo.classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50');
+                timerInfo.classList.add('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
             }
         }
+
         function closeRouletteModal() {
             if (rouletteTimerInterval) clearInterval(rouletteTimerInterval);
             document.getElementById('roulette-modal').classList.add('hidden');
@@ -1727,49 +1430,115 @@
             const wheel = document.getElementById('roulette-wheel');
             const btn = document.getElementById('spin-btn');
             const displayText = document.getElementById('wheel-display-text');
-            btn.disabled = true; btn.classList.add('opacity-50');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
             localStorage.setItem('az_roulette_last', Date.now().toString());
+
             const prizeIndex = Math.floor(Math.random() * roulettePrizes.length);
             const prize = roulettePrizes[prizeIndex];
+
             let tickCount = 0;
-            const tickInterval = setInterval(() => { playWheelTickSound(); tickCount++; if (tickCount > 25) clearInterval(tickInterval); }, 120);
-            const targetDegree = (360 * 5) + (360 - (prizeIndex * (360 / roulettePrizes.length)));
-            wheel.classList.add('wheel-spin'); wheel.style.transform = `rotate(${targetDegree}deg)`;
+            const tickInterval = setInterval(() => {
+                playWheelTickSound();
+                tickCount++;
+                if (tickCount > 25) clearInterval(tickInterval);
+            }, 120);
+
+            const degreesPerSlice = 360 / roulettePrizes.length;
+            const targetDegree = (360 * 5) + (360 - (prizeIndex * degreesPerSlice));
+
+            wheel.classList.add('wheel-spin');
+            wheel.style.transform = `rotate(${targetDegree}deg)`;
+
             setTimeout(() => {
                 displayText.textContent = `${prize.icon} ${prize.label}`;
-                if (prize.isWin) playWinFanfare(); else playSadTrombone();
+
+                if (prize.isWin) {
+                    playWinFanfare();
+                } else {
+                    playSadTrombone();
+                }
+
                 if (prize.discount > 0) appliedDiscount = prize.discount;
-                if (prize.addTokens) { cart.push({ cartId: Date.now(), name: "Prêmio Roleta: 5 Fichas Grátis", price: 0, img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80" }); updateCartBadge(); }
-                if (prize.addDrink) { cart.push({ cartId: Date.now(), name: "Prêmio Roleta: Refri Lata Grátis", price: 0, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80" }); updateCartBadge(); }
-                showToast(prize.toast, prize.icon); updateRouletteTimer();
+                if (prize.addTokens) {
+                    cart.push({
+                        cartId: Date.now() + Math.random(),
+                        name: "Prêmio Roleta: 5 Fichas Grátis",
+                        desc: "Ganhado na Roleta 24h",
+                        price: 0,
+                        img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
+                    });
+                    updateCartBadge();
+                }
+                if (prize.addDrink) {
+                    cart.push({
+                        cartId: Date.now() + Math.random(),
+                        name: "Prêmio Roleta: Refri Lata Grátis",
+                        desc: "Ganhado na Roleta 24h",
+                        price: 0,
+                        img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=300&q=80"
+                    });
+                    updateCartBadge();
+                }
+
+                showToast(prize.toast, prize.icon);
+                updateRouletteTimer();
             }, 4000);
         }
 
-        // PROMOCODE, LAN HOUSE, ARCADE E CARRINHO
+        // PROMOCODE SYSTEM
         function applyPromoCode() {
-            const codeInput = document.getElementById('promo-code-input'); if (!codeInput) return;
+            const codeInput = document.getElementById('promo-code-input');
+            if (!codeInput) return;
             const code = codeInput.value.trim().toUpperCase();
-            if (code === 'ARCADE10') { appliedDiscount = 0.10; showToast('Cupom ARCADE10 aplicado: 10% OFF!', '🎟️'); }
-            else if (code === 'FICHASGRATIS') { cart.push({ cartId: Date.now(), name: "Bônus: 5 Fichas Grátis", price: 0, img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80" }); updateCartBadge(); showToast('5 Fichas grátis adicionadas!', '🎁'); }
-            else if (code === 'MASCOTEVIP') { appliedDiscount = 0.15; showToast('Cupom MASCOTEVIP aplicado: 15% OFF!', '👑'); }
-            else { showToast('Cupom inválido ou expirado!', '⚠️'); }
-            codeInput.value = ''; renderCart();
+
+            if (code === 'ARCADE10') {
+                appliedDiscount = 0.10;
+                showToast('Cupom ARCADE10 aplicado: 10% de desconto!', '🎟️');
+            } else if (code === 'FICHASGRATIS') {
+                cart.push({
+                    cartId: Date.now() + Math.random(),
+                    name: "Bônus: 5 Fichas Grátis (Cupom)",
+                    desc: "Resgatado via código promocional",
+                    price: 0,
+                    img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
+                });
+                updateCartBadge();
+                showToast('5 Fichas grátis adicionadas ao carrinho!', '🎁');
+            } else if (code === 'MASCOTEVIP') {
+                appliedDiscount = 0.15;
+                showToast('Cupom MASCOTEVIP aplicado: 15% OFF!', '👑');
+            } else {
+                showToast('Cupom inválido ou expirado!', '⚠️');
+            }
+            codeInput.value = '';
+            renderCart();
         }
 
         function attachLanEvents() {
             const main = document.getElementById('main-content');
-            const seats = main.querySelectorAll('.seat-btn'); const hours = main.querySelectorAll('.hour-btn');
+            const seats = main.querySelectorAll('.seat-btn');
+            const hours = main.querySelectorAll('.hour-btn');
+
             seats.forEach(s => {
                 s.onclick = (e) => {
                     seats.forEach(b => b.classList.remove('border-purple-500', 'bg-purple-950/40'));
-                    const btn = e.currentTarget; btn.classList.add('border-purple-500', 'bg-purple-950/40');
-                    selectedSeat = { name: btn.dataset.seat, basePrice: btn.dataset.seat.includes('Streamer') ? 18 : 12 };
+                    const btn = e.currentTarget;
+                    btn.classList.add('border-purple-500', 'bg-purple-950/40');
+                    selectedSeat = {
+                        name: btn.dataset.seat,
+                        basePrice: btn.dataset.seat.includes('Streamer') ? 18 : 12
+                    };
                 };
             });
+
             hours.forEach(h => {
                 h.onclick = (e) => {
                     hours.forEach(b => b.classList.remove('border-purple-500', 'bg-purple-950/40'));
-                    const btn = e.currentTarget; btn.classList.add('border-purple-500', 'bg-purple-950/40');
+                    const btn = e.currentTarget;
+                    btn.classList.add('border-purple-500', 'bg-purple-950/40');
                     selectedLanOption = { hours: btn.dataset.hours, mult: parseFloat(btn.dataset.mult) };
                 };
             });
@@ -1777,59 +1546,158 @@
 
         function addLanToCart() {
             if (!selectedSeat || !selectedLanOption) { showToast('Selecione um equipamento e o tempo!', '⚠️'); return; }
-            cart.push({ cartId: Date.now(), name: `Reserva: ${selectedSeat.name}`, desc: `Duração: ${selectedLanOption.hours} Hora(s)`, price: selectedSeat.basePrice * selectedLanOption.mult, img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300&q=80" });
-            updateCartBadge(); showToast('Reserva adicionada!', '🖥️'); changeTab('cart');
+            const totalPrice = selectedSeat.basePrice * selectedLanOption.mult;
+            cart.push({
+                cartId: Date.now() + Math.random(),
+                name: `Reserva: ${selectedSeat.name}`,
+                desc: `Duração: ${selectedLanOption.hours} Hora(s)`,
+                price: totalPrice,
+                img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300&q=80"
+            });
+            updateCartBadge();
+            showToast('Reserva adicionada ao pedido!', '🖥️');
+            changeTab('cart');
         }
 
         function renderArcade() {
-            const container = document.querySelector('#main-content #arcade-packages'); if (!container) return;
+            const container = document.querySelector('#main-content #arcade-packages');
+            if (!container) return;
             container.innerHTML = '';
+
             arcadePackages.forEach((pkg, index) => {
                 const borderClass = pkg.highlight ? 'border-yellow-500/60 bg-gradient-to-r from-yellow-950/20 to-zinc-900' : 'border-[#30363d] bg-[#161b22]';
-                container.innerHTML += `<div class="p-3.5 rounded-2xl border ${borderClass} flex items-center justify-between"><div><div class="font-black text-sm text-yellow-400">${pkg.qty}</div><div class="text-[11px] text-zinc-400">${pkg.bonus}</div></div><button onclick="addArcadeToCart(${index})" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xs px-3.5 py-2.5 rounded-xl">R$ ${formatPrice(pkg.price)}</button></div>`;
+                container.innerHTML += `
+                    <div class="p-3.5 rounded-2xl border ${borderClass} flex items-center justify-between">
+                        <div>
+                            <div class="font-black text-sm text-yellow-400">${pkg.qty}</div>
+                            <div class="text-[11px] text-zinc-400">${pkg.bonus}</div>
+                        </div>
+                        <button onclick="addArcadeToCart(${index})" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xs px-3.5 py-2.5 rounded-xl">
+                            R$ ${formatPrice(pkg.price)}
+                        </button>
+                    </div>
+                `;
             });
         }
 
         function addArcadeToCart(index) {
             const pkg = arcadePackages[index];
-            cart.push({ cartId: Date.now(), name: `Pacote Arcade: ${pkg.qty}`, desc: pkg.bonus, price: pkg.price, img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80" });
-            updateCartBadge(); showToast('Fichas adicionadas!', '🕹️');
+            cart.push({
+                cartId: Date.now() + Math.random(),
+                name: `Pacote Arcade: ${pkg.qty}`,
+                desc: pkg.bonus,
+                price: pkg.price,
+                img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80"
+            });
+            updateCartBadge();
+            showToast('Fichas/Passaporte adicionados!', '🕹️');
         }
 
         function renderCart() {
-            const container = document.querySelector('#main-content #cart-content'); if (!container) return;
-            if (cart.length === 0) { container.innerHTML = `<div class="text-center py-10 text-zinc-500 space-y-2"><div class="text-4xl opacity-40">🛒</div><p class="font-bold text-xs">Seu pedido está vazio.</p></div>`; return; }
-            let subtotal = 0; let itemsHTML = '<div class="space-y-2.5">';
+            const container = document.querySelector('#main-content #cart-content');
+            if (!container) return;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-zinc-500 space-y-2">
+                        <div class="text-4xl opacity-40">🛒</div>
+                        <p class="font-bold text-xs">Seu pedido está vazio.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let subtotal = 0;
+            let itemsHTML = '<div class="space-y-2.5">';
+
             cart.forEach(item => {
                 subtotal += item.price;
-                itemsHTML += `<div class="p-3 rounded-2xl bg-[#161b22] border border-[#30363d] flex items-center justify-between"><div class="flex items-center gap-3"><img src="${item.img}" class="w-10 h-10 rounded-lg object-cover"><div><h4 class="font-bold text-xs text-zinc-100">${item.name}</h4><div class="text-emerald-400 text-xs font-black">R$ ${formatPrice(item.price)}</div></div></div><button onclick="removeFromCart(${item.cartId})" class="text-zinc-500 hover:text-red-400 p-1">✕</button></div>`;
+                itemsHTML += `
+                    <div class="p-3 rounded-2xl bg-[#161b22] border border-[#30363d] flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.img}" class="w-10 h-10 rounded-lg object-cover">
+                            <div>
+                                <h4 class="font-bold text-xs text-zinc-100">${item.name}</h4>
+                                <div class="text-emerald-400 text-xs font-black">R$ ${formatPrice(item.price)}</div>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${item.cartId})" class="text-zinc-500 hover:text-red-400 p-1">✕</button>
+                    </div>
+                `;
             });
             itemsHTML += '</div>';
+
             const discountValue = subtotal * appliedDiscount;
             const finalTotal = Math.max(0, subtotal - discountValue);
-            container.innerHTML = itemsHTML + `<div class="bg-[#161b22] border border-[#30363d] p-4 rounded-2xl space-y-3 mt-3">${appliedDiscount > 0 ? `<div class="flex justify-between items-center text-xs text-pink-400 font-bold"><span>Desconto (${Math.round(appliedDiscount * 100)}%):</span><span>- R$ ${formatPrice(discountValue)}</span></div>` : ''}<div class="flex justify-between items-center text-zinc-100"><span class="text-xs font-bold uppercase text-zinc-400">Total do Pedido</span><span class="text-xl font-black text-emerald-400">R$ ${formatPrice(finalTotal)}</span></div><button onclick="openPixModal(${finalTotal})" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black py-3.5 rounded-xl uppercase tracking-wider text-xs flex items-center justify-center gap-2"><span>PAGAR COM PIX</span><span>❖</span></button></div>`;
+
+            const summaryHTML = `
+                <div class="bg-[#161b22] border border-[#30363d] p-4 rounded-2xl space-y-3 mt-3">
+                    ${appliedDiscount > 0 ? `
+                        <div class="flex justify-between items-center text-xs text-zinc-400">
+                            <span>Subtotal:</span>
+                            <span>R$ ${formatPrice(subtotal)}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-pink-400 font-bold">
+                            <span>Desconto Cupom (${Math.round(appliedDiscount * 100)}%):</span>
+                            <span>- R$ ${formatPrice(discountValue)}</span>
+                        </div>
+                    ` : ''}
+                    <div class="flex justify-between items-center text-zinc-100">
+                        <span class="text-xs font-bold uppercase text-zinc-400">Total do Pedido</span>
+                        <span class="text-xl font-black text-emerald-400">R$ ${formatPrice(finalTotal)}</span>
+                    </div>
+                    <button onclick="openPixModal(${finalTotal})" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-black font-black py-3.5 rounded-xl uppercase tracking-wider text-xs flex items-center justify-center gap-2">
+                        <span>PAGAR COM PIX</span>
+                        <span>❖</span>
+                    </button>
+                </div>
+            `;
+
+            container.innerHTML = itemsHTML + summaryHTML;
         }
 
-        function removeFromCart(cartId) { cart = cart.filter(i => i.cartId !== cartId); updateCartBadge(); renderCart(); }
+        function removeFromCart(cartId) {
+            cart = cart.filter(i => i.cartId !== cartId);
+            updateCartBadge();
+            renderCart();
+        }
+
         function openPixModal(total) {
             document.getElementById('pix-total-value').textContent = `R$ ${formatPrice(total)}`;
+            
             const nameInput = document.getElementById('client-name');
-            if (nameInput) nameInput.value = (currentUser && currentUser.email !== 'cliente@arcadezone.com') ? currentUser.name : '';
+            if (nameInput) {
+                nameInput.value = (currentUser && currentUser.email !== 'cliente@arcadezone.com') ? currentUser.name : '';
+            }
+
             document.getElementById('pix-modal').classList.remove('hidden');
         }
+
         function closePixModal() { document.getElementById('pix-modal').classList.add('hidden'); }
-        function copyPixKey() { navigator.clipboard.writeText(pixKey); showToast('Chave Pix copiada!', '📋'); }
+
+        function copyPixKey() {
+            navigator.clipboard.writeText(pixKey);
+            showToast('Chave Pix copiada!', '📋');
+        }
+
         function confirmPaymentAndClear() {
             const clientName = document.getElementById('client-name').value;
             if (!clientName) { showToast('Digite seu nome/mesa!', '⚠️'); return; }
+
             const totalVal = parseFloat(document.getElementById('pix-total-value').textContent.replace('R$', '').replace(',', '.'));
             ordersLog.push({ client: clientName, total: totalVal, date: new Date().toLocaleString() });
             localStorage.setItem('az_orders_log', JSON.stringify(ordersLog));
-            closePixModal(); showToast(`Pedido confirmado para ${clientName}!`, '🎉');
-            cart = []; appliedDiscount = 0; updateCartBadge(); renderCart();
+
+            closePixModal();
+            showToast(`Pedido confirmado para ${clientName}!`, '🎉');
+            cart = []; appliedDiscount = 0;
+            updateCartBadge(); renderCart();
         }
 
-        window.onload = function() { updateUserUI(); changeTab('menu'); };
+        window.onload = function() {
+            updateUserUI();
+            changeTab('menu');
+        };
     </script>
 </body>
 </html>
