@@ -1,4 +1,4 @@
-// game/js/main.js - Engine Mundo Aberto, GPS Interativo com Rastro, Interiores de Lojas e Compra de Casas
+// game/js/main.js - Engine PC Completo: Mapa com Cursor Livre (M), Mira Só com Arma e Roleta GTA (TAB)
 
 window.startRockstarIntro = function() {
     const introScreen = document.getElementById('vc-intro-screen');
@@ -23,7 +23,7 @@ window.startRockstarIntro = function() {
         const msgs = [
             "Construindo distritos de Ocean Beach, Downtown & Pontes...",
             "Carregando interiores de lojas e casas compráveis...",
-            "Sincronizando sistema de GPS e rastreamento de rota...",
+            "Configurando controles de PC, Roleta de Armas e GPS...",
             "Populando Vice City com +5.000 NPCs e frota V8..."
         ];
 
@@ -65,17 +65,25 @@ function initViceCityEngine() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // PointerLock (Trava do cursor para câmera 360° estilo PC)
-    mount.onclick = () => {
+    function isAnyOverlayOpen() {
         const mapOpen = !document.getElementById('vc-full-map').classList.contains('hidden');
         const wheelOpen = !document.getElementById('vc-weapon-wheel').classList.contains('hidden');
-        if (!mapOpen && !wheelOpen && document.pointerLockElement !== mount) {
+        return mapOpen || wheelOpen;
+    }
+
+    // Trava o cursor do mouse ao clicar na área 3D (somente se Mapa e Roleta estiverem fechados)
+    mount.onclick = () => {
+        if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
             mount.requestPointerLock();
         }
     };
+
     document.addEventListener('pointerlockchange', () => {
         const hint = document.getElementById('vc-lock-hint');
-        if (hint) hint.classList.toggle('hidden', document.pointerLockElement === mount);
+        if (hint) {
+            const locked = (document.pointerLockElement === mount);
+            hint.classList.toggle('hidden', locked || isAnyOverlayOpen());
+        }
     });
 
     scene.add(new THREE.HemisphereLight(0xfce7f3, 0x1e1b4b, 1.05));
@@ -83,15 +91,13 @@ function initViceCityEngine() {
     sun.position.set(80, 120, -60);
     scene.add(sun);
 
-    // Luz interna para o interior das lojas (Y = -40)
     const intLight = new THREE.PointLight(0xffffff, 1.4, 30);
     intLight.position.set(0, -36, 0);
     scene.add(intLight);
 
-    // Constrói o Mundo Aberto
     const { buildings, stores, houses, missionMarker, vehicles, peds, interior } = VCWorld.buildCity(scene);
 
-    // Protagonista Humano
+    // Protagonista Humano Articulado
     const playerChar = VCModels.createHuman3D({
         customDna: {
             skinHex: '#f1c27d', hairColor: 0x1c1917, shirtHex: '#06b6d4', pantsColor: 0x1e3a8a,
@@ -123,20 +129,20 @@ function initViceCityEngine() {
         copUnits.push({ ...copBuilt, speed: 0.30, steer: 0 });
     }
 
-    // Estado Geral do Jogo
+    // Arsenal e Estado
     const weapons = [
-        { name: "Punhos (Briga)", icon: "👊", ammo: "∞", type: "melee" },
+        { name: "Punhos (Desarmado)", icon: "👊", ammo: "∞", type: "melee" },
         { name: "Pistola 9mm", icon: "🔫", ammo: 96, type: "pistol" },
         { name: "Uzi Mac-10", icon: "🧨", ammo: 280, type: "uzi" },
         { name: "Escopeta", icon: "💥", ammo: 36, type: "shotgun" }
     ];
     let currentWeaponIdx = 0;
-    let playerCash = 2000; // Dinheiro inicial suficiente para testar compra de casa ou armas
+    let playerCash = 2000;
     let playerHealth = 100, playerArmor = 100, wantedStars = 0;
     let inVehicle = null, isAiming = false;
-    let activeStoreInterior = null; // Loja em que o jogador está dentro no momento
+    let activeStoreInterior = null;
     let clerkSurrendered = false;
-    let gpsWaypoint = null; // { x, z } marcado pelo jogador no mapa
+    let gpsWaypoint = null;
     let camYaw = 0, camPitch = 0.25;
     let gameMinutes = 17 * 60 + 16;
     let missionStage = 1;
@@ -155,27 +161,48 @@ function initViceCityEngine() {
         window.vcToastTimer = setTimeout(() => el.classList.add('hidden'), 3500);
     }
 
+    // Seleção na Roleta de Armas (TAB ou 1-4)
     window.selectVCWeapon = (idx) => {
         currentWeaponIdx = idx;
         const wType = weapons[idx].type;
         Object.keys(weaponModels3D).forEach(k => weaponModels3D[k].visible = (k === wType));
+
+        // Se trocou para Punhos, desativa a mira automaticamente
+        if (wType === 'melee') {
+            isAiming = false;
+            document.getElementById('vc-crosshair').classList.add('hidden');
+        }
+
         document.getElementById('vc-weapon-icon').textContent = weapons[idx].icon;
         document.getElementById('vc-ammo').textContent = weapons[idx].ammo;
         document.getElementById('vc-weapon-wheel').classList.add('hidden');
         showGameToast(`Equipado: ${weapons[idx].name}`);
+
+        // Retoma trava de câmera no PC após clicar na roleta
+        if (document.pointerLockElement !== mount) {
+            try { mount.requestPointerLock(); } catch (e) {}
+        }
     };
 
-    // =========================================================================
-    // SISTEMA DE MAPA GERAL INTERATIVO + MARCAÇÃO DE GPS COM RASTRO
-    // =========================================================================
+    // Abrir / Fechar Mapa Geral (Tecla M) -> Libera o ponteiro do mouse imediatamente!
     window.toggleFullMap = (forceState) => {
         const mapEl = document.getElementById('vc-full-map');
         if (!mapEl) return;
         const show = forceState !== undefined ? forceState : mapEl.classList.contains('hidden');
         mapEl.classList.toggle('hidden', !show);
+
         if (show) {
-            if (document.pointerLockElement) document.exitPointerLock();
+            isAiming = false;
+            document.getElementById('vc-crosshair').classList.add('hidden');
+            document.getElementById('vc-lock-hint').classList.add('hidden');
+            if (document.pointerLockElement) {
+                document.exitPointerLock();
+            }
             drawBigMap();
+        } else {
+            if (document.pointerLockElement !== mount) {
+                try { mount.requestPointerLock(); } catch (e) {}
+            }
         }
     };
 
@@ -185,7 +212,6 @@ function initViceCityEngine() {
         showGameToast('📍 Rota de GPS removida');
     };
 
-    // Clique no Mapa Grande para marcar destino e traçar o rastro
     const bigMapCanvas = document.getElementById('vc-bigmap-canvas');
     if (bigMapCanvas) {
         bigMapCanvas.onclick = (e) => {
@@ -193,7 +219,6 @@ function initViceCityEngine() {
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
 
-            // Converte pixel (0..420) para coordenada do mundo (-240..+240)
             const worldX = ((clickX - 210) / 210) * 240;
             const worldZ = ((clickY - 210) / 210) * 240;
 
@@ -211,24 +236,38 @@ function initViceCityEngine() {
             `<span class="text-cyan-300">${'★'.repeat(wantedStars)}</span><span class="text-zinc-600">${'☆'.repeat(6 - wantedStars)}</span>`;
     }
 
-    // Controles Teclado & Mouse
+    // Todos os Comandos de Teclado para PC
     const keys = {};
     window.onkeydown = (e) => {
         const k = e.key.toLowerCase();
         keys[k] = true;
 
+        // TAB: Abre Roleta de Armas e libera o ponteiro do mouse para clicar
         if (e.key === 'Tab') {
             e.preventDefault();
-            if (document.pointerLockElement) document.exitPointerLock();
-            document.getElementById('vc-weapon-wheel').classList.remove('hidden');
+            const wheel = document.getElementById('vc-weapon-wheel');
+            if (wheel.classList.contains('hidden')) {
+                isAiming = false;
+                document.getElementById('vc-crosshair').classList.add('hidden');
+                document.getElementById('vc-lock-hint').classList.add('hidden');
+                if (document.pointerLockElement) document.exitPointerLock();
+                wheel.classList.remove('hidden');
+            }
         }
-        if (k === 'm') toggleFullMap();
+
+        // M: Abre/Fecha Mapa e libera o ponteiro do mouse
+        if (k === 'm') {
+            e.preventDefault();
+            toggleFullMap();
+        }
+
+        // Teclas numéricas 1 a 4 para troca rápida de arma
         if (k === '1') selectVCWeapon(0);
         if (k === '2') selectVCWeapon(1);
         if (k === '3') selectVCWeapon(2);
         if (k === '4') selectVCWeapon(3);
 
-        // Pulo ou Suspensão do Carro [Espaço]
+        // Espaço: Pulo do Personagem ou Suspensão Hidráulica do Carro
         if (e.code === 'Space') {
             e.preventDefault();
             if (inVehicle && inVehicle.hopY <= 0.01) {
@@ -238,10 +277,10 @@ function initViceCityEngine() {
             }
         }
 
-        // Buzina [H]
+        // H: Buzina do Carro
         if (k === 'h' && inVehicle) VCSoundFX.playCarHorn();
 
-        // Entrar / Roubar / Sair do Carro [F]
+        // F: Entrar / Roubar / Sair do Veículo
         if (k === 'f' && !activeStoreInterior) {
             if (inVehicle) {
                 inVehicle.doorOpenTimer = 28;
@@ -255,6 +294,8 @@ function initViceCityEngine() {
                         v.doorOpenTimer = 28;
                         inVehicle = v;
                         playerChar.mesh.visible = false;
+                        isAiming = false;
+                        document.getElementById('vc-crosshair').classList.add('hidden');
                         triggerDynamicDialogue('car_theft', 1.15, 1.1);
                         if (v.isCopCar && wantedStars < 2) { wantedStars = 2; spawnCopCar(); }
                         showGameToast(`Dirigindo: ${v.name}`);
@@ -264,11 +305,9 @@ function initViceCityEngine() {
             }
         }
 
-        // Interação Contextual [E]: Entrar/Assaltar Lojas, Comprar Casas e Missões
+        // E: Entrar/Assaltar Lojas, Comprar Casas e Missões
         if (k === 'e' && !inVehicle) {
-            // A) Se já estiver DENTRO de uma loja
             if (activeStoreInterior) {
-                // Sair pela porta da loja
                 if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, 7.0)) < 3.0) {
                     playerChar.mesh.position.set(activeStoreInterior.x, 0, activeStoreInterior.z + 13.5);
                     activeStoreInterior = null;
@@ -276,8 +315,6 @@ function initViceCityEngine() {
                     showGameToast('Saiu da loja');
                     return;
                 }
-
-                // Assaltar o caixa registrador da loja por dentro!
                 if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -3.2)) < 3.5 && !activeStoreInterior.robbed) {
                     activeStoreInterior.robbed = true;
                     activeStoreInterior.marker.material.color.setHex(0x52525b);
@@ -295,7 +332,6 @@ function initViceCityEngine() {
                 return;
             }
 
-            // B) Entrar na porta de uma Loja (Mundo Aberto)
             for (let st of stores) {
                 if (playerChar.mesh.position.distanceTo(st.marker.position) < 4.5) {
                     activeStoreInterior = st;
@@ -307,14 +343,13 @@ function initViceCityEngine() {
                 }
             }
 
-            // C) Comprar ou Usar Casa (Safehouse)
             for (let hs of houses) {
                 if (playerChar.mesh.position.distanceTo(hs.marker.position) < 4.5) {
                     if (!hs.owned) {
                         if (playerCash >= hs.price) {
                             playerCash -= hs.price;
                             hs.owned = true;
-                            hs.marker.material.color.setHex(0x38bdf8); // Muda marcador para azul (Sua Propriedade)
+                            hs.marker.material.color.setHex(0x38bdf8);
                             VCSoundFX.playCash();
                             speakVC("Property purchased! This place is yours now.", "Propriedade comprada! Este lugar agora é seu.", 0.95, 1.0);
                             showGameToast(`🏠 VOCÊ COMPROU: ${hs.name}!`);
@@ -323,10 +358,7 @@ function initViceCityEngine() {
                             showGameToast(`⚠️ Dinheiro insuficiente! Custa $${hs.price}`);
                         }
                     } else {
-                        // Casa já comprada: Recupera vida/colete e limpa polícia!
-                        playerHealth = 100;
-                        playerArmor = 100;
-                        wantedStars = 0;
+                        playerHealth = 100; playerArmor = 100; wantedStars = 0;
                         VCSoundFX.playSynthChord();
                         showGameToast(`🏠 Descansou em ${hs.name}: Vida/Colete 100% e Polícia despistada!`);
                         updateHUD();
@@ -335,12 +367,11 @@ function initViceCityEngine() {
                 }
             }
 
-            // D) Missão [V]
             if (playerChar.mesh.position.distanceTo(missionMarker.position) < 4.5) {
                 if (missionStage === 1) {
                     missionStage = 2;
                     missionMarker.position.set(-120, 0.12, 126);
-                    gpsWaypoint = { x: -120, z: 126 }; // Marca automaticamente no GPS!
+                    gpsWaypoint = { x: -120, z: 126 };
                     wantedStars = Math.min(6, wantedStars + 2);
                     spawnCopCar();
                     document.getElementById('vc-mission-text').textContent = "Siga a linha rosa do GPS até Downtown e despiste a VCPD!";
@@ -364,18 +395,35 @@ function initViceCityEngine() {
 
     window.onkeyup = (e) => {
         keys[e.key.toLowerCase()] = false;
-        if (e.key === 'Tab') document.getElementById('vc-weapon-wheel').classList.add('hidden');
+        if (e.key === 'Tab') {
+            document.getElementById('vc-weapon-wheel').classList.add('hidden');
+            if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
+                try { mount.requestPointerLock(); } catch (e) {}
+            }
+        }
     };
 
+    // Botão Direito: MIRA APENAS SE ESTIVER SEGURANDO UMA ARMA DE FOGO (currentWeaponIdx > 0)
     mount.onmousedown = (e) => {
-        if (e.button === 2) { isAiming = true; document.getElementById('vc-crosshair').classList.remove('hidden'); }
-        if (e.button === 0 && !inVehicle) performAttack();
+        if (isAnyOverlayOpen()) return;
+        if (e.button === 2 && !inVehicle && currentWeaponIdx > 0) {
+            isAiming = true;
+            document.getElementById('vc-crosshair').classList.remove('hidden');
+        }
+        if (e.button === 0 && !inVehicle) {
+            performAttack();
+        }
     };
+
     window.onmouseup = (e) => {
-        if (e.button === 2) { isAiming = false; document.getElementById('vc-crosshair').classList.add('hidden'); }
+        if (e.button === 2) {
+            isAiming = false;
+            document.getElementById('vc-crosshair').classList.add('hidden');
+        }
     };
+
     window.onmousemove = (e) => {
-        if (document.pointerLockElement === mount) {
+        if (document.pointerLockElement === mount && !isAnyOverlayOpen()) {
             camYaw -= e.movementX * 0.004;
             camPitch = Math.max(0.08, Math.min(0.65, camPitch + e.movementY * 0.003));
         }
@@ -388,8 +436,7 @@ function initViceCityEngine() {
             playerChar.punchTimer = 14;
             peds.forEach(p => {
                 if (p.alive && playerChar.mesh.position.distanceTo(p.char.mesh.position) < 2.8) {
-                    p.alive = false;
-                    p.char.state = 'dead';
+                    p.alive = false; p.char.state = 'dead';
                     playerCash += 55;
                     VCSoundFX.playScream(p.isFemale);
                     triggerDynamicDialogue('pedestrian_panic', p.isFemale ? 1.35 : 0.95, 1.15);
@@ -405,7 +452,6 @@ function initViceCityEngine() {
         playerChar.recoilOffset = 0.28;
         VCSoundFX.playGunshot(wpn.type);
 
-        // Se atirar dentro de uma loja, o atendente rende-se imediatamente!
         if (activeStoreInterior && !activeStoreInterior.robbed) {
             clerkSurrendered = true;
             triggerDynamicDialogue('shop_robbery', 1.35, 1.2);
@@ -440,7 +486,6 @@ function initViceCityEngine() {
     }
 
     function moveWithSlide(pos, dx, dz, radius) {
-        // Se estiver dentro de uma loja, limita às paredes do interior
         if (activeStoreInterior) {
             const nx = pos.x + dx;
             const nz = pos.z + dz;
@@ -449,7 +494,6 @@ function initViceCityEngine() {
             return;
         }
 
-        // Impede cair no canal de água fora das 3 pontes (-140, 0, +140)
         const onBridge = Math.abs(pos.z) < 9.5 || Math.abs(pos.z - 140) < 9.5 || Math.abs(pos.z + 140) < 9.5;
         let nextX = pos.x + dx;
         let blockedX = false;
@@ -468,9 +512,6 @@ function initViceCityEngine() {
         if (!blockedZ && Math.abs(nextZ) < 235) pos.z = nextZ;
     }
 
-    // =========================================================================
-    // RENDERIZAÇÃO DO MINIMAPA CIRCULAR E DO MAPA GRANDE COM RASTRO GPS
-    // =========================================================================
     const radarCanvas = document.getElementById('vc-radar');
     const rCtx = radarCanvas ? radarCanvas.getContext('2d') : null;
 
@@ -482,40 +523,30 @@ function initViceCityEngine() {
         const px = inVehicle ? inVehicle.mesh.position.x : playerChar.mesh.position.x;
         const pz = inVehicle ? inVehicle.mesh.position.z : playerChar.mesh.position.z;
 
-        // Canal de água no minimapa
         rCtx.fillStyle = '#0284c7';
         rCtx.fillRect(56 - (px * 0.45) - 8, 0, 16, 112);
 
-        // Rastro Rosa do GPS no Minimapa
         if (gpsWaypoint) {
             const gx = 56 + (gpsWaypoint.x - px) * 0.45;
             const gz = 56 + (gpsWaypoint.z - pz) * 0.45;
-
             rCtx.strokeStyle = '#ec4899';
             rCtx.lineWidth = 3;
-            rCtx.beginPath();
-            rCtx.moveTo(56, 56);
-            rCtx.lineTo(gx, gz);
-            rCtx.stroke();
+            rCtx.beginPath(); rCtx.moveTo(56, 56); rCtx.lineTo(gx, gz); rCtx.stroke();
 
-            // Ponto de destino GPS
             rCtx.fillStyle = '#ec4899';
             rCtx.beginPath(); rCtx.arc(Math.max(10, Math.min(102, gx)), Math.max(10, Math.min(102, gz)), 4.5, 0, Math.PI * 2); rCtx.fill();
 
-            // Remove GPS automaticamente ao chegar no destino
             if (Math.hypot(gpsWaypoint.x - px, gpsWaypoint.z - pz) < 10) {
                 gpsWaypoint = null;
                 showGameToast('📍 Você chegou ao destino marcado!');
             }
         }
 
-        // Ícone Missão [V]
         const mx = 56 + (missionMarker.position.x - px) * 0.45;
         const mz = 56 + (missionMarker.position.z - pz) * 0.45;
         rCtx.fillStyle = '#f43f5e'; rCtx.font = 'bold 11px sans-serif';
         rCtx.fillText('V', Math.max(10, Math.min(98, mx)), Math.max(14, Math.min(102, mz)));
 
-        // Lojas (Amarelo) e Casas (Verde/Azul)
         stores.forEach(st => {
             if (!st.robbed) {
                 rCtx.fillStyle = '#facc15';
@@ -527,7 +558,6 @@ function initViceCityEngine() {
             rCtx.fillRect(56 + (hs.x - px) * 0.45 - 2.5, 56 + (hs.z - pz) * 0.45 - 2.5, 5, 5);
         });
 
-        // Jogador no centro
         rCtx.fillStyle = '#ffffff';
         rCtx.beginPath(); rCtx.arc(56, 56, 3.8, 0, Math.PI * 2); rCtx.fill();
     }
@@ -537,12 +567,10 @@ function initViceCityEngine() {
         const ctx = bc.getContext('2d');
         ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, 420, 420);
 
-        // Canal central, Praia Leste e Oceano
         ctx.fillStyle = '#0284c7'; ctx.fillRect(196, 0, 28, 420);
         ctx.fillStyle = '#fde047'; ctx.fillRect(365, 0, 25, 420);
         ctx.fillStyle = '#06b6d4'; ctx.fillRect(390, 0, 30, 420);
 
-        // 3 Pontes
         ctx.fillStyle = '#64748b';
         [-140, 0, 140].forEach(bz => {
             const py = 210 + (bz / 240) * 210;
@@ -554,24 +582,19 @@ function initViceCityEngine() {
         const mapPx = 210 + (px / 240) * 210;
         const mapPz = 210 + (pz / 240) * 210;
 
-        // Rastro GPS Rosa no Mapa Grande
         if (gpsWaypoint) {
             const gx = 210 + (gpsWaypoint.x / 240) * 210;
             const gz = 210 + (gpsWaypoint.z / 240) * 210;
             ctx.strokeStyle = '#ec4899';
             ctx.lineWidth = 4;
             ctx.setLineDash([8, 5]);
-            ctx.beginPath();
-            ctx.moveTo(mapPx, mapPz);
-            ctx.lineTo(gx, gz);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(mapPx, mapPz); ctx.lineTo(gx, gz); ctx.stroke();
             ctx.setLineDash([]);
 
             ctx.fillStyle = '#ec4899';
             ctx.beginPath(); ctx.arc(gx, gz, 7, 0, Math.PI * 2); ctx.fill();
         }
 
-        // Lojas (Amarelo)
         stores.forEach(st => {
             if (!st.robbed) {
                 ctx.fillStyle = '#facc15';
@@ -579,22 +602,19 @@ function initViceCityEngine() {
             }
         });
 
-        // Casas (Verde = À Venda | Azul = Comprada)
         houses.forEach(hs => {
             ctx.fillStyle = hs.owned ? '#38bdf8' : '#10b981';
             ctx.fillRect(210 + (hs.x / 240) * 210 - 4, 210 + (hs.z / 240) * 210 - 4, 8, 8);
         });
 
-        // Missão [V]
         ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 14px sans-serif';
         ctx.fillText('V', 210 + (missionMarker.position.x / 240) * 210 - 4, 210 + (missionMarker.position.z / 240) * 210 + 4);
 
-        // Posição do Jogador
         ctx.fillStyle = '#ffffff';
         ctx.beginPath(); ctx.arc(mapPx, mapPz, 6, 0, Math.PI * 2); ctx.fill();
     }
 
-    speakVC("Welcome to Vice City! Press M to open the map and set a GPS route.", "Bem-vindo a Vice City! Pressione M para abrir o mapa e marcar uma rota no GPS.", 0.9, 1.0);
+    speakVC("Welcome to Vice City! Press M to open the map and set a GPS route, or hold TAB for weapons.", "Bem-vindo a Vice City! Aperte M para abrir o mapa e marcar o GPS, ou segure TAB para armas.", 0.9, 1.0);
     updateHUD();
 
     let tick = 0;
@@ -611,8 +631,8 @@ function initViceCityEngine() {
         }
 
         const hasGun = currentWeaponIdx > 0;
+        if (!hasGun) isAiming = false;
 
-        // Animação do Atendente dentro da Loja (Mãos ao alto se rendido)
         if (activeStoreInterior) {
             if (clerkSurrendered) {
                 interior.clerkChar.leftArm.rotation.x = -Math.PI * 0.92;
@@ -622,7 +642,6 @@ function initViceCityEngine() {
             }
         }
 
-        // Direção Veículo vs Personagem a Pé
         if (inVehicle) {
             let steerInput = 0;
             if (keys['w'] || keys['arrowup']) inVehicle.speed = Math.min(inVehicle.maxSpeed, inVehicle.speed + 0.026);
@@ -678,7 +697,6 @@ function initViceCityEngine() {
             VCModels.updateHumanAnimation(playerChar, { speed: currentMoveSpeed, isRunning, isAiming, hasGun });
         }
 
-        // Trânsito Autônomo
         vehicles.forEach(v => {
             if (v !== inVehicle) {
                 const aiSpd = 0.16 * v.aiDir;
@@ -689,7 +707,6 @@ function initViceCityEngine() {
             }
         });
 
-        // NPCs
         peds.forEach(p => {
             if (!p.alive) {
                 VCModels.updateHumanAnimation(p.char, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
@@ -703,7 +720,6 @@ function initViceCityEngine() {
             if (Math.abs(p.char.mesh.position.x) > 180 || Math.abs(p.char.mesh.position.z) > 210) p.angle += Math.PI;
         });
 
-        // Projéteis
         for (let i = bullets.length - 1; i >= 0; i--) {
             const b = bullets[i];
             b.mesh.position.x -= Math.sin(b.angle) * 1.65;
@@ -720,7 +736,6 @@ function initViceCityEngine() {
             if (b.life <= 0) { scene.remove(b.mesh); bullets.splice(i, 1); }
         }
 
-        // Polícia
         const targetPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
         if (wantedStars > 0 && !activeStoreInterior && tick % 18 === 0) {
             VCSoundFX.playPoliceSirenStep(Math.floor(tick / 18) % 2 === 0);
@@ -754,7 +769,6 @@ function initViceCityEngine() {
             }
         });
 
-        // Prompts de Interação (Lojas, Casas, Carros, Missão)
         const promptEl = document.getElementById('vc-action-prompt');
         if (promptEl) {
             let msg = "";
@@ -790,7 +804,6 @@ function initViceCityEngine() {
             else promptEl.classList.add('hidden');
         }
 
-        // Câmera
         const distCam = activeStoreInterior ? 4.2 : (isAiming ? 3.5 : (inVehicle ? 9.8 : 6.4));
         const heightCam = activeStoreInterior ? 2.2 : (isAiming ? 2.1 : (inVehicle ? 4.4 : 2.9));
         const sideOffset = isAiming ? 0.95 : 0;
