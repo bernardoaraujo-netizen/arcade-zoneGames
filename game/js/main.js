@@ -1,7 +1,7 @@
 // game/js/main.js - Motor AAA Estilo GTA V/VI:
-// Interiores Entráveis (Mercados, Casas, Ammu-Nation, Delegacia VCPD),
-// Hitboxes 3D, Atropelamentos, Vida/Wasted, Dano/Explosão de Carros, Nitro,
-// Granadas [G], Rifle M4, Rádio [R], Ciclo Dia/Noite e Força Tarefa Policial
+// Configurações em Tempo Real [O] (Volume 200%, Sensibilidade, FOV, Inverter Y, Gráficos),
+// Drops Magnéticos de Dinheiro dos NPCs, Interiores Entráveis, Hitboxes 3D,
+// Atropelamentos, Vida/Wasted, Explosão de Carros, Nitro, Granadas [G], Rádio [R] e Ciclo Dia/Noite
 
 window.startRockstarIntro = function() {
     const introScreen = document.getElementById('vc-intro-screen');
@@ -59,7 +59,127 @@ function initViceCityEngine() {
     });
 
     // =========================================================================
-    // 2. CONSTRUÇÃO DO MUNDO E PROTAGONISTA ARTICULADO
+    // 2. SISTEMA DE CONFIGURAÇÕES DO JOGO ([O] / [P]) + AMPLIFICADOR DE ÁUDIO
+    // =========================================================================
+    const gameSettings = {
+        volume: 1.0,       // 0.0 a 2.0 (200%)
+        sensitivity: 1.0,  // 0.2x a 3.0x
+        fov: 60,           // 50 a 95 graus
+        invertY: false,
+        quality: 'high'
+    };
+
+    // Intercepta AudioContext para aplicar o amplificador de volume (até 200%) em todos os sons
+    let masterGainNode = null;
+    if (window.VCSoundFX && window.VCSoundFX.ctx) {
+        try {
+            const ctx = window.VCSoundFX.ctx;
+            masterGainNode = ctx.createGain();
+            masterGainNode.gain.value = gameSettings.volume;
+            masterGainNode.connect(ctx.destination);
+        } catch (e) {}
+    }
+
+    function playAmplifiedMoneyChime() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = (window.VCSoundFX && window.VCSoundFX.ctx) || new AudioCtx();
+            if (ctx.state === 'suspended') ctx.resume();
+
+            const vol = Math.max(0.01, gameSettings.volume);
+            const now = ctx.currentTime;
+            [987.77, 1318.51].forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+                gain.gain.setValueAtTime(0.18 * vol, now + idx * 0.06);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.22);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + idx * 0.06);
+                osc.stop(now + idx * 0.06 + 0.22);
+            });
+        } catch (e) {
+            if (window.VCSoundFX) VCSoundFX.playCash();
+        }
+    }
+
+    window.updateGameSettings = () => {
+        const volEl = document.getElementById('cfg-volume');
+        const sensEl = document.getElementById('cfg-sensitivity');
+        const fovEl = document.getElementById('cfg-fov');
+        const invEl = document.getElementById('cfg-invert-y');
+        const qualEl = document.getElementById('cfg-quality');
+
+        if (volEl) {
+            const rawVol = parseInt(volEl.value, 10);
+            gameSettings.volume = rawVol / 100;
+            const lbl = document.getElementById('cfg-vol-label');
+            if (lbl) lbl.textContent = `${rawVol}%`;
+            if (masterGainNode) masterGainNode.gain.value = gameSettings.volume;
+            if (window.VCSoundFX) {
+                window.VCSoundFX.masterVolume = gameSettings.volume;
+                if (window.VCSoundFX.masterGain) window.VCSoundFX.masterGain.gain.value = gameSettings.volume;
+            }
+        }
+
+        if (sensEl) {
+            gameSettings.sensitivity = parseFloat(sensEl.value);
+            const lbl = document.getElementById('cfg-sens-label');
+            if (lbl) lbl.textContent = `${gameSettings.sensitivity.toFixed(1)}x`;
+        }
+
+        if (fovEl) {
+            gameSettings.fov = parseInt(fovEl.value, 10);
+            const lbl = document.getElementById('cfg-fov-label');
+            if (lbl) lbl.textContent = `${gameSettings.fov}°`;
+            camera.fov = gameSettings.fov;
+            camera.updateProjectionMatrix();
+        }
+
+        if (invEl) {
+            gameSettings.invertY = invEl.checked;
+        }
+
+        if (qualEl) {
+            gameSettings.quality = qualEl.value;
+            if (gameSettings.quality === 'low') {
+                renderer.setPixelRatio(0.75);
+                camera.far = 220;
+            } else if (gameSettings.quality === 'medium') {
+                renderer.setPixelRatio(1.0);
+                camera.far = 310;
+            } else {
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                camera.far = 420;
+            }
+            camera.updateProjectionMatrix();
+        }
+    };
+
+    window.toggleSettingsModal = (forceState) => {
+        const modal = document.getElementById('vc-settings-modal');
+        if (!modal) return;
+        const show = forceState !== undefined ? forceState : modal.classList.contains('hidden');
+        modal.classList.toggle('hidden', !show);
+
+        if (show) {
+            isAiming = false;
+            mouseLeftDown = false;
+            document.getElementById('vc-crosshair').classList.add('hidden');
+            document.getElementById('vc-lock-hint').classList.add('hidden');
+            if (document.pointerLockElement) document.exitPointerLock();
+        } else {
+            updateGameSettings();
+            if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
+                try { mount.requestPointerLock(); } catch (e) {}
+            }
+        }
+    };
+
+    // =========================================================================
+    // 3. CONSTRUÇÃO DO MUNDO E PROTAGONISTA ARTICULADO
     // =========================================================================
     const {
         colliders,
@@ -108,7 +228,7 @@ function initViceCityEngine() {
     });
 
     // =========================================================================
-    // 3. ESTADO GLOBAL DO JOGADOR, VEÍCULOS, RÁDIO E CONTROLE DE OVERLAYS
+    // 4. ESTADO GLOBAL DO JOGADOR, VEÍCULOS, RÁDIO E OVERLAYS
     // =========================================================================
     const weapons = [
         { name: "Punhos (Desarmado)", icon: "👊", ammo: "∞", type: "melee", dmg: 32, rate: 16 },
@@ -142,7 +262,7 @@ function initViceCityEngine() {
 
     let inVehicle = null;
     let isAiming = false;
-    let activeInterior = null; // Objeto da porta ativa quando dentro de um edifício
+    let activeInterior = null;
     let clerkSurrendered = false;
 
     let gpsWaypoint = null;
@@ -160,7 +280,8 @@ function initViceCityEngine() {
     function isAnyOverlayOpen() {
         const mapOpen = !document.getElementById('vc-full-map').classList.contains('hidden');
         const wheelOpen = !document.getElementById('vc-weapon-wheel').classList.contains('hidden');
-        return mapOpen || wheelOpen;
+        const settingsOpen = !document.getElementById('vc-settings-modal').classList.contains('hidden');
+        return mapOpen || wheelOpen || settingsOpen;
     }
 
     mount.onclick = () => {
@@ -201,7 +322,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 4. MOTOR DE HITBOX 3D (EXTERIOR, INTERIORES, VEÍCULOS E EXPLOSÕES)
+    // 5. MOTOR DE HITBOX 3D (EXTERIOR, INTERIORES, VEÍCULOS E EXPLOSÕES)
     // =========================================================================
     function hitsColliderBox(x, z, radius, boxList) {
         if (!boxList) return false;
@@ -255,7 +376,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 5. EFEITOS DE PARTÍCULAS, EXPLOSÕES E DROPS COLETÁVEIS
+    // 6. PARTÍCULAS, EXPLOSÕES E MAÇOS DE DINHEIRO 3D COM ATRAÇÃO MAGNÉTICA
     // =========================================================================
     function spawnParticle(x, y, z, colorHex, scale = 0.35, vy = 0.08, life = 28) {
         const p = new THREE.Mesh(
@@ -271,6 +392,49 @@ function initViceCityEngine() {
             vz: (Math.random() - 0.5) * 0.14,
             life
         });
+    }
+
+    function spawnPickup(x, z, type = 'cash', value = 85) {
+        const group = new THREE.Group();
+        group.position.set(x, 0.32, z);
+
+        if (type === 'cash') {
+            // Maço de notas verdes + cinta dourada + halo brilhante no chão
+            const billStack = new THREE.Mesh(
+                new THREE.BoxGeometry(0.75, 0.24, 0.42),
+                new THREE.MeshBasicMaterial({ color: 0x10b981 })
+            );
+            const goldBand = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18, 0.26, 0.44),
+                new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+            );
+            const ring = new THREE.Mesh(
+                new THREE.RingGeometry(0.45, 0.62, 16),
+                new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide })
+            );
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = -0.25;
+            group.add(billStack, goldBand, ring);
+        } else {
+            const colorMap = { health: 0xf43f5e, armor: 0x38bdf8, ammo: 0xfacc15 };
+            const box = new THREE.Mesh(
+                new THREE.BoxGeometry(0.65, 0.35, 0.45),
+                new THREE.MeshBasicMaterial({ color: colorMap[type] || 0x38bdf8 })
+            );
+            group.add(box);
+        }
+
+        scene.add(group);
+        droppedPickups.push({ mesh: group, type, value, life: 1500, bobPhase: Math.random() * Math.PI * 2 });
+    }
+
+    function dropNPCLoot(x, z, baseCash = 80) {
+        // Todo NPC morto dropa maço de dinheiro (e ocasionalmente colete ou kit médico)
+        const amount = baseCash + Math.floor(Math.random() * 65);
+        spawnPickup(x, z, 'cash', amount);
+        if (Math.random() < 0.22) {
+            spawnPickup(x + 0.8, z + 0.5, Math.random() < 0.5 ? 'health' : 'armor', 40);
+        }
     }
 
     function triggerExplosion(pos, radius = 11, maxDamage = 110) {
@@ -289,34 +453,30 @@ function initViceCityEngine() {
             );
         }
 
-        // Dano em pedestres próximos
         peds.forEach(p => {
             if (p.alive && p.char.mesh.position.distanceTo(pos) < radius) {
                 p.alive = false;
                 p.hp = 0;
                 p.char.state = 'dead';
-                spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 85);
+                dropNPCLoot(p.char.mesh.position.x, p.char.mesh.position.z, 95);
             }
         });
 
-        // Dano em policiais próximos
         copOfficers.forEach(cop => {
             if (cop.alive && cop.char.mesh.position.distanceTo(pos) < radius) {
                 cop.alive = false;
                 cop.hp = 0;
                 cop.char.state = 'dead';
-                spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, 'cash', 160);
+                dropNPCLoot(cop.char.mesh.position.x, cop.char.mesh.position.z, 175);
             }
         });
 
-        // Dano em veículos próximos
         [...vehicles, ...copUnits].forEach(v => {
             if (!v.destroyed && v.mesh.position.distanceTo(pos) < radius) {
                 damageVehicle(v, 70);
             }
         });
 
-        // Dano no jogador se estiver perto da explosão
         if (!activeInterior && !isPlayerDead) {
             const pPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
             const dist = pPos.distanceTo(pos);
@@ -327,27 +487,11 @@ function initViceCityEngine() {
         }
     }
 
-    function spawnPickup(x, z, type = 'cash', value = 75) {
-        const colorMap = {
-            cash: 0x10b981,
-            health: 0xf43f5e,
-            armor: 0x38bdf8,
-            ammo: 0xfacc15
-        };
-        const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(0.65, 0.28, 0.45),
-            new THREE.MeshBasicMaterial({ color: colorMap[type] || 0x10b981 })
-        );
-        mesh.position.set(x, 0.25, z);
-        scene.add(mesh);
-        droppedPickups.push({ mesh, type, value, life: 1200 });
-    }
-
     function damageVehicle(v, dmg) {
         if (!v || v.destroyed) return;
         v.hp = Math.max(0, (v.hp !== undefined ? v.hp : 100) - dmg);
         if (v.hp <= 0 && !v.burningTimer) {
-            v.burningTimer = 140; // ~2.3 segundos pegando fogo antes de explodir
+            v.burningTimer = 140;
             if (v === inVehicle) {
                 showGameToast('🔥 MOTOR EM CHAMAS! Aperte [F] para pular antes de explodir!');
             }
@@ -355,7 +499,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 6. FORÇA POLICIAL (VIATURAS, DESEMBARQUE ARMADO, SWAT E HELICÓPTEROS)
+    // 7. FORÇA POLICIAL (VIATURAS, DESEMBARQUE ARMADO, SWAT E HELICÓPTEROS)
     // =========================================================================
     const copUnits = [];
     const copOfficers = [];
@@ -472,7 +616,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 7. HUD, VIDA/WASTED, ARSENAL, GRANADAS E DENÚNCIA 190
+    // 8. HUD, VIDA/WASTED, ARSENAL, GRANADAS E DENÚNCIA 190
     // =========================================================================
     function updateHUD() {
         document.getElementById('vc-cash').textContent = `$${String(playerCash).padStart(8, '0')}`;
@@ -559,7 +703,7 @@ function initViceCityEngine() {
         document.getElementById('vc-weapon-wheel').classList.add('hidden');
         showGameToast(`Equipado: ${weapons[idx].name}`);
 
-        if (document.pointerLockElement !== mount) {
+        if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
             try { mount.requestPointerLock(); } catch (e) {}
         }
     };
@@ -619,7 +763,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 8. MAPA COMPLETO (M) E GPS
+    // 9. MAPA COMPLETO (M) E GPS
     // =========================================================================
     window.toggleFullMap = (forceState) => {
         const mapEl = document.getElementById('vc-full-map');
@@ -634,7 +778,7 @@ function initViceCityEngine() {
             if (document.pointerLockElement) document.exitPointerLock();
             drawBigMap();
         } else {
-            if (document.pointerLockElement !== mount) {
+            if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
                 try { mount.requestPointerLock(); } catch (e) {}
             }
         }
@@ -661,7 +805,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 9. CONTROLES DE TECLADO E MOUSE
+    // 10. CONTROLES DE TECLADO E MOUSE (COM SENSIBILIDADE E EIXO Y INVERTIDO)
     // =========================================================================
     const keys = {};
     let mouseLeftDown = false;
@@ -669,6 +813,13 @@ function initViceCityEngine() {
     window.onkeydown = (e) => {
         const k = e.key.toLowerCase();
         keys[k] = true;
+
+        // Tecla [O] ou [P] abre/fecha o Menu de Configurações
+        if (k === 'o' || k === 'p') {
+            e.preventDefault();
+            toggleSettingsModal();
+            return;
+        }
 
         if (isPlayerDead) return;
 
@@ -700,7 +851,6 @@ function initViceCityEngine() {
             throwGrenade();
         }
 
-        // Trocar Estação de Rádio [R]
         if (k === 'r') {
             currentRadioIdx = (currentRadioIdx + 1) % radioStations.length;
             updateRadioHUD();
@@ -708,7 +858,6 @@ function initViceCityEngine() {
             showGameToast(`📻 Rádio: ${radioStations[currentRadioIdx].name}`);
         }
 
-        // Pulo a pé ou Suspensão Hidráulica / Freio de Mão no carro
         if (e.code === 'Space') {
             e.preventDefault();
             if (!inVehicle && playerChar.yPos <= 0.01 && playerChar.state !== 'dead') {
@@ -718,7 +867,6 @@ function initViceCityEngine() {
 
         if (k === 'h' && inVehicle && window.VCSoundFX) VCSoundFX.playCarHorn();
 
-        // Entrar / Sair de Veículos [F]
         if (k === 'f' && !activeInterior) {
             if (inVehicle) {
                 inVehicle.doorOpenTimer = 28;
@@ -750,9 +898,7 @@ function initViceCityEngine() {
             }
         }
 
-        // Interação Universal [E]: Portas de Todos os Edifícios, Interiores, Garagem Pay 'n' Spray e Missões
         if (k === 'e') {
-            // [1] Dentro de um veículo -> Garagem Pay 'n' Spray
             if (inVehicle) {
                 for (let g of garages) {
                     if (inVehicle.mesh.position.distanceTo(g.marker.position) < 5.5) {
@@ -766,7 +912,7 @@ function initViceCityEngine() {
                             if (inVehicle.chassis) inVehicle.chassis.material.color.setHex(newCol);
                             wantedStars = 0;
                             updateHUD();
-                            if (window.VCSoundFX) VCSoundFX.playCash();
+                            playAmplifiedMoneyChime();
                             showGameToast(`🔧 ${g.name}: Lataria 100%, Nova Pintura, NITRO [SHIFT] instalado e Polícia despistada!`);
                         } else {
                             showGameToast('⚠️ Precisa de $400 para usar a Pay \'n\' Spray!');
@@ -777,10 +923,8 @@ function initViceCityEngine() {
                 return;
             }
 
-            // [2] Dentro de algum Interior -> Sair ou Interagir com o local
             if (activeInterior) {
                 const room = interiorRooms[activeInterior.type];
-                // Sair pela porta azul
                 if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.cx, -40, room.exitZ)) < 3.4) {
                     playerChar.mesh.position.set(activeInterior.extX, 0, activeInterior.extZ);
                     const wasReported = activeInterior.reported;
@@ -791,14 +935,13 @@ function initViceCityEngine() {
                     return;
                 }
 
-                // Ação específica de cada Interior
                 if (activeInterior.type === 'store') {
                     if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -1.8)) < 3.5 && !activeInterior.robbed) {
                         activeInterior.robbed = true;
                         activeInterior.marker.material.color.setHex(0x52525b);
                         clerkSurrendered = true;
                         playerCash += activeInterior.cash;
-                        if (window.VCSoundFX) VCSoundFX.playCash();
+                        playAmplifiedMoneyChime();
                         notifySiteDiscount(0.10, `Assalto em ${activeInterior.name}`);
                         showGameToast(`💰 ROUBOU $${activeInterior.cash} DO CAIXA! Fuja pela porta azul!`);
                         updateHUD();
@@ -825,9 +968,9 @@ function initViceCityEngine() {
                             weapons[3].ammo += 24;
                             weapons[4].ammo += 120;
                             grenadeCount += 3;
-                            selectVCWeapon(4); // Equipa o Rifle M4
+                            selectVCWeapon(4);
                             updateHUD();
-                            if (window.VCSoundFX) VCSoundFX.playCash();
+                            playAmplifiedMoneyChime();
                             showGameToast('🎖️ Pacote Ammu-Nation comprado: Rifle M4, Granadas, Colete 100% e Munição!');
                         } else {
                             showGameToast('⚠️ Precisa de $800 para o Pacote Completo Ammu-Nation!');
@@ -850,7 +993,6 @@ function initViceCityEngine() {
                 return;
             }
 
-            // [3] Na rua -> Entrar em qualquer edifício com porta
             for (let door of enterableDoors) {
                 if (playerChar.mesh.position.distanceTo(door.marker.position) < 4.2) {
                     if (door.type === 'house' && !door.owned) {
@@ -858,7 +1000,7 @@ function initViceCityEngine() {
                             playerCash -= door.price;
                             door.owned = true;
                             door.marker.material.color.setHex(0x38bdf8);
-                            if (window.VCSoundFX) VCSoundFX.playCash();
+                            playAmplifiedMoneyChime();
                             updateHUD();
                             showGameToast(`🏠 VOCÊ COMPROU: ${door.name}! Aperte [E] novamente para entrar.`);
                         } else {
@@ -887,7 +1029,6 @@ function initViceCityEngine() {
                 }
             }
 
-            // [4] Iniciar / Concluir Missão [V]
             if (playerChar.mesh.position.distanceTo(missionMarker.position) < 4.5) {
                 if (missionStage === 1) {
                     missionStage = 2;
@@ -946,8 +1087,10 @@ function initViceCityEngine() {
 
     window.onmousemove = (e) => {
         if (document.pointerLockElement === mount && !isAnyOverlayOpen()) {
-            camYaw -= e.movementX * 0.004;
-            camPitch = Math.max(-0.65, Math.min(0.85, camPitch + e.movementY * 0.0038));
+            const sens = gameSettings.sensitivity;
+            const yDir = gameSettings.invertY ? -1 : 1;
+            camYaw -= e.movementX * 0.004 * sens;
+            camPitch = Math.max(-0.65, Math.min(0.85, camPitch + e.movementY * 0.0038 * sens * yDir));
         }
     };
 
@@ -964,7 +1107,7 @@ function initViceCityEngine() {
                     if (p.hp <= 0) {
                         p.alive = false;
                         p.char.state = 'dead';
-                        spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 65);
+                        dropNPCLoot(p.char.mesh.position.x, p.char.mesh.position.z, 75);
                         if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
                     }
                 }
@@ -975,7 +1118,7 @@ function initViceCityEngine() {
                     if (cop.hp <= 0) {
                         cop.alive = false;
                         cop.char.state = 'dead';
-                        spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, 'cash', 120);
+                        dropNPCLoot(cop.char.mesh.position.x, cop.char.mesh.position.z, 140);
                         wantedStars = Math.min(6, wantedStars + 1);
                         updateHUD();
                     }
@@ -990,12 +1133,10 @@ function initViceCityEngine() {
         playerChar.recoilOffset = 0.28;
         if (window.VCSoundFX) VCSoundFX.playGunshot(wpn.type === 'm4' ? 'uzi' : wpn.type);
 
-        // Atirar dentro da loja aciona a denúncia 190
         if (activeInterior && activeInterior.type === 'store' && !activeInterior.reported) {
             clerkSurrendered = true;
             triggerStoreRobberyReport(activeInterior);
         }
-        // Atirar dentro da delegacia dá 3 estrelas imediatas
         if (activeInterior && activeInterior.type === 'police' && wantedStars < 3) {
             wantedStars = 3;
             updateHUD();
@@ -1029,7 +1170,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 10. ATROPELAMENTOS REALISTAS (CARROS <-> PEDESTRES <-> POLICIAIS <-> PLAYER)
+    // 11. ATROPELAMENTOS REALISTAS (CARROS <-> PEDESTRES <-> POLICIAIS <-> PLAYER)
     // =========================================================================
     function handleVehicleRunOver(carObj, speedAbs, isPlayerDriving) {
         if (speedAbs < 0.14 || carObj.destroyed) return;
@@ -1041,7 +1182,7 @@ function initViceCityEngine() {
                 p.alive = false;
                 p.hp = 0;
                 p.char.state = 'dead';
-                spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 75);
+                dropNPCLoot(p.char.mesh.position.x, p.char.mesh.position.z, 85);
                 if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
 
                 if (isPlayerDriving) {
@@ -1060,7 +1201,7 @@ function initViceCityEngine() {
                 cop.alive = false;
                 cop.hp = 0;
                 cop.char.state = 'dead';
-                spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, 'cash', 140);
+                dropNPCLoot(cop.char.mesh.position.x, cop.char.mesh.position.z, 160);
                 if (isPlayerDriving) {
                     carObj.speed *= 0.80;
                     wantedStars = Math.min(6, wantedStars + 1);
@@ -1083,7 +1224,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 11. CICLO DINÂMICO DE 24 HORAS (DIA, PÔR DO SOL NEON E NOITE)
+    // 12. CICLO DINÂMICO DE 24 HORAS (DIA, PÔR DO SOL NEON E NOITE)
     // =========================================================================
     function updateDayNightCycle() {
         const hour = gameMinutes / 60;
@@ -1114,7 +1255,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 12. RADAR MINIMAPA E MAPA AMPLIADO (M)
+    // 13. RADAR MINIMAPA E MAPA AMPLIADO (M)
     // =========================================================================
     const radarCanvas = document.getElementById('vc-radar');
     const rCtx = radarCanvas ? radarCanvas.getContext('2d') : null;
@@ -1159,7 +1300,6 @@ function initViceCityEngine() {
             }
         }
 
-        // Ícones dos Edifícios no Minimapa
         enterableDoors.forEach(d => {
             if (d.type === 'store' && d.robbed) return;
             const colors = { store: '#facc15', house: d.owned ? '#38bdf8' : '#10b981', gunshop: '#f97316', police: '#3b82f6' };
@@ -1261,8 +1401,8 @@ function initViceCityEngine() {
 
     if (window.speakVC) {
         speakVC(
-            "Welcome to ArcadeCity! Enter stores, houses, Ammu-Nation or the Police HQ with E. Press G for grenades and R for radio.",
-            "Bem-vindo a ArcadeCity! Entre em lojas, casas, Ammu-Nation ou Delegacia com E. Aperte G para granadas e R para rádio.",
+            "Welcome to ArcadeCity! Press O for settings, G for grenades, and collect cash dropped by NPCs.",
+            "Bem-vindo a ArcadeCity! Aperte O para configurações, G para granadas e colete o dinheiro dos NPCs.",
             0.9,
             1.0
         );
@@ -1271,7 +1411,7 @@ function initViceCityEngine() {
     updateHUD();
 
     // =========================================================================
-    // 13. LOOP PRINCIPAL DE SIMULAÇÃO (60 FPS)
+    // 14. LOOP PRINCIPAL DE SIMULAÇÃO (60 FPS)
     // =========================================================================
     let tick = 0;
     function gameLoop() {
@@ -1281,12 +1421,10 @@ function initViceCityEngine() {
         if (invulnFrames > 0) invulnFrames--;
         if (fireCooldown > 0) fireCooldown--;
 
-        // Disparo contínuo para armas automáticas (Uzi e Rifle M4)
         if (mouseLeftDown && !inVehicle && !isPlayerDead && (currentWeaponIdx === 2 || currentWeaponIdx === 4)) {
             performAttack();
         }
 
-        // Estado Wasted (Morte)
         if (isPlayerDead) {
             VCModels.updateHumanAnimation(playerChar, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
             wastedTimer--;
@@ -1297,7 +1435,6 @@ function initViceCityEngine() {
 
         if (tick % 45 === 0 && window.VCSoundFX) VCSoundFX.playAmbientCityTick();
 
-        // Relógio e Ciclo Dia/Noite
         if (tick % 45 === 0) {
             gameMinutes = (gameMinutes + 1) % 1440;
             const clk = document.getElementById('vc-clock');
@@ -1307,7 +1444,6 @@ function initViceCityEngine() {
             updateDayNightCycle();
         }
 
-        // Decaimento gradual das estrelas se o jogador despistar a polícia por muito tempo
         if (wantedStars > 0 && !activeInterior) {
             wantedDecayTimer++;
             if (wantedDecayTimer > 1500) {
@@ -1321,7 +1457,7 @@ function initViceCityEngine() {
         const hasGun = currentWeaponIdx > 0;
         if (!hasGun) isAiming = false;
 
-        // Atualização de Partículas (Fumaça, Fogo e Explosões)
+        // Partículas
         for (let i = particles.length - 1; i >= 0; i--) {
             const pt = particles[i];
             pt.mesh.position.x += pt.vx;
@@ -1335,7 +1471,7 @@ function initViceCityEngine() {
             }
         }
 
-        // Granadas arremessadas [G]
+        // Granadas [G]
         for (let i = grenades.length - 1; i >= 0; i--) {
             const g = grenades[i];
             g.mesh.position.x += g.vx;
@@ -1356,24 +1492,37 @@ function initViceCityEngine() {
             }
         }
 
-        // Pickups Coletáveis no Chão (Dinheiro, Vida, Colete, Munição)
+        // Coleta Magnética de Maços de Dinheiro e Itens Dropados pelos NPCs
         for (let i = droppedPickups.length - 1; i >= 0; i--) {
             const pk = droppedPickups[i];
+            pk.bobPhase += 0.08;
             pk.mesh.rotation.y += 0.06;
+            pk.mesh.position.y = 0.30 + Math.sin(pk.bobPhase) * 0.08;
             pk.life--;
+
             const collectorPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
-            if (collectorPos.distanceTo(pk.mesh.position) < 2.5) {
+            const dist = collectorPos.distanceTo(pk.mesh.position);
+
+            // Atração magnética quando o jogador chega a menos de 5.5m
+            if (dist < 5.5 && dist > 0.1) {
+                pk.mesh.position.x = THREE.MathUtils.lerp(pk.mesh.position.x, collectorPos.x, 0.14);
+                pk.mesh.position.z = THREE.MathUtils.lerp(pk.mesh.position.z, collectorPos.z, 0.14);
+            }
+
+            if (dist < 2.2) {
                 if (pk.type === 'cash') {
                     playerCash += pk.value;
+                    playAmplifiedMoneyChime();
                     showGameToast(`💵 +$${pk.value} coletado!`);
                 } else if (pk.type === 'health') {
                     playerHealth = Math.min(100, playerHealth + 40);
+                    playAmplifiedMoneyChime();
                     showGameToast('❤️ +40 Vida recuperada!');
                 } else if (pk.type === 'armor') {
                     playerArmor = Math.min(100, playerArmor + 50);
+                    playAmplifiedMoneyChime();
                     showGameToast('🛡️ +50 Colete Balístico!');
                 }
-                if (window.VCSoundFX) VCSoundFX.playCash();
                 updateHUD();
                 pk.life = 0;
             }
@@ -1383,7 +1532,7 @@ function initViceCityEngine() {
             }
         }
 
-        // Animações internas dos NPCs dentro dos edifícios
+        // Animações internas dos NPCs
         if (activeInterior) {
             if (activeInterior.type === 'store') {
                 if (activeInterior.reported) {
@@ -1407,7 +1556,7 @@ function initViceCityEngine() {
             }
         }
 
-        // Física de Veículos (Direção, Drift com Espaço, Nitro com Shift, Dano e Explosão)
+        // Física de Dano/Fumaça/Explosão de Veículos
         const allVehiclesList = [...vehicles, ...copUnits];
         allVehiclesList.forEach(v => {
             if (v.destroyed) return;
@@ -1433,7 +1582,7 @@ function initViceCityEngine() {
             }
         });
 
-        // Movimento do Jogador (Veículo ou A Pé)
+        // Movimento do Jogador
         if (inVehicle) {
             let steerInput = 0;
             const isNitroActive = !!(inVehicle.hasNitro && keys['shift']);
@@ -1563,7 +1712,7 @@ function initViceCityEngine() {
             if (Math.abs(p.char.mesh.position.x) > 185 || Math.abs(p.char.mesh.position.z) > 215) p.angle += Math.PI;
         });
 
-        // Projéteis do Jogador (Acertam Paredes, Pedestres, Policiais, Veículos e Helicópteros)
+        // Projéteis do Jogador
         for (let i = bullets.length - 1; i >= 0; i--) {
             const b = bullets[i];
             b.mesh.position.x -= Math.sin(b.angle) * 1.85;
@@ -1582,7 +1731,7 @@ function initViceCityEngine() {
                         b.life = 0;
                         if (p.hp <= 0) {
                             p.alive = false; p.char.state = 'dead';
-                            spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 75);
+                            dropNPCLoot(p.char.mesh.position.x, p.char.mesh.position.z, 85);
                             wantedStars = Math.min(6, wantedStars + 1);
                             if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
                             updateHUD();
@@ -1596,7 +1745,7 @@ function initViceCityEngine() {
                         b.life = 0;
                         if (cop.hp <= 0) {
                             cop.alive = false; cop.char.state = 'dead';
-                            spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, Math.random() > 0.5 ? 'armor' : 'cash', 150);
+                            dropNPCLoot(cop.char.mesh.position.x, cop.char.mesh.position.z, 165);
                             wantedStars = Math.min(6, wantedStars + 1);
                             updateHUD();
                         }
@@ -1754,7 +1903,7 @@ function initViceCityEngine() {
             if (eb.life <= 0) { scene.remove(eb.mesh); enemyBullets.splice(i, 1); }
         }
 
-        // Prompts Contextuais na Tela ([E] e [F])
+        // Prompts Contextuais na Tela
         const promptEl = document.getElementById('vc-action-prompt');
         if (promptEl) {
             let msg = "";
@@ -1805,7 +1954,7 @@ function initViceCityEngine() {
             else promptEl.classList.add('hidden');
         }
 
-        // Órbita 3D da Câmera (Horizontal 360° + Vertical Livre)
+        // Órbita 3D da Câmera
         const distCam = activeInterior ? 4.4 : (isAiming ? 3.5 : (inVehicle ? 9.8 : 6.4));
         const baseHeight = activeInterior ? 2.1 : (isAiming ? 1.85 : (inVehicle ? 3.4 : 2.3));
         const sideOffset = isAiming ? 0.95 : 0;
