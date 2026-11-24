@@ -1,10 +1,7 @@
 // game/js/models.js - Anatomia Humana Articulada, +5.000 Variações de NPCs,
-// Motor de Animação Procedural (+100k variações), Armas 3D, Projéteis e Veículos Mecânicos
+// Motor de Animação Procedural, Armas 3D, Projéteis e Veículos Mecânicos
 
 window.VCModels = {
-    // =========================================================================
-    // 1. BANCO COMBINATÓRIO DE +5.000 VARIAÇÕES DE PERSONAGENS & NPCs
-    // =========================================================================
     CharacterGenes: {
         skinTones: ['#ffdbac', '#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#5c3818', '#3b2219'],
         hairColors: ['#09090b', '#1c1917', '#451a03', '#78350f', '#ca8a04', '#eab308', '#dc2626', '#94a3b8'],
@@ -17,11 +14,11 @@ window.VCModels = {
         pantsColors: [0x1e3a8a, 0x0f172a, 0xf8fafc, 0x3f3f46, 0x78350f, 0x064e3b, 0x831843, 0xd97706],
         shoeColors: [0xf8fafc, 0x111827, 0xdc2626, 0x2563eb, 0xfacc15],
         builds: [
-            { scaleX: 0.92, scaleZ: 0.90, height: 0.96 }, // Atlético / Esguio
-            { scaleX: 1.00, scaleZ: 1.00, height: 1.00 }, // Padrão
-            { scaleX: 1.14, scaleZ: 1.12, height: 1.03 }, // Musculoso / Forte
-            { scaleX: 1.24, scaleZ: 1.25, height: 0.98 }, // Robusto
-            { scaleX: 0.88, scaleZ: 0.88, height: 1.04 }  // Alto
+            { scaleX: 0.92, scaleZ: 0.90, height: 0.96 },
+            { scaleX: 1.00, scaleZ: 1.00, height: 1.00 },
+            { scaleX: 1.14, scaleZ: 1.12, height: 1.03 },
+            { scaleX: 1.24, scaleZ: 1.25, height: 0.98 },
+            { scaleX: 0.88, scaleZ: 0.88, height: 1.04 }
         ]
     },
 
@@ -47,9 +44,6 @@ window.VCModels = {
         };
     },
 
-    // =========================================================================
-    // 2. CONSTRUÇÃO DE PERSONAGEM HUMANO ARTICULADO
-    // =========================================================================
     createHuman3D(options = {}) {
         const gene = options.customDna ? {
             skinHex: options.customDna.skinHex || '#f1c27d',
@@ -119,14 +113,12 @@ window.VCModels = {
         const pantsMat = new THREE.MeshStandardMaterial({ color: gene.pantsColor, roughness: 0.8 });
         const shoeMat = new THREE.MeshStandardMaterial({ color: gene.shoeColor, roughness: 0.5 });
 
-        // Tronco e Pescoço
         const torso = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.72, 0.30), shirtMat);
         torso.position.y = 1.12;
         const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.10, 0.14, 10), skinMat);
         neck.position.y = 1.50;
         bodyContainer.add(torso, neck);
 
-        // Cabeça, Cabelo e Óculos
         const headGroup = new THREE.Group();
         headGroup.position.y = 1.72;
         const headMats = [skinMat, skinMat, hairMat, skinMat, skinMat, faceMat];
@@ -151,7 +143,6 @@ window.VCModels = {
         }
         bodyContainer.add(headGroup);
 
-        // Braço Esquerdo
         const leftArm = new THREE.Group();
         leftArm.position.set(-0.38, 1.42, 0);
         const lUpper = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.32, 0.16), shirtMat);
@@ -161,7 +152,6 @@ window.VCModels = {
         leftArm.add(lUpper, lForearm);
         bodyContainer.add(leftArm);
 
-        // Braço Direito + Socket para Armas 3D
         const rightArm = new THREE.Group();
         rightArm.position.set(0.38, 1.42, 0);
         const rUpper = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.32, 0.16), shirtMat);
@@ -173,7 +163,6 @@ window.VCModels = {
         rightArm.add(rUpper, rForearm, handWeaponSocket);
         bodyContainer.add(rightArm);
 
-        // Pernas Articuladas (Coxa, Canela e Sapato)
         const createLeg = (xOff) => {
             const legGroup = new THREE.Group();
             legGroup.position.set(xOff, 0.76, 0);
@@ -209,9 +198,6 @@ window.VCModels = {
         };
     },
 
-    // =========================================================================
-    // 3. MOTOR DE ANIMAÇÃO PROCEDURAL HUMANA
-    // =========================================================================
     updateHumanAnimation(charObj, params = {}) {
         if (!charObj || !charObj.mesh) return;
         const { speed = 0, isRunning = false, isAiming = false, hasGun = false } = params;
@@ -263,9 +249,6 @@ window.VCModels = {
         charObj.recoilOffset = (charObj.recoilOffset || 0) * 0.75;
     },
 
-    // =========================================================================
-    // 4. ARMAS 3D, VEÍCULOS MECÂNICOS E POSTES DA CIDADE
-    // =========================================================================
     createWeapon3D(type = 'pistol') {
         const g = new THREE.Group();
         const metalMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.25 });
