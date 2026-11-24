@@ -1,5 +1,7 @@
-// game/js/main.js - Engine PC Completo: Hitboxes Reais, Atropelamentos, Vida/Wasted,
-// Interior de Lojas com Denúncia Policial, Desembarque com Tiroteio e Helicópteros VCPD
+// game/js/main.js - Motor AAA Estilo GTA V/VI:
+// Interiores Entráveis (Mercados, Casas, Ammu-Nation, Delegacia VCPD),
+// Hitboxes 3D, Atropelamentos, Vida/Wasted, Dano/Explosão de Carros, Nitro,
+// Granadas [G], Rifle M4, Rádio [R], Ciclo Dia/Noite e Força Tarefa Policial
 
 window.startRockstarIntro = function() {
     const introScreen = document.getElementById('vc-intro-screen');
@@ -23,11 +25,14 @@ function initViceCityEngine() {
     const mount = document.getElementById('vc-canvas-mount');
     mount.innerHTML = '';
 
+    // =========================================================================
+    // 1. RENDERIZADOR, CENA, ILUMINAÇÃO DINÂMICA DIA/NOITE E CÂMERA
+    // =========================================================================
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x3b0764);
-    scene.fog = new THREE.FogExp2(0x4c1d95, 0.0046);
+    scene.fog = new THREE.FogExp2(0x4c1d95, 0.0044);
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 380);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -39,6 +44,119 @@ function initViceCityEngine() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    const hemiLight = new THREE.HemisphereLight(0xfce7f3, 0x1e1b4b, 1.05);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xf472b6, 1.15);
+    sunLight.position.set(80, 120, -60);
+    scene.add(sunLight);
+
+    // Luzes dedicadas aos 4 setores de interiores no subsolo (Y = -40)
+    [0, 60, 120, 180].forEach(ix => {
+        const roomLight = new THREE.PointLight(0xffffff, 1.55, 38);
+        roomLight.position.set(ix, -35.2, 0);
+        scene.add(roomLight);
+    });
+
+    // =========================================================================
+    // 2. CONSTRUÇÃO DO MUNDO E PROTAGONISTA ARTICULADO
+    // =========================================================================
+    const {
+        colliders,
+        interiorColliders,
+        interiorRooms,
+        enterableDoors,
+        garages,
+        streetLamps,
+        missionMarker,
+        vehicles,
+        peds,
+        interior
+    } = VCWorld.buildCity(scene);
+
+    const playerChar = VCModels.createHuman3D({
+        isPlayer: true,
+        customDna: {
+            skinHex: '#f1c27d',
+            hairColor: 0x1c1917,
+            shirtHex: '#06b6d4',
+            pantsColor: 0x1e3a8a,
+            shoeColor: 0xf8fafc,
+            shirtStyle: 'hawaiian',
+            accessory: 'none',
+            hasBeard: false,
+            buildScale: 1.0,
+            strideFreq: 1.0,
+            armSwingAmp: 0.9
+        }
+    });
+    playerChar.mesh.position.set(45, 0, -15);
+    scene.add(playerChar.mesh);
+
+    // Arsenal 3D anexado à mão direita
+    const weaponModels3D = {
+        pistol: VCModels.createWeapon3D('pistol'),
+        uzi: VCModels.createWeapon3D('uzi'),
+        shotgun: VCModels.createWeapon3D('shotgun'),
+        m4: VCModels.createWeapon3D('shotgun')
+    };
+    weaponModels3D.m4.scale.set(1.15, 1.15, 1.25);
+
+    Object.values(weaponModels3D).forEach(m => {
+        m.visible = false;
+        playerChar.handWeaponSocket.add(m);
+    });
+
+    // =========================================================================
+    // 3. ESTADO GLOBAL DO JOGADOR, VEÍCULOS, RÁDIO E CONTROLE DE OVERLAYS
+    // =========================================================================
+    const weapons = [
+        { name: "Punhos (Desarmado)", icon: "👊", ammo: "∞", type: "melee", dmg: 32, rate: 16 },
+        { name: "Pistola 9mm", icon: "🔫", ammo: 120, type: "pistol", dmg: 38, rate: 10 },
+        { name: "Uzi Mac-10", icon: "🧨", ammo: 320, type: "uzi", dmg: 24, rate: 4 },
+        { name: "Escopeta Cal.12", icon: "💥", ammo: 48, type: "shotgun", dmg: 48, rate: 22 },
+        { name: "Fuzil M4 Carbine", icon: "🎖️", ammo: 240, type: "m4", dmg: 44, rate: 5 }
+    ];
+
+    const radioStations = [
+        { name: "FLASH FM 80s • ON AIR", color: "#22d3ee" },
+        { name: "ARCADE SYNTHWAVE • NEON", color: "#ec4899" },
+        { name: "VCPD POLICE SCANNER • 190", color: "#facc15" },
+        { name: "RÁDIO DESLIGADO", color: "#71717a" }
+    ];
+
+    let currentRadioIdx = 0;
+    let currentWeaponIdx = 0;
+    let fireCooldown = 0;
+    let grenadeCount = 5;
+
+    let playerCash = 3500;
+    let playerHealth = 100;
+    let playerArmor = 100;
+    let isPlayerDead = false;
+    let wastedTimer = 0;
+    let invulnFrames = 0;
+
+    let wantedStars = 0;
+    let wantedDecayTimer = 0;
+
+    let inVehicle = null;
+    let isAiming = false;
+    let activeInterior = null; // Objeto da porta ativa quando dentro de um edifício
+    let clerkSurrendered = false;
+
+    let gpsWaypoint = null;
+    let camYaw = 0;
+    let camPitch = 0.14;
+    let gameMinutes = 17 * 60 + 30;
+    let missionStage = 1;
+
+    const bullets = [];
+    const enemyBullets = [];
+    const grenades = [];
+    const particles = [];
+    const droppedPickups = [];
+
     function isAnyOverlayOpen() {
         const mapOpen = !document.getElementById('vc-full-map').classList.contains('hidden');
         const wheelOpen = !document.getElementById('vc-weapon-wheel').classList.contains('hidden');
@@ -47,7 +165,7 @@ function initViceCityEngine() {
 
     mount.onclick = () => {
         if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
-            mount.requestPointerLock();
+            try { mount.requestPointerLock(); } catch (e) {}
         }
     };
 
@@ -59,43 +177,34 @@ function initViceCityEngine() {
         }
     });
 
-    scene.add(new THREE.HemisphereLight(0xfce7f3, 0x1e1b4b, 1.05));
-    const sun = new THREE.DirectionalLight(0xf472b6, 1.15);
-    sun.position.set(80, 120, -60);
-    scene.add(sun);
+    function notifySiteDiscount(pct, reason) {
+        try {
+            window.parent.postMessage({ type: 'ARCADE_GTA_REWARD', discount: pct, reason }, '*');
+        } catch (e) {}
+    }
 
-    const intLight = new THREE.PointLight(0xffffff, 1.6, 35);
-    intLight.position.set(0, -35.5, 0);
-    scene.add(intLight);
+    function showGameToast(txt) {
+        const el = document.getElementById('vc-toast');
+        if (!el) return;
+        el.textContent = txt;
+        el.classList.remove('hidden');
+        clearTimeout(window.vcToastTimer);
+        window.vcToastTimer = setTimeout(() => el.classList.add('hidden'), 4000);
+    }
 
-    const { colliders, interiorColliders, stores, houses, missionMarker, vehicles, peds, interior } = VCWorld.buildCity(scene);
-
-    // Protagonista Humano Articulado
-    const playerChar = VCModels.createHuman3D({
-        customDna: {
-            skinHex: '#f1c27d', hairColor: 0x1c1917, shirtHex: '#06b6d4', pantsColor: 0x1e3a8a,
-            shoeColor: 0xf8fafc, shirtStyle: 'hawaiian', accessory: 'none', hasBeard: false,
-            buildScale: 1.0, strideFreq: 1.0, armSwingAmp: 0.9, postureTilt: 0
-        }
-    });
-    playerChar.mesh.position.set(45, 0, -15);
-    scene.add(playerChar.mesh);
-
-    // Armas 3D na Mão Direita
-    const weaponModels3D = {
-        pistol: VCModels.createWeapon3D('pistol'),
-        uzi: VCModels.createWeapon3D('uzi'),
-        shotgun: VCModels.createWeapon3D('shotgun')
-    };
-    Object.values(weaponModels3D).forEach(m => {
-        m.visible = false;
-        playerChar.handWeaponSocket.add(m);
-    });
+    function updateRadioHUD() {
+        const el = document.getElementById('vc-radio-name');
+        if (!el) return;
+        const st = radioStations[currentRadioIdx];
+        el.textContent = st.name;
+        el.style.color = st.color;
+    }
 
     // =========================================================================
-    // MOTOR DE HITBOX 3D (AABB + CÍRCULOS + COLISÃO DE VEÍCULOS)
+    // 4. MOTOR DE HITBOX 3D (EXTERIOR, INTERIORES, VEÍCULOS E EXPLOSÕES)
     // =========================================================================
     function hitsColliderBox(x, z, radius, boxList) {
+        if (!boxList) return false;
         for (let i = 0; i < boxList.length; i++) {
             const b = boxList[i];
             if (x + radius > b.minX && x - radius < b.maxX && z + radius > b.minZ && z - radius < b.maxZ) {
@@ -105,14 +214,17 @@ function initViceCityEngine() {
         return false;
     }
 
-    function moveEntityWithHitbox(pos, dx, dz, radius, isInsideStore = false) {
-        if (isInsideStore) {
+    function moveEntityWithHitbox(pos, dx, dz, radius, interiorType = null) {
+        if (interiorType && interiorRooms[interiorType]) {
+            const room = interiorRooms[interiorType];
+            const roomBoxes = interiorColliders[interiorType] || [];
             const nx = pos.x + dx;
             const nz = pos.z + dz;
-            if (Math.abs(nx) < 8.6 && !hitsColliderBox(nx, pos.z, radius, interiorColliders)) {
+
+            if (Math.abs(nx - room.cx) < 8.8 && !hitsColliderBox(nx, pos.z, radius, roomBoxes)) {
                 pos.x = nx;
             }
-            if (nz > -7.8 && nz < 8.3 && !hitsColliderBox(pos.x, nz, radius, interiorColliders)) {
+            if (nz > -8.6 && nz < 8.8 && !hitsColliderBox(pos.x, nz, radius, roomBoxes)) {
                 pos.z = nz;
             }
             return;
@@ -133,54 +245,157 @@ function initViceCityEngine() {
     }
 
     function checkVehicleBump(movingCar, nextX, nextZ, allVehicles, extraCops) {
-        const checkList = [...allVehicles, ...extraCops];
-        for (let other of checkList) {
-            if (other === movingCar) continue;
+        const list = [...allVehicles, ...extraCops];
+        for (let other of list) {
+            if (other === movingCar || other.destroyed) continue;
             const dist = Math.hypot(nextX - other.mesh.position.x, nextZ - other.mesh.position.z);
-            if (dist < 3.2) return other;
+            if (dist < 3.25) return other;
         }
         return null;
     }
 
     // =========================================================================
-    // SISTEMA DE FORÇA POLICIAL (VIATURAS, DESEMBARQUE, HELICÓPTEROS E DENÚNCIAS)
+    // 5. EFEITOS DE PARTÍCULAS, EXPLOSÕES E DROPS COLETÁVEIS
+    // =========================================================================
+    function spawnParticle(x, y, z, colorHex, scale = 0.35, vy = 0.08, life = 28) {
+        const p = new THREE.Mesh(
+            new THREE.BoxGeometry(scale, scale, scale),
+            new THREE.MeshBasicMaterial({ color: colorHex })
+        );
+        p.position.set(x, y, z);
+        scene.add(p);
+        particles.push({
+            mesh: p,
+            vx: (Math.random() - 0.5) * 0.14,
+            vy: vy + Math.random() * 0.06,
+            vz: (Math.random() - 0.5) * 0.14,
+            life
+        });
+    }
+
+    function triggerExplosion(pos, radius = 11, maxDamage = 110) {
+        if (window.VCSoundFX) VCSoundFX.playGunshot('shotgun');
+
+        for (let i = 0; i < 24; i++) {
+            const col = i % 2 === 0 ? 0xf97316 : 0xfacc15;
+            spawnParticle(
+                pos.x + (Math.random() - 0.5) * 2.5,
+                pos.y + 0.8 + Math.random() * 1.5,
+                pos.z + (Math.random() - 0.5) * 2.5,
+                col,
+                0.65,
+                0.18,
+                36
+            );
+        }
+
+        // Dano em pedestres próximos
+        peds.forEach(p => {
+            if (p.alive && p.char.mesh.position.distanceTo(pos) < radius) {
+                p.alive = false;
+                p.hp = 0;
+                p.char.state = 'dead';
+                spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 85);
+            }
+        });
+
+        // Dano em policiais próximos
+        copOfficers.forEach(cop => {
+            if (cop.alive && cop.char.mesh.position.distanceTo(pos) < radius) {
+                cop.alive = false;
+                cop.hp = 0;
+                cop.char.state = 'dead';
+                spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, 'cash', 160);
+            }
+        });
+
+        // Dano em veículos próximos
+        [...vehicles, ...copUnits].forEach(v => {
+            if (!v.destroyed && v.mesh.position.distanceTo(pos) < radius) {
+                damageVehicle(v, 70);
+            }
+        });
+
+        // Dano no jogador se estiver perto da explosão
+        if (!activeInterior && !isPlayerDead) {
+            const pPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
+            const dist = pPos.distanceTo(pos);
+            if (dist < radius) {
+                const factor = 1 - (dist / radius);
+                applyDamageToPlayer(Math.round(maxDamage * factor), 'explosion');
+            }
+        }
+    }
+
+    function spawnPickup(x, z, type = 'cash', value = 75) {
+        const colorMap = {
+            cash: 0x10b981,
+            health: 0xf43f5e,
+            armor: 0x38bdf8,
+            ammo: 0xfacc15
+        };
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(0.65, 0.28, 0.45),
+            new THREE.MeshBasicMaterial({ color: colorMap[type] || 0x10b981 })
+        );
+        mesh.position.set(x, 0.25, z);
+        scene.add(mesh);
+        droppedPickups.push({ mesh, type, value, life: 1200 });
+    }
+
+    function damageVehicle(v, dmg) {
+        if (!v || v.destroyed) return;
+        v.hp = Math.max(0, (v.hp !== undefined ? v.hp : 100) - dmg);
+        if (v.hp <= 0 && !v.burningTimer) {
+            v.burningTimer = 140; // ~2.3 segundos pegando fogo antes de explodir
+            if (v === inVehicle) {
+                showGameToast('🔥 MOTOR EM CHAMAS! Aperte [F] para pular antes de explodir!');
+            }
+        }
+    }
+
+    // =========================================================================
+    // 6. FORÇA POLICIAL (VIATURAS, DESEMBARQUE ARMADO, SWAT E HELICÓPTEROS)
     // =========================================================================
     const copUnits = [];
     const copOfficers = [];
     const copHelis = [];
-    const enemyBullets = [];
-    const droppedCash = [];
-
-    function spawnDroppedCash(x, z, amount) {
-        const cashMesh = new THREE.Mesh(
-            new THREE.BoxGeometry(0.65, 0.14, 0.35),
-            new THREE.MeshBasicMaterial({ color: 0x10b981 })
-        );
-        cashMesh.position.set(x, 0.18, z);
-        scene.add(cashMesh);
-        droppedCash.push({ mesh: cashMesh, amount, life: 900 });
-    }
 
     function spawnCopCar(nearPos = null) {
         if (copUnits.length >= 4) return;
         const basePos = nearPos || playerChar.mesh.position;
         const copBuilt = VCModels.createCar3D(0x090d16, true);
         const angleSpawn = Math.random() * Math.PI * 2;
-        const sx = Math.max(-195, Math.min(195, basePos.x + Math.cos(angleSpawn) * 42));
-        const sz = Math.max(-220, Math.min(220, basePos.z + Math.sin(angleSpawn) * 42));
+        const sx = Math.max(-195, Math.min(195, basePos.x + Math.cos(angleSpawn) * 44));
+        const sz = Math.max(-220, Math.min(220, basePos.z + Math.sin(angleSpawn) * 44));
         copBuilt.mesh.position.set(sx, 0, sz);
         scene.add(copBuilt.mesh);
-        copUnits.push({ ...copBuilt, speed: 0.32, deployed: false });
+        copUnits.push({
+            ...copBuilt,
+            name: 'Viatura VCPD',
+            isCopCar: true,
+            speed: 0.32,
+            maxSpeed: 0.72,
+            angle: 0,
+            hp: 120,
+            burningTimer: 0,
+            destroyed: false,
+            deployed: false
+        });
     }
 
     function deployCopsFromCar(copCar) {
-        if (copCar.deployed) return;
+        if (copCar.deployed || copCar.destroyed) return;
         copCar.deployed = true;
         copCar.doorOpenTimer = 45;
 
+        const isSwat = wantedStars >= 4;
         [-1.9, 1.9].forEach((sideOffset, idx) => {
-            const officer = VCModels.createHuman3D({ isCop: true, seed: 700 + idx });
-            const gun = VCModels.createWeapon3D('pistol');
+            const officer = VCModels.createHuman3D({
+                isCop: true,
+                seed: 700 + idx + (isSwat ? 50 : 0)
+            });
+            const gun = VCModels.createWeapon3D(isSwat ? 'uzi' : 'pistol');
             officer.handWeaponSocket.add(gun);
             officer.mesh.position.set(
                 copCar.mesh.position.x + sideOffset,
@@ -191,8 +406,9 @@ function initViceCityEngine() {
             copOfficers.push({
                 char: officer,
                 alive: true,
-                hp: 65,
-                shootCooldown: 30 + Math.floor(Math.random() * 25)
+                isSwat,
+                hp: isSwat ? 110 : 65,
+                shootCooldown: 28 + Math.floor(Math.random() * 20)
             });
         });
     }
@@ -216,16 +432,23 @@ function initViceCityEngine() {
         tail.position.set(0, 0.25, 3.8);
 
         const rotor = new THREE.Mesh(
-            new THREE.BoxGeometry(8.5, 0.08, 0.35),
+            new THREE.BoxGeometry(8.8, 0.08, 0.35),
             new THREE.MeshBasicMaterial({ color: 0xe2e8f0 })
         );
         rotor.position.set(0, 1.0, 0);
 
-        const spotlight = new THREE.SpotLight(0xffffff, 2.2, 65, Math.PI / 6, 0.4);
+        const spotlight = new THREE.SpotLight(0xffffff, 2.4, 70, Math.PI / 6, 0.4);
         spotlight.position.set(0, -0.8, -1.5);
         heli.add(body, cockpit, tail, rotor, spotlight, spotlight.target);
 
-        return { mesh: heli, rotor, spotlight, shootCooldown: 55, orbitAngle: Math.random() * Math.PI * 2 };
+        return {
+            mesh: heli,
+            rotor,
+            spotlight,
+            hp: 180,
+            shootCooldown: 50,
+            orbitAngle: Math.random() * Math.PI * 2
+        };
     }
 
     function syncPoliceEscalation() {
@@ -249,47 +472,8 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // ARSENAL, ESTADO DE VIDA DO PERSONAGEM E SISTEMA WASTED
+    // 7. HUD, VIDA/WASTED, ARSENAL, GRANADAS E DENÚNCIA 190
     // =========================================================================
-    const weapons = [
-        { name: "Punhos (Desarmado)", icon: "👊", ammo: "∞", type: "melee" },
-        { name: "Pistola 9mm", icon: "🔫", ammo: 96, type: "pistol" },
-        { name: "Uzi Mac-10", icon: "🧨", ammo: 280, type: "uzi" },
-        { name: "Escopeta", icon: "💥", ammo: 36, type: "shotgun" }
-    ];
-    let currentWeaponIdx = 0;
-    let playerCash = 2000;
-    let playerHealth = 100;
-    let playerArmor = 100;
-    let isPlayerDead = false;
-    let wastedTimer = 0;
-    let invulnFrames = 0;
-    let wantedStars = 0;
-    let inVehicle = null;
-    let isAiming = false;
-    let activeStoreInterior = null;
-    let clerkSurrendered = false;
-    let storeReportTimer = 0;
-    let gpsWaypoint = null;
-    let camYaw = 0;
-    let camPitch = 0.12;
-    let gameMinutes = 17 * 60 + 16;
-    let missionStage = 1;
-    const bullets = [];
-
-    function notifySiteDiscount(pct, reason) {
-        try { window.parent.postMessage({ type: 'ARCADE_GTA_REWARD', discount: pct, reason }, '*'); } catch (e) {}
-    }
-
-    function showGameToast(txt) {
-        const el = document.getElementById('vc-toast');
-        if (!el) return;
-        el.textContent = txt;
-        el.classList.remove('hidden');
-        clearTimeout(window.vcToastTimer);
-        window.vcToastTimer = setTimeout(() => el.classList.add('hidden'), 3800);
-    }
-
     function updateHUD() {
         document.getElementById('vc-cash').textContent = `$${String(playerCash).padStart(8, '0')}`;
         document.getElementById('vc-health').textContent = Math.max(0, Math.round(playerHealth));
@@ -311,7 +495,7 @@ function initViceCityEngine() {
             playerHealth = Math.max(0, playerHealth - dmg);
         }
 
-        invulnFrames = 14;
+        invulnFrames = 12;
         updateHUD();
 
         if (playerHealth <= 0) {
@@ -322,7 +506,7 @@ function initViceCityEngine() {
     function triggerPlayerWasted(cause) {
         if (isPlayerDead) return;
         isPlayerDead = true;
-        wastedTimer = 150;
+        wastedTimer = 160;
         isAiming = false;
         document.getElementById('vc-crosshair').classList.add('hidden');
 
@@ -337,9 +521,11 @@ function initViceCityEngine() {
 
         const msg = cause === 'runover'
             ? '💀 WASTED! Você foi atropelado! (-$250 taxa hospitalar)'
-            : '💀 WASTED! Você foi eliminado! (-$250 taxa hospitalar)';
+            : (cause === 'explosion'
+                ? '💀 WASTED! Você explodiu! (-$250 taxa hospitalar)'
+                : '💀 WASTED! Você foi eliminado! (-$250 taxa hospitalar)');
         showGameToast(msg);
-        speakVC("Wasted! You are out.", "Eliminado! Você caiu em combate.", 0.8, 0.95);
+        if (window.speakVC) speakVC("Wasted! You are out.", "Eliminado! Você caiu em combate.", 0.8, 0.95);
     }
 
     function respawnAtHospital() {
@@ -347,7 +533,7 @@ function initViceCityEngine() {
         playerChar.state = 'alive';
         playerChar.mesh.rotation.x = 0;
         playerChar.mesh.position.set(45, 0, -15);
-        activeStoreInterior = null;
+        activeInterior = null;
         clerkSurrendered = false;
         playerHealth = 100;
         playerArmor = 50;
@@ -358,7 +544,7 @@ function initViceCityEngine() {
     }
 
     window.selectVCWeapon = (idx) => {
-        if (isPlayerDead) return;
+        if (isPlayerDead || !weapons[idx]) return;
         currentWeaponIdx = idx;
         const wType = weapons[idx].type;
         Object.keys(weaponModels3D).forEach(k => weaponModels3D[k].visible = (k === wType));
@@ -369,7 +555,7 @@ function initViceCityEngine() {
         }
 
         document.getElementById('vc-weapon-icon').textContent = weapons[idx].icon;
-        document.getElementById('vc-ammo').textContent = weapons[idx].ammo;
+        document.getElementById('vc-ammo').textContent = `${weapons[idx].ammo} | 💣${grenadeCount}`;
         document.getElementById('vc-weapon-wheel').classList.add('hidden');
         showGameToast(`Equipado: ${weapons[idx].name}`);
 
@@ -378,6 +564,63 @@ function initViceCityEngine() {
         }
     };
 
+    function throwGrenade() {
+        if (grenadeCount <= 0 || inVehicle || isPlayerDead) {
+            if (grenadeCount <= 0) showGameToast('⚠️ Sem granadas! Compre na Ammu-Nation.');
+            return;
+        }
+        grenadeCount--;
+        const wpn = weapons[currentWeaponIdx];
+        document.getElementById('vc-ammo').textContent = `${wpn.ammo} | 💣${grenadeCount}`;
+
+        const gMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(0.18, 10, 10),
+            new THREE.MeshStandardMaterial({ color: 0x16a34a, metalness: 0.7 })
+        );
+        gMesh.position.set(playerChar.mesh.position.x, playerChar.mesh.position.y + 1.5, playerChar.mesh.position.z);
+        scene.add(gMesh);
+
+        grenades.push({
+            mesh: gMesh,
+            vx: -Math.sin(camYaw) * 0.42,
+            vy: 0.24,
+            vz: -Math.cos(camYaw) * 0.42,
+            timer: 110
+        });
+        showGameToast('💣 Granada lançada!');
+    }
+
+    function triggerStoreRobberyReport(storeDoor) {
+        if (storeDoor.reported) return;
+        storeDoor.reported = true;
+        interior.alarmLight.material.color.setHex(0xef4444);
+
+        wantedStars = Math.min(6, Math.max(3, wantedStars + 3));
+        updateHUD();
+
+        const exitPoint = new THREE.Vector3(storeDoor.extX, 0, storeDoor.extZ);
+        while (copUnits.length < 2) spawnCopCar(exitPoint);
+        copUnits.forEach((c, idx) => {
+            c.mesh.position.set(storeDoor.extX + (idx === 0 ? -7.5 : 7.5), 0, storeDoor.extZ + 11);
+            c.deployed = false;
+            deployCopsFromCar(c);
+        });
+
+        if (window.triggerDynamicDialogue) triggerDynamicDialogue('shop_robbery', 1.3, 1.15);
+        if (window.speakVC) {
+            speakVC(
+                `911 Emergency! Armed robbery reported at ${storeDoor.name}! All VCPD units respond!`,
+                `Emergência 190! Assalto denunciado em ${storeDoor.name}! Todas as viaturas VCPD no local!`,
+                0.9,
+                1.1
+            );
+        }
+        showGameToast(`🚨 DENÚNCIA 190: O atendente denunciou o roubo em ${storeDoor.name}! A polícia cercou a saída!`);
+    }
+
+    // =========================================================================
+    // 8. MAPA COMPLETO (M) E GPS
+    // =========================================================================
     window.toggleFullMap = (forceState) => {
         const mapEl = document.getElementById('vc-full-map');
         if (!mapEl) return;
@@ -417,35 +660,12 @@ function initViceCityEngine() {
         };
     }
 
-    // Denúncia Policial quando o jogador rouba a loja
-    function triggerStoreRobberyReport(storeObj) {
-        if (storeObj.reported) return;
-        storeObj.reported = true;
-        interior.alarmLight.material.color.setHex(0xef4444);
-
-        wantedStars = Math.min(6, Math.max(3, wantedStars + 3));
-        updateHUD();
-
-        // Posiciona viaturas e policiais armados na porta de saída da loja esperando o jogador!
-        const exitPoint = new THREE.Vector3(storeObj.exitX, 0, storeObj.exitZ);
-        while (copUnits.length < 2) spawnCopCar(exitPoint);
-        copUnits.forEach((c, idx) => {
-            c.mesh.position.set(storeObj.exitX + (idx === 0 ? -7 : 7), 0, storeObj.exitZ + 11);
-            c.deployed = false;
-            deployCopsFromCar(c);
-        });
-
-        triggerDynamicDialogue('shop_robbery', 1.3, 1.15);
-        speakVC(
-            `911 Emergency! Armed robbery reported at ${storeObj.name}! All VCPD units respond!`,
-            `Emergência 190! Assalto à mão armada denunciado em ${storeObj.name}! Todas as viaturas VCPD no local!`,
-            0.9,
-            1.1
-        );
-        showGameToast(`🚨 DENÚNCIA 190: O atendente denunciou o roubo em ${storeObj.name}! A polícia cercou a porta!`);
-    }
-
+    // =========================================================================
+    // 9. CONTROLES DE TECLADO E MOUSE
+    // =========================================================================
     const keys = {};
+    let mouseLeftDown = false;
+
     window.onkeydown = (e) => {
         const k = e.key.toLowerCase();
         keys[k] = true;
@@ -473,19 +693,33 @@ function initViceCityEngine() {
         if (k === '2') selectVCWeapon(1);
         if (k === '3') selectVCWeapon(2);
         if (k === '4') selectVCWeapon(3);
+        if (k === '5') selectVCWeapon(4);
 
+        if (k === 'g') {
+            e.preventDefault();
+            throwGrenade();
+        }
+
+        // Trocar Estação de Rádio [R]
+        if (k === 'r') {
+            currentRadioIdx = (currentRadioIdx + 1) % radioStations.length;
+            updateRadioHUD();
+            if (window.VCSoundFX) VCSoundFX.playSynthChord();
+            showGameToast(`📻 Rádio: ${radioStations[currentRadioIdx].name}`);
+        }
+
+        // Pulo a pé ou Suspensão Hidráulica / Freio de Mão no carro
         if (e.code === 'Space') {
             e.preventDefault();
-            if (inVehicle && inVehicle.hopY <= 0.01) {
-                inVehicle.hopVy = 0.24;
-            } else if (!inVehicle && playerChar.yPos <= 0.01 && playerChar.state !== 'dead') {
+            if (!inVehicle && playerChar.yPos <= 0.01 && playerChar.state !== 'dead') {
                 playerChar.vy = 0.28;
             }
         }
 
-        if (k === 'h' && inVehicle) VCSoundFX.playCarHorn();
+        if (k === 'h' && inVehicle && window.VCSoundFX) VCSoundFX.playCarHorn();
 
-        if (k === 'f' && !activeStoreInterior) {
+        // Entrar / Sair de Veículos [F]
+        if (k === 'f' && !activeInterior) {
             if (inVehicle) {
                 inVehicle.doorOpenTimer = 28;
                 playerChar.mesh.position.set(inVehicle.mesh.position.x - 2.3, 0, inVehicle.mesh.position.z);
@@ -495,7 +729,7 @@ function initViceCityEngine() {
             } else {
                 const allDrivable = [...vehicles, ...copUnits];
                 for (let v of allDrivable) {
-                    if (playerChar.mesh.position.distanceTo(v.mesh.position) < 4.5) {
+                    if (!v.destroyed && playerChar.mesh.position.distanceTo(v.mesh.position) < 4.5) {
                         v.doorOpenTimer = 28;
                         inVehicle = v;
                         if (v.angle === undefined) v.angle = v.mesh.rotation.y;
@@ -504,86 +738,156 @@ function initViceCityEngine() {
                         playerChar.mesh.visible = false;
                         isAiming = false;
                         document.getElementById('vc-crosshair').classList.add('hidden');
-                        triggerDynamicDialogue('car_theft', 1.15, 1.1);
+                        if (window.triggerDynamicDialogue) triggerDynamicDialogue('car_theft', 1.15, 1.1);
                         if (v.isCopCar && wantedStars < 2) {
                             wantedStars = 2;
                             updateHUD();
                         }
-                        showGameToast(`Dirigindo: ${v.name || 'Viatura VCPD'}`);
+                        showGameToast(`Dirigindo: ${v.name || 'Viatura VCPD'}${v.hasNitro ? ' (NITRO ATIVO [SHIFT])' : ''}`);
                         break;
                     }
                 }
             }
         }
 
-        if (k === 'e' && !inVehicle) {
-            if (activeStoreInterior) {
-                // Sair pela porta azul da loja
-                if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, 8.2)) < 3.2) {
-                    playerChar.mesh.position.set(activeStoreInterior.exitX, 0, activeStoreInterior.exitZ);
-                    const wasReported = activeStoreInterior.reported;
-                    activeStoreInterior = null;
-                    clerkSurrendered = false;
-                    interior.alarmLight.material.color.setHex(0x334155);
-                    showGameToast(wasReported ? '🚨 Cuidado! A polícia está na porta da loja!' : 'Saiu da loja');
-                    return;
-                }
-                // Roubar o caixa registradora no balcão
-                if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -2.2)) < 3.4 && !activeStoreInterior.robbed) {
-                    activeStoreInterior.robbed = true;
-                    activeStoreInterior.marker.material.color.setHex(0x52525b);
-                    clerkSurrendered = true;
-                    playerCash += activeStoreInterior.cash;
-                    VCSoundFX.playCash();
-                    notifySiteDiscount(0.10, `Assalto em ${activeStoreInterior.name}`);
-                    showGameToast(`💰 ROUBOU $${activeStoreInterior.cash} DO CAIXA! Fuja pela porta azul!`);
-                    updateHUD();
-                    triggerStoreRobberyReport(activeStoreInterior);
-                    return;
+        // Interação Universal [E]: Portas de Todos os Edifícios, Interiores, Garagem Pay 'n' Spray e Missões
+        if (k === 'e') {
+            // [1] Dentro de um veículo -> Garagem Pay 'n' Spray
+            if (inVehicle) {
+                for (let g of garages) {
+                    if (inVehicle.mesh.position.distanceTo(g.marker.position) < 5.5) {
+                        if (playerCash >= 400) {
+                            playerCash -= 400;
+                            inVehicle.hp = 100;
+                            inVehicle.burningTimer = 0;
+                            inVehicle.hasNitro = true;
+                            const neonColors = [0xec4899, 0x06b6d4, 0xfacc15, 0xa855f7, 0x10b981];
+                            const newCol = neonColors[Math.floor(Math.random() * neonColors.length)];
+                            if (inVehicle.chassis) inVehicle.chassis.material.color.setHex(newCol);
+                            wantedStars = 0;
+                            updateHUD();
+                            if (window.VCSoundFX) VCSoundFX.playCash();
+                            showGameToast(`🔧 ${g.name}: Lataria 100%, Nova Pintura, NITRO [SHIFT] instalado e Polícia despistada!`);
+                        } else {
+                            showGameToast('⚠️ Precisa de $400 para usar a Pay \'n\' Spray!');
+                        }
+                        return;
+                    }
                 }
                 return;
             }
 
-            // Entrar na loja pela porta
-            for (let st of stores) {
-                if (playerChar.mesh.position.distanceTo(st.marker.position) < 4.5) {
-                    activeStoreInterior = st;
-                    clerkSurrendered = st.robbed;
-                    storeReportTimer = 0;
-                    interior.alarmLight.material.color.setHex(st.reported ? 0xef4444 : 0x334155);
-                    playerChar.mesh.position.set(0, -40, 6.8);
-                    camYaw = 0;
-                    showGameToast(`🏪 Entrou em ${st.name} • Vá até o balcão [E] para roubar o caixa!`);
+            // [2] Dentro de algum Interior -> Sair ou Interagir com o local
+            if (activeInterior) {
+                const room = interiorRooms[activeInterior.type];
+                // Sair pela porta azul
+                if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.cx, -40, room.exitZ)) < 3.4) {
+                    playerChar.mesh.position.set(activeInterior.extX, 0, activeInterior.extZ);
+                    const wasReported = activeInterior.reported;
+                    activeInterior = null;
+                    clerkSurrendered = false;
+                    interior.alarmLight.material.color.setHex(0x334155);
+                    showGameToast(wasReported ? '🚨 Alerta! A polícia cercou a saída!' : 'Saiu do edifício');
                     return;
                 }
-            }
 
-            // Comprar ou descansar em casa
-            for (let hs of houses) {
-                if (playerChar.mesh.position.distanceTo(hs.marker.position) < 4.5) {
-                    if (!hs.owned) {
-                        if (playerCash >= hs.price) {
-                            playerCash -= hs.price;
-                            hs.owned = true;
-                            hs.marker.material.color.setHex(0x38bdf8);
-                            VCSoundFX.playCash();
-                            speakVC("Property purchased! This place is yours now.", "Propriedade comprada! Este lugar agora é seu.", 0.95, 1.0);
-                            showGameToast(`🏠 VOCÊ COMPROU: ${hs.name}!`);
-                            updateHUD();
-                        } else {
-                            showGameToast(`⚠️ Dinheiro insuficiente! Custa $${hs.price}`);
-                        }
-                    } else {
-                        playerHealth = 100; playerArmor = 100; wantedStars = 0;
-                        VCSoundFX.playSynthChord();
-                        showGameToast(`🏠 Descansou em ${hs.name}: Vida/Colete 100% e Polícia despistada!`);
+                // Ação específica de cada Interior
+                if (activeInterior.type === 'store') {
+                    if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -1.8)) < 3.5 && !activeInterior.robbed) {
+                        activeInterior.robbed = true;
+                        activeInterior.marker.material.color.setHex(0x52525b);
+                        clerkSurrendered = true;
+                        playerCash += activeInterior.cash;
+                        if (window.VCSoundFX) VCSoundFX.playCash();
+                        notifySiteDiscount(0.10, `Assalto em ${activeInterior.name}`);
+                        showGameToast(`💰 ROUBOU $${activeInterior.cash} DO CAIXA! Fuja pela porta azul!`);
                         updateHUD();
+                        triggerStoreRobberyReport(activeInterior);
+                        return;
                     }
-                    return;
+                } else if (activeInterior.type === 'house') {
+                    if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
+                        playerHealth = 100;
+                        playerArmor = 100;
+                        wantedStars = 0;
+                        if (window.VCSoundFX) VCSoundFX.playSynthChord();
+                        updateHUD();
+                        showGameToast(`🛏️ Descansou em ${activeInterior.name}: Vida/Colete 100% e Polícia despistada!`);
+                        return;
+                    }
+                } else if (activeInterior.type === 'gunshop') {
+                    if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
+                        if (playerCash >= 800) {
+                            playerCash -= 800;
+                            playerArmor = 100;
+                            weapons[1].ammo += 60;
+                            weapons[2].ammo += 150;
+                            weapons[3].ammo += 24;
+                            weapons[4].ammo += 120;
+                            grenadeCount += 3;
+                            selectVCWeapon(4); // Equipa o Rifle M4
+                            updateHUD();
+                            if (window.VCSoundFX) VCSoundFX.playCash();
+                            showGameToast('🎖️ Pacote Ammu-Nation comprado: Rifle M4, Granadas, Colete 100% e Munição!');
+                        } else {
+                            showGameToast('⚠️ Precisa de $800 para o Pacote Completo Ammu-Nation!');
+                        }
+                        return;
+                    }
+                } else if (activeInterior.type === 'police') {
+                    if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
+                        playerArmor = 100;
+                        weapons[3].ammo += 24;
+                        weapons[4].ammo += 90;
+                        grenadeCount += 2;
+                        wantedStars = Math.min(6, wantedStars + 3);
+                        updateHUD();
+                        if (window.VCSoundFX) VCSoundFX.playPoliceSirenStep(true);
+                        showGameToast('🚨 INVADIU O ARSENAL DA VCPD! Colete/Munição no máximo e 3 Estrelas de Procurado!');
+                        return;
+                    }
+                }
+                return;
+            }
+
+            // [3] Na rua -> Entrar em qualquer edifício com porta
+            for (let door of enterableDoors) {
+                if (playerChar.mesh.position.distanceTo(door.marker.position) < 4.2) {
+                    if (door.type === 'house' && !door.owned) {
+                        if (playerCash >= door.price) {
+                            playerCash -= door.price;
+                            door.owned = true;
+                            door.marker.material.color.setHex(0x38bdf8);
+                            if (window.VCSoundFX) VCSoundFX.playCash();
+                            updateHUD();
+                            showGameToast(`🏠 VOCÊ COMPROU: ${door.name}! Aperte [E] novamente para entrar.`);
+                        } else {
+                            showGameToast(`⚠️ Dinheiro insuficiente! ${door.name} custa $${door.price}`);
+                        }
+                        return;
+                    }
+
+                    const room = interiorRooms[door.type];
+                    if (room) {
+                        activeInterior = door;
+                        clerkSurrendered = !!door.robbed;
+                        if (door.type === 'store') {
+                            interior.alarmLight.material.color.setHex(door.reported ? 0xef4444 : 0x334155);
+                        }
+                        playerChar.mesh.position.set(room.cx, -40, room.spawnZ);
+                        camYaw = 0;
+
+                        if (door.type === 'police' && wantedStars > 0) {
+                            showGameToast('🚨 Você entrou na Delegacia VCPD sendo procurado! Cuidado!');
+                        } else {
+                            showGameToast(`🚪 Entrou em: ${door.name}`);
+                        }
+                        return;
+                    }
                 }
             }
 
-            // Missão [V]
+            // [4] Iniciar / Concluir Missão [V]
             if (playerChar.mesh.position.distanceTo(missionMarker.position) < 4.5) {
                 if (missionStage === 1) {
                     missionStage = 2;
@@ -591,7 +895,7 @@ function initViceCityEngine() {
                     gpsWaypoint = { x: -120, z: 126 };
                     wantedStars = Math.min(6, wantedStars + 3);
                     document.getElementById('vc-mission-text').textContent = "Siga a linha rosa do GPS até Downtown e despiste a VCPD!";
-                    triggerDynamicDialogue('police_dispatch', 0.85, 1.05);
+                    if (window.triggerDynamicDialogue) triggerDynamicDialogue('police_dispatch', 0.85, 1.05);
                     updateHUD();
                 } else {
                     missionStage = 1;
@@ -599,10 +903,10 @@ function initViceCityEngine() {
                     gpsWaypoint = null;
                     playerCash += 4500;
                     wantedStars = 0;
-                    VCSoundFX.playSynthChord();
+                    if (window.VCSoundFX) VCSoundFX.playSynthChord();
                     notifySiteDiscount(0.15, "Missão ArcadeCity Concluída");
                     document.getElementById('vc-mission-text').textContent = "Missão Concluída! (+15% OFF liberado no site!)";
-                    speakVC("Mission passed! Respect plus!", "Missão cumprida! Respeito aumentado!", 0.9, 1.0);
+                    if (window.speakVC) speakVC("Mission passed! Respect plus!", "Missão cumprida! Respeito aumentado!", 0.9, 1.0);
                     showGameToast('🏆 MISSÃO CONCLUÍDA! +$4.500 e 15% OFF!');
                     updateHUD();
                 }
@@ -627,11 +931,13 @@ function initViceCityEngine() {
             document.getElementById('vc-crosshair').classList.remove('hidden');
         }
         if (e.button === 0 && !inVehicle) {
+            mouseLeftDown = true;
             performAttack();
         }
     };
 
     window.onmouseup = (e) => {
+        if (e.button === 0) mouseLeftDown = false;
         if (e.button === 2) {
             isAiming = false;
             document.getElementById('vc-crosshair').classList.add('hidden');
@@ -646,27 +952,30 @@ function initViceCityEngine() {
     };
 
     function performAttack() {
+        if (fireCooldown > 0 || isPlayerDead || inVehicle) return;
         const wpn = weapons[currentWeaponIdx];
+        fireCooldown = wpn.rate;
 
         if (wpn.type === 'melee') {
             playerChar.punchTimer = 14;
             peds.forEach(p => {
                 if (p.alive && playerChar.mesh.position.distanceTo(p.char.mesh.position) < 2.8) {
-                    p.hp -= 30;
+                    p.hp -= wpn.dmg;
                     if (p.hp <= 0) {
-                        p.alive = false; p.char.state = 'dead';
-                        spawnDroppedCash(p.char.mesh.position.x, p.char.mesh.position.z, 65);
-                        VCSoundFX.playScream(p.isFemale);
-                        triggerDynamicDialogue('pedestrian_panic', p.isFemale ? 1.35 : 0.95, 1.15);
+                        p.alive = false;
+                        p.char.state = 'dead';
+                        spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 65);
+                        if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
                     }
                 }
             });
             copOfficers.forEach(cop => {
                 if (cop.alive && playerChar.mesh.position.distanceTo(cop.char.mesh.position) < 2.8) {
-                    cop.hp -= 35;
+                    cop.hp -= wpn.dmg;
                     if (cop.hp <= 0) {
-                        cop.alive = false; cop.char.state = 'dead';
-                        spawnDroppedCash(cop.char.mesh.position.x, cop.char.mesh.position.z, 120);
+                        cop.alive = false;
+                        cop.char.state = 'dead';
+                        spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, 'cash', 120);
                         wantedStars = Math.min(6, wantedStars + 1);
                         updateHUD();
                     }
@@ -677,27 +986,30 @@ function initViceCityEngine() {
 
         if (wpn.ammo <= 0) return;
         wpn.ammo--;
-        document.getElementById('vc-ammo').textContent = wpn.ammo;
+        document.getElementById('vc-ammo').textContent = `${wpn.ammo} | 💣${grenadeCount}`;
         playerChar.recoilOffset = 0.28;
-        VCSoundFX.playGunshot(wpn.type);
+        if (window.VCSoundFX) VCSoundFX.playGunshot(wpn.type === 'm4' ? 'uzi' : wpn.type);
 
-        // Se atirar dentro da loja, o atendente rende-se e denuncia o assalto
-        if (activeStoreInterior && !activeStoreInterior.reported) {
+        // Atirar dentro da loja aciona a denúncia 190
+        if (activeInterior && activeInterior.type === 'store' && !activeInterior.reported) {
             clerkSurrendered = true;
-            triggerStoreRobberyReport(activeStoreInterior);
+            triggerStoreRobberyReport(activeInterior);
+        }
+        // Atirar dentro da delegacia dá 3 estrelas imediatas
+        if (activeInterior && activeInterior.type === 'police' && wantedStars < 3) {
+            wantedStars = 3;
+            updateHUD();
         }
 
         const activeModel = weaponModels3D[wpn.type];
         if (activeModel && activeModel.userData.flash) {
             activeModel.userData.flash.visible = true;
-            setTimeout(() => { activeModel.userData.flash.visible = false; }, 65);
+            setTimeout(() => { activeModel.userData.flash.visible = false; }, 60);
         }
 
         const bulletCount = wpn.type === 'shotgun' ? 4 : 1;
-        const dmgPerBullet = wpn.type === 'shotgun' ? 50 : (wpn.type === 'uzi' ? 25 : 35);
-
         for (let s = 0; s < bulletCount; s++) {
-            const spread = wpn.type === 'shotgun' ? (Math.random() - 0.5) * 0.22 : 0;
+            const spread = wpn.type === 'shotgun' ? (Math.random() - 0.5) * 0.22 : (wpn.type === 'uzi' ? (Math.random() - 0.5) * 0.06 : 0);
             const bMesh = new THREE.Mesh(
                 new THREE.CylinderGeometry(0.03, 0.03, 0.55, 6),
                 new THREE.MeshBasicMaterial({ color: 0xfacc15 })
@@ -706,38 +1018,34 @@ function initViceCityEngine() {
             bMesh.rotation.y = camYaw + spread;
             bMesh.position.set(playerChar.mesh.position.x, playerChar.mesh.position.y + 1.42, playerChar.mesh.position.z);
             scene.add(bMesh);
-            bullets.push({ mesh: bMesh, angle: camYaw + spread, life: 55, dmg: dmgPerBullet });
+            bullets.push({ mesh: bMesh, angle: camYaw + spread, life: 55, dmg: wpn.dmg });
         }
 
-        peds.forEach(p => { if (p.alive && playerChar.mesh.position.distanceTo(p.char.mesh.position) < 28) p.panic = true; });
-        if (wantedStars === 0 && Math.random() < 0.55) {
+        peds.forEach(p => { if (p.alive && playerChar.mesh.position.distanceTo(p.char.mesh.position) < 30) p.panic = true; });
+        if (wantedStars === 0 && Math.random() < 0.5) {
             wantedStars = 1;
-            triggerDynamicDialogue('police_dispatch', 0.85, 1.1);
             updateHUD();
         }
     }
 
     // =========================================================================
-    // SISTEMA DE ATROPELAMENTO REALISTA (JOGADOR <-> CARROS <-> PEDESTRES)
+    // 10. ATROPELAMENTOS REALISTAS (CARROS <-> PEDESTRES <-> POLICIAIS <-> PLAYER)
     // =========================================================================
     function handleVehicleRunOver(carObj, speedAbs, isPlayerDriving) {
-        if (speedAbs < 0.14) return;
+        if (speedAbs < 0.14 || carObj.destroyed) return;
         const carPos = carObj.mesh.position;
 
-        // 1. Atropelar Pedestres (Hitbox do carro vs Hitbox do pedestre)
         peds.forEach(p => {
             if (!p.alive) return;
-            const dx = p.char.mesh.position.x - carPos.x;
-            const dz = p.char.mesh.position.z - carPos.z;
-            if (Math.abs(dx) < 1.55 && Math.abs(dz) < 2.45) {
+            if (Math.abs(p.char.mesh.position.x - carPos.x) < 1.55 && Math.abs(p.char.mesh.position.z - carPos.z) < 2.45) {
                 p.alive = false;
                 p.hp = 0;
                 p.char.state = 'dead';
-                spawnDroppedCash(p.char.mesh.position.x, p.char.mesh.position.z, 70);
-                VCSoundFX.playScream(p.isFemale);
+                spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 75);
+                if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
 
                 if (isPlayerDriving) {
-                    carObj.speed *= 0.82;
+                    carObj.speed *= 0.84;
                     if (Math.random() < 0.45) {
                         wantedStars = Math.min(6, wantedStars + 1);
                         updateHUD();
@@ -746,16 +1054,13 @@ function initViceCityEngine() {
             }
         });
 
-        // 2. Atropelar Policiais a pé
         copOfficers.forEach(cop => {
             if (!cop.alive) return;
-            const dx = cop.char.mesh.position.x - carPos.x;
-            const dz = cop.char.mesh.position.z - carPos.z;
-            if (Math.abs(dx) < 1.55 && Math.abs(dz) < 2.45) {
+            if (Math.abs(cop.char.mesh.position.x - carPos.x) < 1.55 && Math.abs(cop.char.mesh.position.z - carPos.z) < 2.45) {
                 cop.alive = false;
                 cop.hp = 0;
                 cop.char.state = 'dead';
-                spawnDroppedCash(cop.char.mesh.position.x, cop.char.mesh.position.z, 130);
+                spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, 'cash', 140);
                 if (isPlayerDriving) {
                     carObj.speed *= 0.80;
                     wantedStars = Math.min(6, wantedStars + 1);
@@ -764,31 +1069,71 @@ function initViceCityEngine() {
             }
         });
 
-        // 3. Atropelar o Jogador se ele estiver a pé na frente de um carro em movimento
-        if (!isPlayerDriving && !inVehicle && !activeStoreInterior && !isPlayerDead) {
+        if (!isPlayerDriving && !inVehicle && !activeInterior && !isPlayerDead) {
             const dx = playerChar.mesh.position.x - carPos.x;
             const dz = playerChar.mesh.position.z - carPos.z;
             if (Math.abs(dx) < 1.5 && Math.abs(dz) < 2.4) {
-                // Empurra o jogador para o lado e aplica dano de atropelamento
                 const pushDir = dx >= 0 ? 1 : -1;
-                moveEntityWithHitbox(playerChar.mesh.position, pushDir * 2.2, 0, 0.45, false);
+                moveEntityWithHitbox(playerChar.mesh.position, pushDir * 2.2, 0, 0.45, null);
                 playerChar.vy = 0.22;
-                applyDamageToPlayer(Math.round(speedAbs * 140), 'runover');
+                applyDamageToPlayer(Math.round(speedAbs * 145), 'runover');
                 showGameToast('🚗 CUIDADO! Você foi atropelado!');
             }
         }
     }
 
+    // =========================================================================
+    // 11. CICLO DINÂMICO DE 24 HORAS (DIA, PÔR DO SOL NEON E NOITE)
+    // =========================================================================
+    function updateDayNightCycle() {
+        const hour = gameMinutes / 60;
+        const isNight = (hour >= 19.5 || hour < 6.0);
+        const isSunset = (hour >= 16.5 && hour < 19.5) || (hour >= 6.0 && hour < 8.0);
+
+        if (isNight) {
+            scene.background.setHex(0x090514);
+            scene.fog.color.setHex(0x13092b);
+            hemiLight.intensity = 0.45;
+            sunLight.intensity = 0.35;
+        } else if (isSunset) {
+            scene.background.setHex(0x3b0764);
+            scene.fog.color.setHex(0x4c1d95);
+            hemiLight.intensity = 0.95;
+            sunLight.intensity = 1.1;
+        } else {
+            scene.background.setHex(0x0284c7);
+            scene.fog.color.setHex(0x38bdf8);
+            hemiLight.intensity = 1.3;
+            sunLight.intensity = 1.45;
+        }
+
+        const lampColor = isNight ? 0xfef08a : 0x475569;
+        streetLamps.forEach(lamp => {
+            if (lamp && lamp.material) lamp.material.color.setHex(lampColor);
+        });
+    }
+
+    // =========================================================================
+    // 12. RADAR MINIMAPA E MAPA AMPLIADO (M)
+    // =========================================================================
     const radarCanvas = document.getElementById('vc-radar');
     const rCtx = radarCanvas ? radarCanvas.getContext('2d') : null;
+
+    function getPlayerWorldRefPos() {
+        if (activeInterior) return new THREE.Vector3(activeInterior.extX, 0, activeInterior.extZ);
+        if (inVehicle) return inVehicle.mesh.position;
+        return playerChar.mesh.position;
+    }
 
     function drawRadar() {
         if (!rCtx) return;
         rCtx.clearRect(0, 0, 112, 112);
-        rCtx.fillStyle = '#0f172a'; rCtx.fillRect(0, 0, 112, 112);
+        rCtx.fillStyle = '#0f172a';
+        rCtx.fillRect(0, 0, 112, 112);
 
-        const px = activeStoreInterior ? activeStoreInterior.x : (inVehicle ? inVehicle.mesh.position.x : playerChar.mesh.position.x);
-        const pz = activeStoreInterior ? activeStoreInterior.z : (inVehicle ? inVehicle.mesh.position.z : playerChar.mesh.position.z);
+        const ref = getPlayerWorldRefPos();
+        const px = ref.x;
+        const pz = ref.z;
 
         rCtx.fillStyle = '#0284c7';
         rCtx.fillRect(56 - (px * 0.45) - 8, 0, 16, 112);
@@ -798,10 +1143,15 @@ function initViceCityEngine() {
             const gz = 56 + (gpsWaypoint.z - pz) * 0.45;
             rCtx.strokeStyle = '#ec4899';
             rCtx.lineWidth = 3;
-            rCtx.beginPath(); rCtx.moveTo(56, 56); rCtx.lineTo(gx, gz); rCtx.stroke();
+            rCtx.beginPath();
+            rCtx.moveTo(56, 56);
+            rCtx.lineTo(gx, gz);
+            rCtx.stroke();
 
             rCtx.fillStyle = '#ec4899';
-            rCtx.beginPath(); rCtx.arc(Math.max(10, Math.min(102, gx)), Math.max(10, Math.min(102, gz)), 4.5, 0, Math.PI * 2); rCtx.fill();
+            rCtx.beginPath();
+            rCtx.arc(Math.max(10, Math.min(102, gx)), Math.max(10, Math.min(102, gz)), 4.5, 0, Math.PI * 2);
+            rCtx.fill();
 
             if (Math.hypot(gpsWaypoint.x - px, gpsWaypoint.z - pz) < 10) {
                 gpsWaypoint = null;
@@ -809,12 +1159,26 @@ function initViceCityEngine() {
             }
         }
 
+        // Ícones dos Edifícios no Minimapa
+        enterableDoors.forEach(d => {
+            if (d.type === 'store' && d.robbed) return;
+            const colors = { store: '#facc15', house: d.owned ? '#38bdf8' : '#10b981', gunshop: '#f97316', police: '#3b82f6' };
+            rCtx.fillStyle = colors[d.type] || '#ffffff';
+            rCtx.fillRect(56 + (d.extX - px) * 0.45 - 2.5, 56 + (d.extZ - pz) * 0.45 - 2.5, 5, 5);
+        });
+
+        garages.forEach(g => {
+            rCtx.fillStyle = '#06b6d4';
+            rCtx.fillRect(56 + (g.x - px) * 0.45 - 2.5, 56 + (g.z - pz) * 0.45 - 2.5, 5, 5);
+        });
+
         copOfficers.forEach(cop => {
             if (cop.alive) {
                 rCtx.fillStyle = '#ef4444';
                 rCtx.fillRect(56 + (cop.char.mesh.position.x - px) * 0.45 - 2, 56 + (cop.char.mesh.position.z - pz) * 0.45 - 2, 4, 4);
             }
         });
+
         copHelis.forEach(h => {
             rCtx.fillStyle = '#38bdf8';
             rCtx.beginPath();
@@ -824,28 +1188,22 @@ function initViceCityEngine() {
 
         const mx = 56 + (missionMarker.position.x - px) * 0.45;
         const mz = 56 + (missionMarker.position.z - pz) * 0.45;
-        rCtx.fillStyle = '#f43f5e'; rCtx.font = 'bold 11px sans-serif';
+        rCtx.fillStyle = '#f43f5e';
+        rCtx.font = 'bold 11px sans-serif';
         rCtx.fillText('V', Math.max(10, Math.min(98, mx)), Math.max(14, Math.min(102, mz)));
 
-        stores.forEach(st => {
-            if (!st.robbed) {
-                rCtx.fillStyle = '#facc15';
-                rCtx.fillRect(56 + (st.x - px) * 0.45 - 2.5, 56 + (st.z - pz) * 0.45 - 2.5, 5, 5);
-            }
-        });
-        houses.forEach(hs => {
-            rCtx.fillStyle = hs.owned ? '#38bdf8' : '#10b981';
-            rCtx.fillRect(56 + (hs.x - px) * 0.45 - 2.5, 56 + (hs.z - pz) * 0.45 - 2.5, 5, 5);
-        });
-
         rCtx.fillStyle = '#ffffff';
-        rCtx.beginPath(); rCtx.arc(56, 56, 3.8, 0, Math.PI * 2); rCtx.fill();
+        rCtx.beginPath();
+        rCtx.arc(56, 56, 3.8, 0, Math.PI * 2);
+        rCtx.fill();
     }
 
     function drawBigMap() {
-        const bc = document.getElementById('vc-bigmap-canvas'); if (!bc) return;
+        const bc = document.getElementById('vc-bigmap-canvas');
+        if (!bc) return;
         const ctx = bc.getContext('2d');
-        ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, 420, 420);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, 420, 420);
 
         ctx.fillStyle = '#0284c7'; ctx.fillRect(196, 0, 28, 420);
         ctx.fillStyle = '#fde047'; ctx.fillRect(365, 0, 25, 420);
@@ -857,10 +1215,9 @@ function initViceCityEngine() {
             ctx.fillRect(194, py - 6, 32, 12);
         });
 
-        const px = activeStoreInterior ? activeStoreInterior.x : (inVehicle ? inVehicle.mesh.position.x : playerChar.mesh.position.x);
-        const pz = activeStoreInterior ? activeStoreInterior.z : (inVehicle ? inVehicle.mesh.position.z : playerChar.mesh.position.z);
-        const mapPx = 210 + (px / 240) * 210;
-        const mapPz = 210 + (pz / 240) * 210;
+        const ref = getPlayerWorldRefPos();
+        const mapPx = 210 + (ref.x / 240) * 210;
+        const mapPz = 210 + (ref.z / 240) * 210;
 
         if (gpsWaypoint) {
             const gx = 210 + (gpsWaypoint.x / 240) * 210;
@@ -868,43 +1225,68 @@ function initViceCityEngine() {
             ctx.strokeStyle = '#ec4899';
             ctx.lineWidth = 4;
             ctx.setLineDash([8, 5]);
-            ctx.beginPath(); ctx.moveTo(mapPx, mapPz); ctx.lineTo(gx, gz); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(mapPx, mapPz);
+            ctx.lineTo(gx, gz);
+            ctx.stroke();
             ctx.setLineDash([]);
 
             ctx.fillStyle = '#ec4899';
-            ctx.beginPath(); ctx.arc(gx, gz, 7, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath();
+            ctx.arc(gx, gz, 7, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        stores.forEach(st => {
-            if (!st.robbed) {
-                ctx.fillStyle = '#facc15';
-                ctx.fillRect(210 + (st.x / 240) * 210 - 4, 210 + (st.z / 240) * 210 - 4, 8, 8);
-            }
+        enterableDoors.forEach(d => {
+            if (d.type === 'store' && d.robbed) return;
+            const colors = { store: '#facc15', house: d.owned ? '#38bdf8' : '#10b981', gunshop: '#f97316', police: '#3b82f6' };
+            ctx.fillStyle = colors[d.type] || '#ffffff';
+            ctx.fillRect(210 + (d.extX / 240) * 210 - 4, 210 + (d.extZ / 240) * 210 - 4, 8, 8);
         });
 
-        houses.forEach(hs => {
-            ctx.fillStyle = hs.owned ? '#38bdf8' : '#10b981';
-            ctx.fillRect(210 + (hs.x / 240) * 210 - 4, 210 + (hs.z / 240) * 210 - 4, 8, 8);
+        garages.forEach(g => {
+            ctx.fillStyle = '#06b6d4';
+            ctx.fillRect(210 + (g.x / 240) * 210 - 4, 210 + (g.z / 240) * 210 - 4, 8, 8);
         });
 
-        ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 14px sans-serif';
+        ctx.fillStyle = '#f43f5e';
+        ctx.font = 'bold 14px sans-serif';
         ctx.fillText('V', 210 + (missionMarker.position.x / 240) * 210 - 4, 210 + (missionMarker.position.z / 240) * 210 + 4);
 
         ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(mapPx, mapPz, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(mapPx, mapPz, 6, 0, Math.PI * 2);
+        ctx.fill();
     }
 
-    speakVC("Welcome to ArcadeCity! Enter yellow markers to rob stores, or press M for the GPS map.", "Bem-vindo a ArcadeCity! Entre nos pontos amarelos para assaltar lojas ou aperte M para o mapa.", 0.9, 1.0);
+    if (window.speakVC) {
+        speakVC(
+            "Welcome to ArcadeCity! Enter stores, houses, Ammu-Nation or the Police HQ with E. Press G for grenades and R for radio.",
+            "Bem-vindo a ArcadeCity! Entre em lojas, casas, Ammu-Nation ou Delegacia com E. Aperte G para granadas e R para rádio.",
+            0.9,
+            1.0
+        );
+    }
+    updateRadioHUD();
     updateHUD();
 
+    // =========================================================================
+    // 13. LOOP PRINCIPAL DE SIMULAÇÃO (60 FPS)
+    // =========================================================================
     let tick = 0;
     function gameLoop() {
         requestAnimationFrame(gameLoop);
         tick++;
 
         if (invulnFrames > 0) invulnFrames--;
+        if (fireCooldown > 0) fireCooldown--;
 
-        // Lógica de Wasted (Morte do Personagem)
+        // Disparo contínuo para armas automáticas (Uzi e Rifle M4)
+        if (mouseLeftDown && !inVehicle && !isPlayerDead && (currentWeaponIdx === 2 || currentWeaponIdx === 4)) {
+            performAttack();
+        }
+
+        // Estado Wasted (Morte)
         if (isPlayerDead) {
             VCModels.updateHumanAnimation(playerChar, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
             wastedTimer--;
@@ -913,85 +1295,196 @@ function initViceCityEngine() {
             return;
         }
 
-        if (tick % 45 === 0) VCSoundFX.playAmbientCityTick();
+        if (tick % 45 === 0 && window.VCSoundFX) VCSoundFX.playAmbientCityTick();
 
-        if (tick % 60 === 0) {
+        // Relógio e Ciclo Dia/Noite
+        if (tick % 45 === 0) {
             gameMinutes = (gameMinutes + 1) % 1440;
             const clk = document.getElementById('vc-clock');
-            if (clk) clk.textContent = `${String(Math.floor(gameMinutes / 60)).padStart(2, '0')}:${String(gameMinutes % 60).padStart(2, '0')}`;
+            if (clk) {
+                clk.textContent = `${String(Math.floor(gameMinutes / 60)).padStart(2, '0')}:${String(gameMinutes % 60).padStart(2, '0')}`;
+            }
+            updateDayNightCycle();
+        }
+
+        // Decaimento gradual das estrelas se o jogador despistar a polícia por muito tempo
+        if (wantedStars > 0 && !activeInterior) {
+            wantedDecayTimer++;
+            if (wantedDecayTimer > 1500) {
+                wantedStars = Math.max(0, wantedStars - 1);
+                wantedDecayTimer = 0;
+                updateHUD();
+                if (wantedStars === 0) showGameToast('🕶️ Polícia despistada!');
+            }
         }
 
         const hasGun = currentWeaponIdx > 0;
         if (!hasGun) isAiming = false;
 
-        // Dinheiro dropado no chão (Coleta automática ao passar por cima)
-        for (let i = droppedCash.length - 1; i >= 0; i--) {
-            const dc = droppedCash[i];
-            dc.mesh.rotation.y += 0.06;
-            dc.life--;
-            const collectorPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
-            if (collectorPos.distanceTo(dc.mesh.position) < 2.5) {
-                playerCash += dc.amount;
-                VCSoundFX.playCash();
-                showGameToast(`💵 +$${dc.amount} coletado!`);
-                updateHUD();
-                dc.life = 0;
-            }
-            if (dc.life <= 0) {
-                scene.remove(dc.mesh);
-                droppedCash.splice(i, 1);
+        // Atualização de Partículas (Fumaça, Fogo e Explosões)
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const pt = particles[i];
+            pt.mesh.position.x += pt.vx;
+            pt.mesh.position.y += pt.vy;
+            pt.mesh.position.z += pt.vz;
+            pt.mesh.scale.multiplyScalar(0.96);
+            pt.life--;
+            if (pt.life <= 0) {
+                scene.remove(pt.mesh);
+                particles.splice(i, 1);
             }
         }
 
-        // Animação e Alarme no Interior da Loja
-        if (activeStoreInterior) {
-            if (activeStoreInterior.reported) {
-                const blink = Math.floor(tick / 10) % 2 === 0;
-                interior.alarmLight.material.color.setHex(blink ? 0xef4444 : 0x7f1d1d);
+        // Granadas arremessadas [G]
+        for (let i = grenades.length - 1; i >= 0; i--) {
+            const g = grenades[i];
+            g.mesh.position.x += g.vx;
+            g.mesh.position.y += g.vy;
+            g.mesh.position.z += g.vz;
+            g.vy -= 0.015;
+            if (g.mesh.position.y <= 0.18) {
+                g.mesh.position.y = 0.18;
+                g.vx *= 0.75;
+                g.vz *= 0.75;
+                g.vy = 0;
             }
-            if (clerkSurrendered) {
-                interior.clerkChar.leftArm.rotation.x = -Math.PI * 0.92;
-                interior.clerkChar.rightArm.rotation.x = -Math.PI * 0.92;
-            } else {
-                VCModels.updateHumanAnimation(interior.clerkChar, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
-                // Se o jogador apontar arma no balcão, atendente se rende e denuncia!
-                if (isAiming && hasGun && playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -2.5)) < 4.5) {
-                    clerkSurrendered = true;
-                    triggerStoreRobberyReport(activeStoreInterior);
+            g.timer--;
+            if (g.timer <= 0) {
+                triggerExplosion(g.mesh.position, 12, 120);
+                scene.remove(g.mesh);
+                grenades.splice(i, 1);
+            }
+        }
+
+        // Pickups Coletáveis no Chão (Dinheiro, Vida, Colete, Munição)
+        for (let i = droppedPickups.length - 1; i >= 0; i--) {
+            const pk = droppedPickups[i];
+            pk.mesh.rotation.y += 0.06;
+            pk.life--;
+            const collectorPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
+            if (collectorPos.distanceTo(pk.mesh.position) < 2.5) {
+                if (pk.type === 'cash') {
+                    playerCash += pk.value;
+                    showGameToast(`💵 +$${pk.value} coletado!`);
+                } else if (pk.type === 'health') {
+                    playerHealth = Math.min(100, playerHealth + 40);
+                    showGameToast('❤️ +40 Vida recuperada!');
+                } else if (pk.type === 'armor') {
+                    playerArmor = Math.min(100, playerArmor + 50);
+                    showGameToast('🛡️ +50 Colete Balístico!');
+                }
+                if (window.VCSoundFX) VCSoundFX.playCash();
+                updateHUD();
+                pk.life = 0;
+            }
+            if (pk.life <= 0) {
+                scene.remove(pk.mesh);
+                droppedPickups.splice(i, 1);
+            }
+        }
+
+        // Animações internas dos NPCs dentro dos edifícios
+        if (activeInterior) {
+            if (activeInterior.type === 'store') {
+                if (activeInterior.reported) {
+                    const blink = Math.floor(tick / 10) % 2 === 0;
+                    interior.alarmLight.material.color.setHex(blink ? 0xef4444 : 0x7f1d1d);
+                }
+                if (clerkSurrendered) {
+                    interior.clerkChar.leftArm.rotation.x = -Math.PI * 0.92;
+                    interior.clerkChar.rightArm.rotation.x = -Math.PI * 0.92;
+                } else {
+                    VCModels.updateHumanAnimation(interior.clerkChar, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
+                    if (isAiming && hasGun && playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -1.8)) < 4.5) {
+                        clerkSurrendered = true;
+                        triggerStoreRobberyReport(activeInterior);
+                    }
+                }
+            } else if (activeInterior.type === 'gunshop') {
+                VCModels.updateHumanAnimation(interior.gunDealerChar, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
+            } else if (activeInterior.type === 'police') {
+                VCModels.updateHumanAnimation(interior.deskCopChar, { speed: 0, isRunning: false, isAiming: false, hasGun: true });
+            }
+        }
+
+        // Física de Veículos (Direção, Drift com Espaço, Nitro com Shift, Dano e Explosão)
+        const allVehiclesList = [...vehicles, ...copUnits];
+        allVehiclesList.forEach(v => {
+            if (v.destroyed) return;
+            const hp = v.hp !== undefined ? v.hp : 100;
+            if (hp < 45 && tick % 6 === 0) {
+                spawnParticle(v.mesh.position.x, 1.1, v.mesh.position.z, hp < 20 ? 0x18181b : 0x64748b, 0.35, 0.08, 24);
+            }
+            if (v.burningTimer > 0) {
+                v.burningTimer--;
+                if (tick % 3 === 0) {
+                    spawnParticle(v.mesh.position.x, 1.2, v.mesh.position.z, 0xf97316, 0.5, 0.12, 20);
+                }
+                if (v.burningTimer <= 0) {
+                    v.destroyed = true;
+                    if (v.chassis) v.chassis.material.color.setHex(0x18181b);
+                    if (v === inVehicle) {
+                        playerChar.mesh.position.set(v.mesh.position.x - 2.2, 0, v.mesh.position.z);
+                        playerChar.mesh.visible = true;
+                        inVehicle = null;
+                    }
+                    triggerExplosion(v.mesh.position, 11, 130);
                 }
             }
-        }
+        });
 
-        // Movimento do Jogador (Veículo ou A Pé com Hitbox)
+        // Movimento do Jogador (Veículo ou A Pé)
         if (inVehicle) {
             let steerInput = 0;
-            if (keys['w'] || keys['arrowup']) inVehicle.speed = Math.min(inVehicle.maxSpeed, inVehicle.speed + 0.028);
-            else if (keys['s'] || keys['arrowdown']) inVehicle.speed = Math.max(-0.32, inVehicle.speed - 0.028);
-            else inVehicle.speed *= 0.95;
+            const isNitroActive = !!(inVehicle.hasNitro && keys['shift']);
+            const isHandbrake = !!keys[' '];
+            const topSpeed = isNitroActive ? inVehicle.maxSpeed * 1.45 : inVehicle.maxSpeed;
+            const accel = isNitroActive ? 0.048 : 0.028;
+
+            if (keys['w'] || keys['arrowup']) inVehicle.speed = Math.min(topSpeed, inVehicle.speed + accel);
+            else if (keys['s'] || keys['arrowdown']) inVehicle.speed = Math.max(-0.34, inVehicle.speed - 0.028);
+            else inVehicle.speed *= isHandbrake ? 0.88 : 0.95;
+
+            if (isNitroActive && Math.abs(inVehicle.speed) > 0.2 && tick % 2 === 0) {
+                spawnParticle(
+                    inVehicle.mesh.position.x + Math.sin(inVehicle.angle) * 2.1,
+                    0.45,
+                    inVehicle.mesh.position.z + Math.cos(inVehicle.angle) * 2.1,
+                    0x06b6d4,
+                    0.28,
+                    0.02,
+                    14
+                );
+            }
 
             if (Math.abs(inVehicle.speed) > 0.01) {
-                const turn = inVehicle.speed > 0 ? 0.045 : -0.045;
+                const turnMult = isHandbrake ? 0.068 : 0.045;
+                const turn = inVehicle.speed > 0 ? turnMult : -turnMult;
                 if (keys['a'] || keys['arrowleft']) { inVehicle.angle += turn; steerInput = 1; }
                 if (keys['d'] || keys['arrowright']) { inVehicle.angle -= turn; steerInput = -1; }
             }
 
-            if (Math.abs(inVehicle.speed) > 0.08 && tick % 8 === 0) {
-                VCSoundFX.playEnginePulse(Math.abs(inVehicle.speed) / inVehicle.maxSpeed, Math.abs(steerInput) > 0 && Math.abs(inVehicle.speed) > 0.45);
+            if (Math.abs(inVehicle.speed) > 0.08 && tick % 8 === 0 && window.VCSoundFX) {
+                VCSoundFX.playEnginePulse(Math.abs(inVehicle.speed) / topSpeed, (isHandbrake || Math.abs(steerInput) > 0) && Math.abs(inVehicle.speed) > 0.45);
             }
 
             const dx = -Math.sin(inVehicle.angle) * inVehicle.speed;
             const dz = -Math.cos(inVehicle.angle) * inVehicle.speed;
 
-            // Colisão veículo vs veículo
             const bumped = checkVehicleBump(inVehicle, inVehicle.mesh.position.x + dx, inVehicle.mesh.position.z + dz, vehicles, copUnits);
             if (bumped) {
+                const impact = Math.abs(inVehicle.speed);
+                if (impact > 0.25) {
+                    damageVehicle(inVehicle, Math.round(impact * 24));
+                    damageVehicle(bumped, Math.round(impact * 30));
+                }
                 inVehicle.speed *= -0.35;
                 if (bumped.isCopCar && wantedStars < 1) {
                     wantedStars = 1;
                     updateHUD();
                 }
             } else {
-                moveEntityWithHitbox(inVehicle.mesh.position, dx, dz, 1.35, false);
+                moveEntityWithHitbox(inVehicle.mesh.position, dx, dz, 1.35, null);
             }
 
             inVehicle.mesh.rotation.y = inVehicle.angle;
@@ -1020,7 +1513,13 @@ function initViceCityEngine() {
                 const len = Math.hypot(dirX, dirZ);
                 dirX /= len; dirZ /= len;
 
-                moveEntityWithHitbox(playerChar.mesh.position, dirX * moveSpeed, dirZ * moveSpeed, 0.48, !!activeStoreInterior);
+                moveEntityWithHitbox(
+                    playerChar.mesh.position,
+                    dirX * moveSpeed,
+                    dirZ * moveSpeed,
+                    0.48,
+                    activeInterior ? activeInterior.type : null
+                );
                 currentMoveSpeed = moveSpeed;
 
                 if (!isAiming) playerChar.mesh.rotation.y = Math.atan2(-dirX, -dirZ);
@@ -1030,9 +1529,9 @@ function initViceCityEngine() {
             VCModels.updateHumanAnimation(playerChar, { speed: currentMoveSpeed, isRunning, isAiming, hasGun });
         }
 
-        // Tráfego de Veículos NPC (Atropelam se estiverem em velocidade)
+        // Tráfego Civil NPC
         vehicles.forEach(v => {
-            if (v !== inVehicle) {
+            if (v !== inVehicle && !v.destroyed) {
                 const aiSpd = 0.22 * v.aiDir;
                 const bumped = checkVehicleBump(v, v.mesh.position.x, v.mesh.position.z + aiSpd, vehicles, copUnits);
                 if (!bumped) {
@@ -1045,7 +1544,7 @@ function initViceCityEngine() {
             }
         });
 
-        // Pedestres com Hitbox de Prédios
+        // Pedestres
         peds.forEach(p => {
             if (!p.alive) {
                 VCModels.updateHumanAnimation(p.char, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
@@ -1054,9 +1553,8 @@ function initViceCityEngine() {
             const spd = p.panic ? 0.22 : 0.055;
             const prevX = p.char.mesh.position.x;
             const prevZ = p.char.mesh.position.z;
-            moveEntityWithHitbox(p.char.mesh.position, -Math.sin(p.angle) * spd, -Math.cos(p.angle) * spd, 0.45, false);
+            moveEntityWithHitbox(p.char.mesh.position, -Math.sin(p.angle) * spd, -Math.cos(p.angle) * spd, 0.45, null);
 
-            // Se bateu numa parede, muda de direção
             if (Math.hypot(p.char.mesh.position.x - prevX, p.char.mesh.position.z - prevZ) < spd * 0.3) {
                 p.angle += Math.PI * 0.65;
             }
@@ -1065,28 +1563,28 @@ function initViceCityEngine() {
             if (Math.abs(p.char.mesh.position.x) > 185 || Math.abs(p.char.mesh.position.z) > 215) p.angle += Math.PI;
         });
 
-        // Projéteis do Jogador (Com Hitbox de Parede, Pedestres e Policiais)
+        // Projéteis do Jogador (Acertam Paredes, Pedestres, Policiais, Veículos e Helicópteros)
         for (let i = bullets.length - 1; i >= 0; i--) {
             const b = bullets[i];
-            b.mesh.position.x -= Math.sin(b.angle) * 1.75;
-            b.mesh.position.z -= Math.cos(b.angle) * 1.75;
+            b.mesh.position.x -= Math.sin(b.angle) * 1.85;
+            b.mesh.position.z -= Math.cos(b.angle) * 1.85;
             b.life--;
 
-            const activeBoxes = activeStoreInterior ? interiorColliders : colliders;
+            const activeBoxes = activeInterior ? (interiorColliders[activeInterior.type] || []) : colliders;
             if (hitsColliderBox(b.mesh.position.x, b.mesh.position.z, 0.1, activeBoxes)) {
                 b.life = 0;
             }
 
-            if (b.life > 0 && !activeStoreInterior) {
+            if (b.life > 0 && !activeInterior) {
                 peds.forEach(p => {
                     if (p.alive && b.mesh.position.distanceTo(p.char.mesh.position) < 1.25) {
                         p.hp -= b.dmg;
                         b.life = 0;
                         if (p.hp <= 0) {
                             p.alive = false; p.char.state = 'dead';
-                            spawnDroppedCash(p.char.mesh.position.x, p.char.mesh.position.z, 75);
+                            spawnPickup(p.char.mesh.position.x, p.char.mesh.position.z, 'cash', 75);
                             wantedStars = Math.min(6, wantedStars + 1);
-                            VCSoundFX.playScream(p.isFemale);
+                            if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
                             updateHUD();
                         }
                     }
@@ -1098,9 +1596,31 @@ function initViceCityEngine() {
                         b.life = 0;
                         if (cop.hp <= 0) {
                             cop.alive = false; cop.char.state = 'dead';
-                            spawnDroppedCash(cop.char.mesh.position.x, cop.char.mesh.position.z, 150);
+                            spawnPickup(cop.char.mesh.position.x, cop.char.mesh.position.z, Math.random() > 0.5 ? 'armor' : 'cash', 150);
                             wantedStars = Math.min(6, wantedStars + 1);
                             updateHUD();
+                        }
+                    }
+                });
+
+                allVehiclesList.forEach(v => {
+                    if (!v.destroyed && v !== inVehicle && b.mesh.position.distanceTo(v.mesh.position) < 2.2) {
+                        damageVehicle(v, b.dmg * 0.65);
+                        b.life = 0;
+                    }
+                });
+
+                copHelis.forEach((h, hIdx) => {
+                    if (Math.hypot(b.mesh.position.x - h.mesh.position.x, b.mesh.position.z - h.mesh.position.z) < 3.5) {
+                        h.hp -= b.dmg;
+                        b.life = 0;
+                        if (h.hp <= 0) {
+                            triggerExplosion(h.mesh.position, 10, 60);
+                            scene.remove(h.mesh);
+                            copHelis.splice(hIdx, 1);
+                            playerCash += 500;
+                            updateHUD();
+                            showGameToast('🚁 Helicóptero da VCPD abatido! +$500');
                         }
                     }
                 });
@@ -1109,14 +1629,14 @@ function initViceCityEngine() {
             if (b.life <= 0) { scene.remove(b.mesh); bullets.splice(i, 1); }
         }
 
-        // IA Policial: Viaturas Cercam, Desembarcam Policiais e Helicópteros Atiram
+        // IA Policial (Viaturas, Desembarque Armado e Helicópteros)
         const targetPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
-        if (wantedStars > 0 && !activeStoreInterior && tick % 18 === 0) {
+        if (wantedStars > 0 && !activeInterior && tick % 18 === 0 && window.VCSoundFX) {
             VCSoundFX.playPoliceSirenStep(Math.floor(tick / 18) % 2 === 0);
         }
 
         copUnits.forEach(cop => {
-            if (wantedStars > 0 && !activeStoreInterior && cop !== inVehicle) {
+            if (wantedStars > 0 && !activeInterior && cop !== inVehicle && !cop.destroyed) {
                 const dx = targetPos.x - cop.mesh.position.x;
                 const dz = targetPos.z - cop.mesh.position.z;
                 const dist = Math.hypot(dx, dz);
@@ -1124,11 +1644,12 @@ function initViceCityEngine() {
                 cop.mesh.rotation.y = cAng;
 
                 const flash = Math.floor(tick / 8) % 2 === 0;
-                cop.sR.visible = flash; cop.sB.visible = !flash;
+                if (cop.sR) cop.sR.visible = flash;
+                if (cop.sB) cop.sB.visible = !flash;
 
                 if (dist > 14.5) {
                     const cSpd = 0.29 + (wantedStars * 0.03);
-                    moveEntityWithHitbox(cop.mesh.position, -Math.sin(cAng) * cSpd, -Math.cos(cAng) * cSpd, 1.35, false);
+                    moveEntityWithHitbox(cop.mesh.position, -Math.sin(cAng) * cSpd, -Math.cos(cAng) * cSpd, 1.35, null);
                     VCModels.updateCarAnimation(cop, cSpd, 0);
                 } else {
                     VCModels.updateCarAnimation(cop, 0, 0);
@@ -1142,7 +1663,7 @@ function initViceCityEngine() {
                 VCModels.updateHumanAnimation(cop.char, { speed: 0, isRunning: false, isAiming: false, hasGun: true });
                 return;
             }
-            if (activeStoreInterior) return;
+            if (activeInterior) return;
 
             const dx = targetPos.x - cop.char.mesh.position.x;
             const dz = targetPos.z - cop.char.mesh.position.z;
@@ -1151,17 +1672,17 @@ function initViceCityEngine() {
             cop.char.mesh.rotation.y = angToPlayer;
 
             if (dist > 11 && dist < 55) {
-                moveEntityWithHitbox(cop.char.mesh.position, -Math.sin(angToPlayer) * 0.14, -Math.cos(angToPlayer) * 0.14, 0.45, false);
+                moveEntityWithHitbox(cop.char.mesh.position, -Math.sin(angToPlayer) * 0.14, -Math.cos(angToPlayer) * 0.14, 0.45, null);
                 VCModels.updateHumanAnimation(cop.char, { speed: 0.14, isRunning: true, isAiming: true, hasGun: true });
             } else {
                 VCModels.updateHumanAnimation(cop.char, { speed: 0, isRunning: false, isAiming: true, hasGun: true });
             }
 
             cop.shootCooldown--;
-            if (cop.shootCooldown <= 0 && dist < 42) {
-                cop.shootCooldown = Math.max(24, 65 - wantedStars * 6);
+            if (cop.shootCooldown <= 0 && dist < 44) {
+                cop.shootCooldown = Math.max(20, 62 - wantedStars * 6);
                 cop.char.recoilOffset = 0.25;
-                VCSoundFX.playGunshot('pistol');
+                if (window.VCSoundFX) VCSoundFX.playGunshot('pistol');
 
                 const eb = new THREE.Mesh(
                     new THREE.CylinderGeometry(0.035, 0.035, 0.6, 6),
@@ -1171,12 +1692,19 @@ function initViceCityEngine() {
                 eb.rotation.y = angToPlayer;
                 eb.position.set(cop.char.mesh.position.x, 1.4, cop.char.mesh.position.z);
                 scene.add(eb);
-                enemyBullets.push({ mesh: eb, vx: -Math.sin(angToPlayer) * 1.15, vy: 0, vz: -Math.cos(angToPlayer) * 1.15, life: 55, dmg: 8 });
+                enemyBullets.push({
+                    mesh: eb,
+                    vx: -Math.sin(angToPlayer) * 1.18,
+                    vy: 0,
+                    vz: -Math.cos(angToPlayer) * 1.18,
+                    life: 55,
+                    dmg: cop.isSwat ? 11 : 7
+                });
             }
         });
 
         copHelis.forEach((heli, idx) => {
-            heli.rotor.rotation.y += 0.45;
+            heli.rotor.rotation.y += 0.48;
             heli.orbitAngle += 0.015;
 
             const desiredX = targetPos.x + Math.cos(heli.orbitAngle + idx * Math.PI) * 20;
@@ -1188,11 +1716,11 @@ function initViceCityEngine() {
             heli.mesh.lookAt(targetPos.x, 1.5, targetPos.z);
             heli.spotlight.target.position.copy(targetPos);
 
-            if (!activeStoreInterior) {
+            if (!activeInterior) {
                 heli.shootCooldown--;
                 if (heli.shootCooldown <= 0) {
-                    heli.shootCooldown = Math.max(22, 55 - wantedStars * 5);
-                    VCSoundFX.playGunshot('uzi');
+                    heli.shootCooldown = Math.max(20, 52 - wantedStars * 5);
+                    if (window.VCSoundFX) VCSoundFX.playGunshot('uzi');
 
                     const dir = new THREE.Vector3(
                         targetPos.x - heli.mesh.position.x,
@@ -1206,7 +1734,7 @@ function initViceCityEngine() {
                     );
                     hb.position.copy(heli.mesh.position);
                     scene.add(hb);
-                    enemyBullets.push({ mesh: hb, vx: dir.x * 1.35, vy: dir.y * 1.35, vz: dir.z * 1.35, life: 60, dmg: 9 });
+                    enemyBullets.push({ mesh: hb, vx: dir.x * 1.38, vy: dir.y * 1.38, vz: dir.z * 1.38, life: 60, dmg: 9 });
                 }
             }
         });
@@ -1218,37 +1746,53 @@ function initViceCityEngine() {
             eb.mesh.position.z += eb.vz;
             eb.life--;
 
-            if (!activeStoreInterior && eb.mesh.position.distanceTo(targetPos) < (inVehicle ? 2.4 : 1.15)) {
-                applyDamageToPlayer(eb.dmg, 'combat');
+            if (!activeInterior && eb.mesh.position.distanceTo(targetPos) < (inVehicle ? 2.4 : 1.15)) {
+                if (inVehicle) damageVehicle(inVehicle, eb.dmg * 0.75);
+                else applyDamageToPlayer(eb.dmg, 'combat');
                 eb.life = 0;
             }
             if (eb.life <= 0) { scene.remove(eb.mesh); enemyBullets.splice(i, 1); }
         }
 
+        // Prompts Contextuais na Tela ([E] e [F])
         const promptEl = document.getElementById('vc-action-prompt');
         if (promptEl) {
             let msg = "";
-            if (activeStoreInterior) {
-                if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, 8.2)) < 3.2) {
-                    msg = "Pressione [E] para SAIR DA LOJA";
-                } else if (playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -2.2)) < 3.4 && !activeStoreInterior.robbed) {
-                    msg = `Pressione [E] para ROUBAR O CAIXA ($${activeStoreInterior.cash})`;
-                }
-            } else {
-                if (!inVehicle) {
-                    const allDrivable = [...vehicles, ...copUnits];
-                    for (let v of allDrivable) {
-                        if (playerChar.mesh.position.distanceTo(v.mesh.position) < 4.5) { msg = `Pressione [F] para roubar ${v.name || 'Viatura VCPD'}`; break; }
+            if (inVehicle) {
+                for (let g of garages) {
+                    if (inVehicle.mesh.position.distanceTo(g.marker.position) < 5.5) {
+                        msg = `Pressione [E] para Reparar, Pintar + NITRO na ${g.name} ($400)`;
+                        break;
                     }
                 }
-                for (let st of stores) {
-                    if (playerChar.mesh.position.distanceTo(st.marker.position) < 4.5) { msg = `Pressione [E] para ENTRAR em ${st.name}`; break; }
+            } else if (activeInterior) {
+                const room = interiorRooms[activeInterior.type];
+                if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.cx, -40, room.exitZ)) < 3.4) {
+                    msg = `Pressione [E] para SAIR de ${activeInterior.name}`;
+                } else if (activeInterior.type === 'store' && !activeInterior.robbed && playerChar.mesh.position.distanceTo(new THREE.Vector3(0, -40, -1.8)) < 3.5) {
+                    msg = `Pressione [E] para ROUBAR O CAIXA ($${activeInterior.cash})`;
+                } else if (activeInterior.type === 'house' && playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
+                    msg = "Pressione [E] para DESCANSAR na cama (Vida/Colete 100% + Limpar Polícia)";
+                } else if (activeInterior.type === 'gunshop' && playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
+                    msg = "Pressione [E] para COMPRAR Pacote Rifle M4 + Granadas + Colete ($800)";
+                } else if (activeInterior.type === 'police' && playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
+                    msg = "Pressione [E] para SAQUEAR Arsenal Policial (+Colete, Munição e +3 Estrelas)";
                 }
-                for (let hs of houses) {
-                    if (playerChar.mesh.position.distanceTo(hs.marker.position) < 4.5) {
-                        msg = hs.owned
-                            ? `Pressione [E] para DESCANSAR em ${hs.name} (Vida 100% + Limpar Polícia)`
-                            : `Pressione [E] para COMPRAR ${hs.name} ($${hs.price})`;
+            } else {
+                const allDrivable = [...vehicles, ...copUnits];
+                for (let v of allDrivable) {
+                    if (!v.destroyed && playerChar.mesh.position.distanceTo(v.mesh.position) < 4.5) {
+                        msg = `Pressione [F] para roubar ${v.name || 'Viatura VCPD'}`;
+                        break;
+                    }
+                }
+                for (let door of enterableDoors) {
+                    if (playerChar.mesh.position.distanceTo(door.marker.position) < 4.2) {
+                        if (door.type === 'house' && !door.owned) {
+                            msg = `Pressione [E] para COMPRAR ${door.name} ($${door.price})`;
+                        } else {
+                            msg = `Pressione [E] para ENTRAR em ${door.name}`;
+                        }
                         break;
                     }
                 }
@@ -1261,14 +1805,14 @@ function initViceCityEngine() {
             else promptEl.classList.add('hidden');
         }
 
-        // Órbita 3D completa da Câmera
-        const distCam = activeStoreInterior ? 4.4 : (isAiming ? 3.5 : (inVehicle ? 9.8 : 6.4));
-        const baseHeight = activeStoreInterior ? 2.1 : (isAiming ? 1.85 : (inVehicle ? 3.4 : 2.3));
+        // Órbita 3D da Câmera (Horizontal 360° + Vertical Livre)
+        const distCam = activeInterior ? 4.4 : (isAiming ? 3.5 : (inVehicle ? 9.8 : 6.4));
+        const baseHeight = activeInterior ? 2.1 : (isAiming ? 1.85 : (inVehicle ? 3.4 : 2.3));
         const sideOffset = isAiming ? 0.95 : 0;
 
         const horizDist = distCam * Math.cos(camPitch * 0.75);
         const vertOffset = distCam * Math.sin(camPitch);
-        const camY = activeStoreInterior
+        const camY = activeInterior
             ? Math.max(-39.2, Math.min(-34.2, targetPos.y + baseHeight + vertOffset))
             : Math.max(0.45, targetPos.y + baseHeight + vertOffset);
 
