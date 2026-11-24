@@ -330,12 +330,12 @@
             <div class="space-y-3" id="reviews-feed-list"></div>
         </div>
 
-        <!-- Aba Minigames estilo Pou -->
+        <!-- Aba Games (Minigames + GTA ArcadeCity 3D) -->
         <div id="tpl-games" class="space-y-4">
             <div class="bg-gradient-to-r from-purple-950/50 to-pink-950/40 p-4 rounded-2xl border border-purple-500/30 text-center relative">
                 <div id="diff-badge" class="absolute top-2 right-2 bg-green-500/20 border border-green-500 text-green-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase">🟢 FÁCIL</div>
-                <h2 class="text-base font-black text-purple-300">🎮 DESAFIE O MASCOTE DE CRISTAL</h2>
-                <p class="text-[11px] text-zinc-400 mt-0.5">Jogue no PC ou Telemóvel!</p>
+                <h2 class="text-base font-black text-purple-300">🎮 ARENA DE GAMES ARCADEZONE</h2>
+                <p class="text-[11px] text-zinc-400 mt-0.5">Jogue no PC ou Telemóvel e ganhe descontos reais!</p>
             </div>
 
             <div class="bg-[#161b22] border border-[#30363d] p-2.5 rounded-2xl flex items-center justify-between">
@@ -354,10 +354,34 @@
                 <button onclick="initPenaltyGame()" class="bg-[#161b22] border border-[#30363d] p-3 rounded-2xl font-bold text-xs text-pink-300 hover:border-pink-500 flex flex-col items-center gap-1">
                     <span class="text-2xl">⚽</span><span>Pênalti do Mascote</span>
                 </button>
+
+                <!-- Botão GTA ArcadeCity 3D -->
+                <button onclick="openGTAArcadeCity()" class="col-span-2 bg-gradient-to-r from-pink-950/85 via-purple-950/85 to-cyan-950/85 hover:brightness-110 p-3.5 rounded-2xl border-2 border-pink-500/60 flex items-center justify-between text-left shadow-lg">
+                    <div>
+                        <div class="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-300 uppercase">🌴 GRAND THEFT ARCADE: ARCADECITY 3D</div>
+                        <div class="text-[10px] text-zinc-300 mt-0.5">Mundo Aberto 3D (PC) • Missões, Carros, Lojas & GPS</div>
+                    </div>
+                    <span class="bg-cyan-500 text-black font-black px-3 py-1.5 rounded-xl text-[11px] uppercase flex-shrink-0">▶ Jogar</span>
+                </button>
+            </div>
+
+            <!-- Janela do GTA ArcadeCity 3D -->
+            <div id="gta-arcade-box" class="hidden space-y-2">
+                <div class="flex items-center justify-between bg-[#161b22] border border-[#30363d] p-2 rounded-xl">
+                    <span class="text-[10px] font-black text-pink-400 uppercase px-2">🌴 GTA ArcadeCity 3D</span>
+                    <div class="flex gap-1.5">
+                        <a href="./game/index.html" target="_blank" class="bg-[#21262d] hover:bg-cyan-500 hover:text-black text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px]">↗ Nova Aba</a>
+                        <button onclick="document.getElementById('gta-frame').requestFullscreen()" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px]">🖥️ Tela Cheia</button>
+                        <button onclick="closeGTAArcadeCity()" class="bg-zinc-800 hover:bg-red-600 text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px]">✕</button>
+                    </div>
+                </div>
+                <div class="w-full h-[540px] bg-black rounded-2xl border-2 border-pink-500 overflow-hidden shadow-2xl">
+                    <iframe id="gta-frame" src="" class="w-full h-full border-0" allow="fullscreen"></iframe>
+                </div>
             </div>
 
             <div id="game-arena" class="bg-zinc-950 border border-[#30363d] rounded-2xl p-3 text-center min-h-[320px] flex flex-col items-center justify-center relative overflow-hidden">
-                <p class="text-xs text-zinc-500">Escolha um jogo acima para desafiar o Mascote Roxo!</p>
+                <p class="text-xs text-zinc-500">Escolha um jogo acima para jogar!</p>
             </div>
         </div>
 
@@ -445,7 +469,41 @@
         let currentReviewStars = 5;
         const pixKey = "f882100@gmail.com";
 
-        // Estado do Usuário: Visitante / Cliente Padrão (Sem Admin por padrão ao carregar)
+        // Escuta recompensas vindas do GTA ArcadeCity 3D (game/index.html)
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'ARCADE_GTA_REWARD') {
+                const disc = event.data.discount || 0.10;
+                if (disc > appliedDiscount) appliedDiscount = disc;
+                playWinFanfare();
+                showToast(`🌴 GTA ArcadeCity: Cupom de ${Math.round(disc * 100)}% OFF aplicado ao carrinho!`, '🏆');
+            }
+        });
+
+        function openGTAArcadeCity() {
+            const box = document.getElementById('gta-arcade-box');
+            const frame = document.getElementById('gta-frame');
+            const arena = document.getElementById('game-arena');
+            if (volleyLoop) clearInterval(volleyLoop);
+            if (penAnimLoop) clearInterval(penAnimLoop);
+            if (arena) arena.classList.add('hidden');
+            if (box && frame) {
+                box.classList.remove('hidden');
+                if (!frame.src || !frame.src.includes('game/index.html')) {
+                    frame.src = './game/index.html';
+                }
+            }
+        }
+
+        function closeGTAArcadeCity() {
+            const box = document.getElementById('gta-arcade-box');
+            const frame = document.getElementById('gta-frame');
+            const arena = document.getElementById('game-arena');
+            if (frame) frame.src = '';
+            if (box) box.classList.add('hidden');
+            if (arena) arena.classList.remove('hidden');
+        }
+
+        // Estado do Usuário
         let savedUser = JSON.parse(localStorage.getItem('az_user'));
         let currentUser = (savedUser && savedUser.isAdmin) ? { name: "Cliente Visitante", email: "cliente@arcadezone.com", isAdmin: false, photo: null } : (savedUser || { name: "Cliente Visitante", email: "cliente@arcadezone.com", isAdmin: false, photo: null });
 
@@ -928,6 +986,12 @@
         }
 
         function changeTab(tabName) {
+            // Encerra o iframe 3D se o usuário sair da aba Games
+            if (currentTab === 'games' && tabName !== 'games') {
+                const activeFrame = document.querySelector('#main-content #gta-frame');
+                if (activeFrame) activeFrame.src = '';
+            }
+
             currentTab = tabName;
             const mainContent = document.getElementById('main-content');
             const template = document.getElementById(`tpl-${tabName}`).cloneNode(true);
@@ -1024,6 +1088,7 @@
         // GAME 1: POU VÔLEI REALISTA
         let volleyLoop = null;
         function initVolleyGame() {
+            closeGTAArcadeCity();
             const arena = document.getElementById('game-arena');
             if (!arena) return;
             if (volleyLoop) clearInterval(volleyLoop);
@@ -1198,7 +1263,7 @@
             }
         }
 
-        // GAME 2: PÊNALTI ESTILO WORLD CUP (3 BARRAS DE TRAVA)
+        // GAME 2: PÊNALTI ESTILO WORLD CUP
         let penStep = 1;
         let penDirVal = 50;
         let penHgtVal = 50;
@@ -1207,6 +1272,7 @@
         let penAnimLoop = null;
 
         function initPenaltyGame() {
+            closeGTAArcadeCity();
             const arena = document.getElementById('game-arena');
             if (!arena) return;
             if (volleyLoop) clearInterval(volleyLoop);
@@ -1352,7 +1418,7 @@
                 const isSaved = Math.abs(ballX - (gkTargetX + 18)) < 28 && Math.abs(ballY - 40) < 30;
 
                 if (isSaved) {
-                    showToast(' O Mascote Goleiro defendeu o chute!', '⚽');
+                    showToast('O Mascote Goleiro defendeu o chute!', '⚽');
                 } else {
                     appliedDiscount = 0.10;
                     showToast('🎉 GOOOOOOLAZO! Você venceu o Mascote!', '⚽');
