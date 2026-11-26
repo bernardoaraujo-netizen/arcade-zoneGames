@@ -1,7 +1,7 @@
-// game/js/main.js - Motor Completo Mega Mundo Aberto ArcadeCity 3D:
-// Gotas de Chuva 3D, Ondas Reais no Mar, Natação, Voo de Aviões/Jatos,
-// Grau na Bicicleta [Q/Ctrl], Jet-Skis, Ônibus, Animais Vivos (Cachorros, Gatos, Pássaros),
-// Banco Central com Seguranças/Cofre, Lanchonetes, Escolas, Vida Degradê e Tela Avermelhada
+// game/js/main.js - Motor Completo Estilo GTA V/VI:
+// Ligação Realista (Celular no Ouvido + Som Chamando + Voz Central + 20s Chegada Física sem Teleporte),
+// Táxi/Uber Autônomo até o GPS, Polícia 190, Mecânico, Animação 3D de Sprint & Nado Crawl Rápido,
+// Postos de Gasolina Explodíveis, Bullet-Time [TAB], Faca/Bastão, Amassados, NPCs 60/40 e Mapa GTA
 
 window.startRockstarIntro = function() {
     const menuScreen = document.getElementById('vc-menu-screen');
@@ -48,7 +48,7 @@ function initViceCityEngine() {
     scene.background = new THREE.Color(0x3b0764);
     scene.fog = new THREE.FogExp2(0x4c1d95, 0.0022);
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 650);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 680);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -67,7 +67,6 @@ function initViceCityEngine() {
     sunLight.position.set(140, 220, -120);
     scene.add(sunLight);
 
-    // Luzes dedicadas aos 7 setores de interiores no subsolo (Y = -40)
     [0, 60, 120, 180, 240, 300, 360].forEach(ix => {
         const roomLight = new THREE.PointLight(0xffffff, 1.6, 42);
         roomLight.position.set(ix, -35.2, 0);
@@ -75,7 +74,7 @@ function initViceCityEngine() {
     });
 
     // =========================================================================
-    // 2. CONFIGURAÇÕES DO JOGO ([O] / [P]) + AMPLIFICADOR DE VOLUME
+    // 2. CONFIGURAÇÕES ([O] / [P]) + EFEITOS SONOROS SINTETIZADOS (TELEFONE, MOEDA)
     // =========================================================================
     const gameSettings = {
         volume: 1.0,
@@ -85,12 +84,56 @@ function initViceCityEngine() {
         quality: 'high'
     };
 
+    function getAudioContext() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = (window.VCSoundFX && window.VCSoundFX.ctx) || new AudioCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+        return ctx;
+    }
+
+    function playPhoneRingTone() {
+        try {
+            const ctx = getAudioContext();
+            const vol = Math.max(0.01, gameSettings.volume);
+            const now = ctx.currentTime;
+            // Toque padrão brasileiro/americano de chamada telefônica (425Hz + 480Hz)
+            [425, 480].forEach(freq => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.12 * vol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.85);
+            });
+        } catch (e) {}
+    }
+
+    function playPhoneHangupBeep() {
+        try {
+            const ctx = getAudioContext();
+            const vol = Math.max(0.01, gameSettings.volume);
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(620, now);
+            osc.frequency.setValueAtTime(440, now + 0.12);
+            gain.gain.setValueAtTime(0.14 * vol, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.28);
+        } catch (e) {}
+    }
+
     function playAmplifiedMoneyChime() {
         try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            const ctx = (window.VCSoundFX && window.VCSoundFX.ctx) || new AudioCtx();
-            if (ctx.state === 'suspended') ctx.resume();
-
+            const ctx = getAudioContext();
             const vol = Math.max(0.01, gameSettings.volume);
             const now = ctx.currentTime;
             [987.77, 1318.51].forEach((freq, idx) => {
@@ -177,7 +220,7 @@ function initViceCityEngine() {
     };
 
     // =========================================================================
-    // 3. MUNDO GIGANTE, PROTAGONISTA, ARMAS E SISTEMA DE GOTAS DE CHUVA 3D
+    // 3. MUNDO GIGANTE, PROTAGONISTA, CELULAR 3D NA MÃO, ARMAS E POSTOS DE GASOLINA
     // =========================================================================
     const {
         colliders,
@@ -217,7 +260,24 @@ function initViceCityEngine() {
     playerChar.mesh.position.set(55, 0, -15);
     scene.add(playerChar.mesh);
 
+    // Smartphone 3D iluminado na mão direita quando o personagem está em ligação
+    const phoneProp3D = new THREE.Group();
+    const phoneBody = new THREE.Mesh(
+        new THREE.BoxGeometry(0.11, 0.21, 0.025),
+        new THREE.MeshStandardMaterial({ color: 0x09090b, metalness: 0.8 })
+    );
+    const phoneScreen = new THREE.Mesh(
+        new THREE.BoxGeometry(0.095, 0.18, 0.028),
+        new THREE.MeshBasicMaterial({ color: 0x22d3ee })
+    );
+    phoneProp3D.add(phoneBody, phoneScreen);
+    phoneProp3D.visible = false;
+    playerChar.handWeaponSocket.add(phoneProp3D);
+
+    // Arsenal 3D anexado à mão direita (Faca, Bastão, Pistola, Uzi, Escopeta, Fuzil M4)
     const weaponModels3D = {
+        knife: VCModels.createWeapon3D('knife'),
+        bat: VCModels.createWeapon3D('bat'),
         pistol: VCModels.createWeapon3D('pistol'),
         uzi: VCModels.createWeapon3D('uzi'),
         shotgun: VCModels.createWeapon3D('shotgun'),
@@ -229,7 +289,41 @@ function initViceCityEngine() {
         playerChar.handWeaponSocket.add(m);
     });
 
-    // Sistema de 450 Gotas de Chuva 3D caindo do céu
+    // Postos de Gasolina Explodíveis + Abastecimento [E]
+    const gasStations = [];
+    [
+        { name: "Posto Octane Ocean Beach", x: 52, z: 95 },
+        { name: "Posto Turbo Downtown", x: -72, z: -95 },
+        { name: "Posto Aeroporto Express", x: -395, z: -85 }
+    ].forEach(gs => {
+        const canopy = new THREE.Mesh(
+            new THREE.BoxGeometry(10, 0.6, 7),
+            new THREE.MeshBasicMaterial({ color: 0xef4444 })
+        );
+        canopy.position.set(gs.x, 4.4, gs.z);
+        const pump1 = new THREE.Mesh(
+            new THREE.BoxGeometry(1.1, 1.8, 0.9),
+            new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.5 })
+        );
+        pump1.position.set(gs.x - 2.2, 0.9, gs.z);
+        const pump2 = new THREE.Mesh(
+            new THREE.BoxGeometry(1.1, 1.8, 0.9),
+            new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.5 })
+        );
+        pump2.position.set(gs.x + 2.2, 0.9, gs.z);
+        scene.add(canopy, pump1, pump2);
+
+        gasStations.push({
+            name: gs.name,
+            x: gs.x,
+            z: gs.z,
+            pumps: [pump1, pump2],
+            exploded: false,
+            respawnTimer: 0
+        });
+    });
+
+    // Sistema de 450 Gotas de Chuva 3D
     const rainDrops = [];
     const rainGroup = new THREE.Group();
     rainGroup.visible = false;
@@ -237,21 +331,19 @@ function initViceCityEngine() {
     const dropMat = new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.65 });
     for (let i = 0; i < 450; i++) {
         const drop = new THREE.Mesh(dropGeo, dropMat);
-        drop.position.set(
-            (Math.random() - 0.5) * 90,
-            Math.random() * 45,
-            (Math.random() - 0.5) * 90
-        );
+        drop.position.set((Math.random() - 0.5) * 90, Math.random() * 45, (Math.random() - 0.5) * 90);
         rainGroup.add(drop);
         rainDrops.push(drop);
     }
     scene.add(rainGroup);
 
     // =========================================================================
-    // 4. ESTADO DO JOGADOR, CLIMA/TEMPERATURA, RÁDIO E ARSENAL
+    // 4. ESTADO DO JOGADOR, FÔLEGO (STAMINA), LIGAÇÃO TELEFÔNICA E TÁXI/UBER
     // =========================================================================
     const weapons = [
-        { name: "Punhos (Desarmado)", icon: "👊", ammo: "∞", type: "melee", dmg: 32, rate: 16 },
+        { name: "Punhos (Desarmado)", icon: "👊", ammo: "∞", type: "melee", dmg: 30, rate: 15 },
+        { name: "Faca Tática", icon: "🔪", ammo: "∞", type: "knife", dmg: 55, rate: 12 },
+        { name: "Bastão de Beisebol", icon: "🏏", ammo: "∞", type: "bat", dmg: 68, rate: 18 },
         { name: "Pistola 9mm", icon: "🔫", ammo: 120, type: "pistol", dmg: 38, rate: 10 },
         { name: "Uzi Mac-10", icon: "🧨", ammo: 320, type: "uzi", dmg: 24, rate: 4 },
         { name: "Escopeta Cal.12", icon: "💥", ammo: 48, type: "shotgun", dmg: 48, rate: 22 },
@@ -280,6 +372,7 @@ function initViceCityEngine() {
     let playerCash = 3500;
     let playerHealth = 100;
     let playerArmor = 100;
+    let playerStamina = 100;
     let isPlayerDead = false;
     let wastedTimer = 0;
     let invulnFrames = 0;
@@ -288,6 +381,7 @@ function initViceCityEngine() {
     let wantedDecayTimer = 0;
 
     let inVehicle = null;
+    let ridingAsPassenger = false; // Quando o jogador entra no banco de trás do Táxi/Uber
     let isAiming = false;
     let activeInterior = null;
     let clerkSurrendered = false;
@@ -297,6 +391,11 @@ function initViceCityEngine() {
     let camPitch = 0.14;
     let gameMinutes = 17 * 60 + 30;
     let missionStage = 1;
+    let wheelieTicks = 0;
+
+    // Sistema de Ligação Telefônica (Celular no Ouvido + Toque Chamando + Chegada Física)
+    let activePhoneCall = null; // { service, stage: 'ringing'|'answered', timer, ringsLeft, targetPos }
+    const dispatchedServices = []; // Veículos (Táxi/Uber, Polícia 190, Mecânico, Gangue) vindo pelas ruas
 
     const bullets = [];
     const enemyBullets = [];
@@ -308,7 +407,8 @@ function initViceCityEngine() {
         const mapOpen = !document.getElementById('vc-full-map').classList.contains('hidden');
         const wheelOpen = !document.getElementById('vc-weapon-wheel').classList.contains('hidden');
         const settingsOpen = !document.getElementById('vc-settings-modal').classList.contains('hidden');
-        return mapOpen || wheelOpen || settingsOpen;
+        const phoneOpen = !document.getElementById('vc-phone-modal').classList.contains('hidden');
+        return mapOpen || wheelOpen || settingsOpen || phoneOpen;
     }
 
     mount.onclick = () => {
@@ -337,7 +437,7 @@ function initViceCityEngine() {
         el.textContent = txt;
         el.classList.remove('hidden');
         clearTimeout(window.vcToastTimer);
-        window.vcToastTimer = setTimeout(() => el.classList.add('hidden'), 4000);
+        window.vcToastTimer = setTimeout(() => el.classList.add('hidden'), 4200);
     }
 
     function updateRadioHUD() {
@@ -358,14 +458,225 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 5. HITBOXES 3D, VERIFICAÇÃO DE ÁGUA (MAR/RIO) E ONDAS REAIS
+    // 5. APLICATIVOS DO SMARTPHONE ([T] / SETA ↑) COM LIGAÇÃO E CHEGADA FÍSICA
+    // =========================================================================
+    window.togglePhoneModal = (forceState) => {
+        const modal = document.getElementById('vc-phone-modal');
+        if (!modal) return;
+        const show = forceState !== undefined ? forceState : modal.classList.contains('hidden');
+        modal.classList.toggle('hidden', !show);
+
+        if (show) {
+            isAiming = false;
+            mouseLeftDown = false;
+            document.getElementById('vc-crosshair').classList.add('hidden');
+            document.getElementById('vc-lock-hint').classList.add('hidden');
+            if (document.pointerLockElement) document.exitPointerLock();
+        } else if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
+            try { mount.requestPointerLock(); } catch (e) {}
+        }
+    };
+
+    function initiatePhoneCall(serviceType) {
+        if (activeInterior) {
+            showGameToast('📵 Sem sinal dentro do edifício! Saia para a rua para ligar.');
+            return;
+        }
+        if (activePhoneCall) {
+            showGameToast('📞 Você já está em uma ligação!');
+            return;
+        }
+
+        togglePhoneModal(false);
+
+        // Guarda arma temporariamente e coloca o celular 3D no ouvido direito
+        Object.values(weaponModels3D).forEach(m => m.visible = false);
+        phoneProp3D.visible = true;
+
+        activePhoneCall = {
+            service: serviceType,
+            stage: 'ringing',
+            timer: 65, // ~1.1s entre cada toque
+            ringsLeft: 3,
+            callerPos: playerChar.mesh.position.clone()
+        };
+
+        playPhoneRingTone();
+        showGameToast('📞 Chamando... (Segurando celular no ouvido)');
+    }
+
+    function spawnDispatchedVehicle(serviceType, destPos) {
+        // Nasce longe (135 metros de distância na avenida) e dirige fisicamente até o jogador
+        const spawnAngle = Math.random() * Math.PI * 2;
+        const spawnX = Math.max(-480, Math.min(480, destPos.x + Math.cos(spawnAngle) * 135));
+        const spawnZ = Math.max(-650, Math.min(650, destPos.z + Math.sin(spawnAngle) * 135));
+
+        if (serviceType === 'taxi') {
+            const taxi = VCModels.createCar3D(0xfacc15, false);
+            // Letreiro luminoso de Táxi no teto
+            const taxiSign = new THREE.Mesh(
+                new THREE.BoxGeometry(0.75, 0.22, 0.32),
+                new THREE.MeshBasicMaterial({ color: 0xfef08a })
+            );
+            taxiSign.position.set(0, 1.48, 0.1);
+            taxi.mesh.add(taxiSign);
+
+            const driver = VCModels.createHuman3D({ seed: 1234 });
+            driver.mesh.scale.setScalar(0.75);
+            driver.mesh.position.set(-0.35, 0.35, 0.1);
+            taxi.mesh.add(driver.mesh);
+
+            taxi.mesh.position.set(spawnX, 0, spawnZ);
+            scene.add(taxi.mesh);
+
+            const taxiObj = {
+                ...taxi,
+                driverChar: driver,
+                name: 'Táxi / Uber ArcadeCab',
+                isTaxi: true,
+                speed: 0.45,
+                maxSpeed: 0.82,
+                angle: 0,
+                aiDir: 0,
+                hp: 140,
+                hasNitro: true,
+                burningTimer: 0,
+                destroyed: false
+            };
+            vehicles.push(taxiObj);
+            dispatchedServices.push({
+                type: 'taxi',
+                vehicle: taxiObj,
+                targetX: destPos.x,
+                targetZ: destPos.z,
+                arrived: false,
+                tripActive: false
+            });
+        } else if (serviceType === 'police') {
+            const cop = VCModels.createCar3D(0x090d16, true);
+            cop.mesh.position.set(spawnX, 0, spawnZ);
+            scene.add(cop.mesh);
+
+            const copObj = {
+                ...cop,
+                name: 'Viatura VCPD (Chamado 190)',
+                isCopCar: true,
+                speed: 0.48,
+                maxSpeed: 0.85,
+                angle: 0,
+                aiDir: 0,
+                hp: 150,
+                hasNitro: true,
+                burningTimer: 0,
+                destroyed: false,
+                deployed: false
+            };
+            copUnits.push(copObj);
+            dispatchedServices.push({
+                type: 'police',
+                vehicle: copObj,
+                targetX: destPos.x,
+                targetZ: destPos.z,
+                arrived: false
+            });
+        } else if (serviceType === 'mechanic') {
+            const sportCar = VCModels.createCar3D(0x06b6d4, false);
+            sportCar.mesh.position.set(spawnX, 0, spawnZ);
+            scene.add(sportCar.mesh);
+
+            const carObj = {
+                ...sportCar,
+                name: 'Infernus GT Turbo (Entregue pelo Mecânico)',
+                speed: 0.48,
+                maxSpeed: 0.96,
+                angle: 0,
+                aiDir: 0,
+                hp: 150,
+                hasNitro: true,
+                burningTimer: 0,
+                destroyed: false
+            };
+            vehicles.push(carObj);
+            dispatchedServices.push({
+                type: 'mechanic',
+                vehicle: carObj,
+                targetX: destPos.x,
+                targetZ: destPos.z,
+                arrived: false
+            });
+        } else if (serviceType === 'gang') {
+            const van = VCModels.createCar3D(0x9333ea, false);
+            van.mesh.position.set(spawnX, 0, spawnZ);
+            scene.add(van.mesh);
+
+            const vanObj = {
+                ...van,
+                name: 'Carro da Gangue Aliada',
+                speed: 0.46,
+                maxSpeed: 0.82,
+                angle: 0,
+                aiDir: 0,
+                hp: 140,
+                hasNitro: false,
+                burningTimer: 0,
+                destroyed: false
+            };
+            vehicles.push(vanObj);
+            dispatchedServices.push({
+                type: 'gang',
+                vehicle: vanObj,
+                targetX: destPos.x,
+                targetZ: destPos.z,
+                arrived: false
+            });
+        }
+    }
+
+    window.phoneCallTaxi = () => {
+        if (playerCash < 100) { showGameToast('⚠️ Precisa de $100 para pedir um Táxi/Uber!'); return; }
+        playerCash -= 100;
+        updateHUD();
+        initiatePhoneCall('taxi');
+    };
+
+    window.phoneCallPolice = () => {
+        initiatePhoneCall('police');
+    };
+
+    window.phoneBribePolice = () => {
+        if (wantedStars === 0) { showGameToast('ℹ️ Você não está sendo procurado.'); return; }
+        if (playerCash < 600) { showGameToast('⚠️ Precisa de $600 para subornar a VCPD!'); return; }
+        playerCash -= 600;
+        wantedStars = 0;
+        updateHUD();
+        togglePhoneModal(false);
+        playAmplifiedMoneyChime();
+        showGameToast('🕶️ Suborno pago! Estrelas de procurado removidas.');
+    };
+
+    window.phoneCallMechanic = () => {
+        if (playerCash < 500) { showGameToast('⚠️ Precisa de $500 para o Mecânico VIP!'); return; }
+        playerCash -= 500;
+        updateHUD();
+        initiatePhoneCall('mechanic');
+    };
+
+    window.phoneCallGangBackup = () => {
+        if (playerCash < 400) { showGameToast('⚠️ Precisa de $400 para chamar reforços!'); return; }
+        playerCash -= 400;
+        updateHUD();
+        initiatePhoneCall('gang');
+    };
+
+    // =========================================================================
+    // 6. HITBOXES 3D, ÁGUA / ONDAS REAIS E PARTÍCULAS
     // =========================================================================
     const bridgeZs = [-600, -300, 0, 300, 600];
 
     function isPointInWater(x, z) {
         const onBridge = bridgeZs.some(bz => Math.abs(z - bz) < 11.5);
-        if (!onBridge && Math.abs(x) < 26) return true; // Rio central
-        if (x > 560) return true; // Oceano a leste
+        if (!onBridge && Math.abs(x) < 26) return true;
+        if (x > 560) return true;
         return false;
     }
 
@@ -394,12 +705,8 @@ function initViceCityEngine() {
             const nx = pos.x + dx;
             const nz = pos.z + dz;
 
-            if (Math.abs(nx - room.cx) < 11.2 && !hitsColliderBox(nx, pos.z, radius, roomBoxes)) {
-                pos.x = nx;
-            }
-            if (nz > -11.5 && nz < 11.2 && !hitsColliderBox(pos.x, nz, radius, roomBoxes)) {
-                pos.z = nz;
-            }
+            if (Math.abs(nx - room.cx) < 11.2 && !hitsColliderBox(nx, pos.z, radius, roomBoxes)) pos.x = nx;
+            if (nz > -11.5 && nz < 11.2 && !hitsColliderBox(pos.x, nz, radius, roomBoxes)) pos.z = nz;
             return;
         }
 
@@ -427,9 +734,6 @@ function initViceCityEngine() {
         return null;
     }
 
-    // =========================================================================
-    // 6. PARTÍCULAS, EXPLOSÕES E MAÇOS DE DINHEIRO MAGNÉTICOS
-    // =========================================================================
     function spawnParticle(x, y, z, colorHex, scale = 0.35, vy = 0.08, life = 28) {
         const p = new THREE.Mesh(
             new THREE.BoxGeometry(scale, scale, scale),
@@ -549,7 +853,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 7. FORÇA POLICIAL (VIATURAS, SWAT E HELICÓPTEROS)
+    // 7. FORÇA POLICIAL (VIATURAS, DESEMBARQUE SWAT E HELICÓPTEROS)
     // =========================================================================
     const copUnits = [];
     const copOfficers = [];
@@ -666,23 +970,28 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 8. BARRA DE VIDA DEGRADÊ (VERDE->AMARELO->VERMELHO) + TELA AVERMELHADA
+    // 8. HUD (VIDA DEGRADÊ, FÔLEGO, VINHETA VERMELHA) E ARSENAL
     // =========================================================================
     function updateHUD() {
         document.getElementById('vc-cash').textContent = `$${String(playerCash).padStart(8, '0')}`;
 
         const hp = Math.max(0, Math.round(playerHealth));
         const arm = Math.max(0, Math.round(playerArmor));
+        const stam = Math.max(0, Math.round(playerStamina));
 
         document.getElementById('vc-health').textContent = hp;
         document.getElementById('vc-armor').textContent = arm;
+        const stamEl = document.getElementById('vc-stamina');
+        if (stamEl) stamEl.textContent = stam;
 
         const healthBar = document.getElementById('vc-health-bar');
         const healthText = document.getElementById('vc-health-text');
         const armorBar = document.getElementById('vc-armor-bar');
+        const stamBar = document.getElementById('vc-stamina-bar');
         const vignette = document.getElementById('vc-damage-vignette');
 
         if (armorBar) armorBar.style.width = `${arm}%`;
+        if (stamBar) stamBar.style.width = `${stam}%`;
 
         if (healthBar) {
             healthBar.style.width = `${hp}%`;
@@ -698,7 +1007,6 @@ function initViceCityEngine() {
             }
         }
 
-        // Vinheta vermelha na tela vai ficando mais forte conforme a vida diminui
         if (vignette) {
             if (hp < 65) {
                 const alpha = Math.min(0.88, ((65 - hp) / 65) * 0.85);
@@ -740,12 +1048,15 @@ function initViceCityEngine() {
         isPlayerDead = true;
         wastedTimer = 160;
         isAiming = false;
+        activePhoneCall = null;
+        phoneProp3D.visible = false;
         document.getElementById('vc-crosshair').classList.add('hidden');
 
         if (inVehicle) {
             playerChar.mesh.position.set(inVehicle.mesh.position.x - 2.2, 0, inVehicle.mesh.position.z);
             playerChar.mesh.visible = true;
             inVehicle = null;
+            ridingAsPassenger = false;
         }
         playerChar.state = 'dead';
         wantedStars = 0;
@@ -757,7 +1068,6 @@ function initViceCityEngine() {
                 ? '💀 WASTED! Você explodiu! (-$250 taxa hospitalar)'
                 : '💀 WASTED! Você foi eliminado! (-$250 taxa hospitalar)');
         showGameToast(msg);
-        if (window.speakVC) speakVC("Wasted! You are out.", "Eliminado! Você caiu em combate.", 0.8, 0.95);
     }
 
     function respawnAtHospital() {
@@ -769,6 +1079,7 @@ function initViceCityEngine() {
         clerkSurrendered = false;
         playerHealth = 100;
         playerArmor = 50;
+        playerStamina = 100;
         playerCash = Math.max(0, playerCash - 250);
         invulnFrames = 60;
         updateHUD();
@@ -779,9 +1090,10 @@ function initViceCityEngine() {
         if (isPlayerDead || !weapons[idx]) return;
         currentWeaponIdx = idx;
         const wType = weapons[idx].type;
+        phoneProp3D.visible = false;
         Object.keys(weaponModels3D).forEach(k => weaponModels3D[k].visible = (k === wType));
 
-        if (wType === 'melee') {
+        if (wType === 'melee' || wType === 'knife' || wType === 'bat') {
             isAiming = false;
             document.getElementById('vc-crosshair').classList.add('hidden');
         }
@@ -838,12 +1150,11 @@ function initViceCityEngine() {
             deployCopsFromCar(c);
         });
 
-        if (window.triggerDynamicDialogue) triggerDynamicDialogue('shop_robbery', 1.3, 1.15);
         showGameToast(`🚨 DENÚNCIA 190: O atendente denunciou o roubo em ${storeDoor.name}! A polícia cercou a saída!`);
     }
 
     // =========================================================================
-    // 9. MAPA GIGANTE (M) E GPS
+    // 9. MAPA GTA COM TODOS OS SÍMBOLOS (💰, 🛒, 🍔, 🎓, ⛽, 🏠, 🔫, 🚓, 🔧, ✈️, 🚕)
     // =========================================================================
     window.toggleFullMap = (forceState) => {
         const mapEl = document.getElementById('vc-full-map');
@@ -857,10 +1168,8 @@ function initViceCityEngine() {
             document.getElementById('vc-lock-hint').classList.add('hidden');
             if (document.pointerLockElement) document.exitPointerLock();
             drawBigMap();
-        } else {
-            if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
-                try { mount.requestPointerLock(); } catch (e) {}
-            }
+        } else if (!isAnyOverlayOpen() && document.pointerLockElement !== mount) {
+            try { mount.requestPointerLock(); } catch (e) {}
         }
     };
 
@@ -880,8 +1189,158 @@ function initViceCityEngine() {
             const worldZ = ((clickY - 210) / 210) * 750;
             gpsWaypoint = { x: worldX, z: worldZ };
             drawBigMap();
-            showGameToast('📍 Destino marcado! Siga o rastro rosa no minimapa.');
+            showGameToast('📍 Destino marcado! Siga no minimapa ou chame um Táxi [T].');
         };
+    }
+
+    const doorSymbols = {
+        bank: '💰',
+        store: '🛒',
+        diner: '🍔',
+        school: '🎓',
+        house: '🏠',
+        gunshop: '🔫',
+        police: '🚓'
+    };
+
+    function getPlayerWorldRefPos() {
+        if (activeInterior) return new THREE.Vector3(activeInterior.extX, 0, activeInterior.extZ);
+        if (inVehicle) return inVehicle.mesh.position;
+        return playerChar.mesh.position;
+    }
+
+    const radarCanvas = document.getElementById('vc-radar');
+    const rCtx = radarCanvas ? radarCanvas.getContext('2d') : null;
+
+    function drawRadar() {
+        if (!rCtx) return;
+        rCtx.clearRect(0, 0, 112, 112);
+        rCtx.fillStyle = '#0f172a';
+        rCtx.fillRect(0, 0, 112, 112);
+
+        const ref = getPlayerWorldRefPos();
+        const px = ref.x;
+        const pz = ref.z;
+
+        rCtx.fillStyle = '#0284c7';
+        rCtx.fillRect(56 - (px * 0.22) - 6, 0, 12, 112);
+
+        if (gpsWaypoint) {
+            const gx = 56 + (gpsWaypoint.x - px) * 0.22;
+            const gz = 56 + (gpsWaypoint.z - pz) * 0.22;
+            rCtx.strokeStyle = '#ec4899';
+            rCtx.lineWidth = 3;
+            rCtx.beginPath();
+            rCtx.moveTo(56, 56);
+            rCtx.lineTo(gx, gz);
+            rCtx.stroke();
+
+            rCtx.font = '11px sans-serif';
+            rCtx.fillText('📍', Math.max(8, Math.min(96, gx - 5)), Math.max(12, Math.min(104, gz + 4)));
+
+            if (Math.hypot(gpsWaypoint.x - px, gpsWaypoint.z - pz) < 14) {
+                gpsWaypoint = null;
+                showGameToast('📍 Você chegou ao destino marcado!');
+            }
+        }
+
+        rCtx.font = '10px sans-serif';
+        rCtx.textAlign = 'center';
+        rCtx.textBaseline = 'middle';
+
+        enterableDoors.forEach(d => {
+            if ((d.type === 'store' || d.type === 'bank') && d.robbed) return;
+            const sx = 56 + (d.extX - px) * 0.22;
+            const sz = 56 + (d.extZ - pz) * 0.22;
+            if (sx > 6 && sx < 106 && sz > 6 && sz < 106) {
+                rCtx.fillText(doorSymbols[d.type] || '•', sx, sz);
+            }
+        });
+
+        garages.forEach(g => {
+            const sx = 56 + (g.x - px) * 0.22;
+            const sz = 56 + (g.z - pz) * 0.22;
+            if (sx > 6 && sx < 106 && sz > 6 && sz < 106) rCtx.fillText('🔧', sx, sz);
+        });
+
+        gasStations.forEach(gs => {
+            const sx = 56 + (gs.x - px) * 0.22;
+            const sz = 56 + (gs.z - pz) * 0.22;
+            if (sx > 6 && sx < 106 && sz > 6 && sz < 106) rCtx.fillText('⛽', sx, sz);
+        });
+
+        dispatchedServices.forEach(srv => {
+            if (srv.vehicle && !srv.vehicle.destroyed) {
+                const sx = 56 + (srv.vehicle.mesh.position.x - px) * 0.22;
+                const sz = 56 + (srv.vehicle.mesh.position.z - pz) * 0.22;
+                const icon = srv.type === 'taxi' ? '🚕' : (srv.type === 'police' ? '🚓' : '🏎️');
+                rCtx.fillText(icon, Math.max(10, Math.min(102, sx)), Math.max(10, Math.min(102, sz)));
+            }
+        });
+
+        rCtx.fillStyle = '#ffffff';
+        rCtx.beginPath();
+        rCtx.arc(56, 56, 3.8, 0, Math.PI * 2);
+        rCtx.fill();
+    }
+
+    function drawBigMap() {
+        const bc = document.getElementById('vc-bigmap-canvas');
+        if (!bc) return;
+        const ctx = bc.getContext('2d');
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, 420, 420);
+
+        ctx.fillStyle = '#0284c7'; ctx.fillRect(202, 0, 16, 420);
+        ctx.fillStyle = '#fde047'; ctx.fillRect(345, 0, 18, 420);
+        ctx.fillStyle = '#06b6d4'; ctx.fillRect(363, 0, 57, 420);
+
+        ctx.fillStyle = '#09090b'; ctx.fillRect(72, 150, 14, 120);
+
+        const ref = getPlayerWorldRefPos();
+        const mapPx = 210 + (ref.x / 750) * 210;
+        const mapPz = 210 + (ref.z / 750) * 210;
+
+        if (gpsWaypoint) {
+            const gx = 210 + (gpsWaypoint.x / 750) * 210;
+            const gz = 210 + (gpsWaypoint.z / 750) * 210;
+            ctx.strokeStyle = '#ec4899';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 5]);
+            ctx.beginPath();
+            ctx.moveTo(mapPx, mapPz);
+            ctx.lineTo(gx, gz);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = '14px sans-serif';
+            ctx.fillText('📍', gx - 7, gz + 5);
+        }
+
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        enterableDoors.forEach(d => {
+            const sx = 210 + (d.extX / 750) * 210;
+            const sz = 210 + (d.extZ / 750) * 210;
+            ctx.fillText(doorSymbols[d.type] || '•', sx, sz);
+        });
+
+        garages.forEach(g => {
+            ctx.fillText('🔧', 210 + (g.x / 750) * 210, 210 + (g.z / 750) * 210);
+        });
+
+        gasStations.forEach(gs => {
+            ctx.fillText('⛽', 210 + (gs.x / 750) * 210, 210 + (gs.z / 750) * 210);
+        });
+
+        ctx.fillText('✈️', 79, 210);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(mapPx, mapPz, 6, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     // =========================================================================
@@ -900,8 +1359,15 @@ function initViceCityEngine() {
             return;
         }
 
+        if (k === 't' || (!inVehicle && e.key === 'ArrowUp')) {
+            e.preventDefault();
+            togglePhoneModal();
+            return;
+        }
+
         if (isPlayerDead) return;
 
+        // Roleta de Armas [TAB] -> Ativa Câmera Lenta (Bullet-Time estilo GTA V)
         if (e.key === 'Tab') {
             e.preventDefault();
             const wheel = document.getElementById('vc-weapon-wheel');
@@ -914,25 +1380,17 @@ function initViceCityEngine() {
             }
         }
 
-        if (k === 'm') {
-            e.preventDefault();
-            toggleFullMap();
-        }
-
+        if (k === 'm') { e.preventDefault(); toggleFullMap(); }
         if (k === '1') selectVCWeapon(0);
         if (k === '2') selectVCWeapon(1);
         if (k === '3') selectVCWeapon(2);
         if (k === '4') selectVCWeapon(3);
         if (k === '5') selectVCWeapon(4);
+        if (k === '6') selectVCWeapon(5);
+        if (k === '7') selectVCWeapon(6);
 
-        if (k === 'g') {
-            e.preventDefault();
-            throwGrenade();
-        }
-
-        if (k === 'c') {
-            cycleWeather();
-        }
+        if (k === 'g') { e.preventDefault(); throwGrenade(); }
+        if (k === 'c') cycleWeather();
 
         if (k === 'r') {
             currentRadioIdx = (currentRadioIdx + 1) % radioStations.length;
@@ -951,7 +1409,7 @@ function initViceCityEngine() {
 
         if (k === 'h' && inVehicle && window.VCSoundFX) VCSoundFX.playCarHorn();
 
-        // Entrar / Sair de Carros, Bicicletas, Jet-Skis, Aviões e Jatos [F]
+        // Entrar / Sair de Veículos e Táxi/Uber [F]
         if (k === 'f' && !activeInterior) {
             if (inVehicle) {
                 const isAircraft = inVehicle.vehicleType === 'plane' || inVehicle.vehicleType === 'jet';
@@ -964,6 +1422,7 @@ function initViceCityEngine() {
                 playerChar.mesh.position.set(inVehicle.mesh.position.x - 2.6, inVehicle.altitude || 0, inVehicle.mesh.position.z);
                 playerChar.mesh.visible = true;
                 inVehicle = null;
+                ridingAsPassenger = false;
                 document.getElementById('vc-alt-badge').classList.add('hidden');
             } else {
                 const allDrivable = [...vehicles, ...copUnits];
@@ -977,6 +1436,30 @@ function initViceCityEngine() {
                         playerChar.mesh.visible = false;
                         isAiming = false;
                         document.getElementById('vc-crosshair').classList.add('hidden');
+
+                        // Se for o Táxi/Uber que você chamou, entra como passageiro e inicia a viagem até o GPS!
+                        if (v.isTaxi) {
+                            ridingAsPassenger = true;
+                            const srv = dispatchedServices.find(s => s.vehicle === v);
+                            if (srv) {
+                                if (!gpsWaypoint) {
+                                    gpsWaypoint = { x: -110, z: 65 }; // Destino padrão: Banco Central Downtown
+                                    showGameToast('🚕 Entrou no Táxi! Levando você até o Centro (Marque outro ponto no Mapa [M] se quiser).');
+                                } else {
+                                    showGameToast('🚕 Entrou no Táxi! O motorista está indo para o seu destino GPS.');
+                                }
+                                srv.tripActive = true;
+                            }
+                            return;
+                        }
+
+                        ridingAsPassenger = false;
+                        // Se roubar carro com motorista NPC dentro, o motorista sai correndo
+                        if (v.driverChar) {
+                            v.mesh.remove(v.driverChar.mesh);
+                            v.driverChar = null;
+                            v.aiDir = 0;
+                        }
 
                         const isAircraft = v.vehicleType === 'plane' || v.vehicleType === 'jet';
                         document.getElementById('vc-alt-badge').classList.toggle('hidden', !isAircraft);
@@ -1002,15 +1485,31 @@ function initViceCityEngine() {
                             inVehicle.hp = 100;
                             inVehicle.burningTimer = 0;
                             inVehicle.hasNitro = true;
+                            if (VCModels.repairCarDent) VCModels.repairCarDent(inVehicle);
                             const neonColors = [0xec4899, 0x06b6d4, 0xfacc15, 0xa855f7, 0x10b981];
                             const newCol = neonColors[Math.floor(Math.random() * neonColors.length)];
                             if (inVehicle.chassis) inVehicle.chassis.material.color.setHex(newCol);
                             wantedStars = 0;
                             updateHUD();
                             playAmplifiedMoneyChime();
-                            showGameToast(`🔧 ${g.name}: Lataria 100%, Nova Pintura, NITRO [SHIFT] e Polícia despistada!`);
+                            showGameToast(`🔧 ${g.name}: Lataria desamassada 100%, Nova Pintura, NITRO [SHIFT] e Polícia despistada!`);
                         } else {
                             showGameToast('⚠️ Precisa de $400 para usar a Pay \'n\' Spray!');
+                        }
+                        return;
+                    }
+                }
+                for (let gs of gasStations) {
+                    if (!gs.exploded && Math.hypot(inVehicle.mesh.position.x - gs.x, inVehicle.mesh.position.z - gs.z) < 7.0) {
+                        if (playerCash >= 80) {
+                            playerCash -= 80;
+                            inVehicle.hp = 100;
+                            inVehicle.hasNitro = true;
+                            playAmplifiedMoneyChime();
+                            updateHUD();
+                            showGameToast(`⛽ Tanque cheio e Nitro recarregado no ${gs.name}! (-$80)`);
+                        } else {
+                            showGameToast('⚠️ Precisa de $80 para abastecer!');
                         }
                         return;
                     }
@@ -1047,6 +1546,7 @@ function initViceCityEngine() {
                     if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
                         playerHealth = 100;
                         playerArmor = 100;
+                        playerStamina = 100;
                         wantedStars = 0;
                         if (window.VCSoundFX) VCSoundFX.playSynthChord();
                         updateHUD();
@@ -1058,12 +1558,12 @@ function initViceCityEngine() {
                         if (playerCash >= 800) {
                             playerCash -= 800;
                             playerArmor = 100;
-                            weapons[1].ammo += 60;
-                            weapons[2].ammo += 150;
-                            weapons[3].ammo += 24;
-                            weapons[4].ammo += 120;
+                            weapons[3].ammo += 60;
+                            weapons[4].ammo += 150;
+                            weapons[5].ammo += 24;
+                            weapons[6].ammo += 120;
                             grenadeCount += 3;
-                            selectVCWeapon(4);
+                            selectVCWeapon(6);
                             updateHUD();
                             playAmplifiedMoneyChime();
                             showGameToast('🎖️ Pacote Ammu-Nation comprado: Rifle M4, Granadas, Colete 100% e Munição!');
@@ -1075,8 +1575,8 @@ function initViceCityEngine() {
                 } else if (activeInterior.type === 'police') {
                     if (playerChar.mesh.position.distanceTo(new THREE.Vector3(room.actionX, -40, room.actionZ)) < 3.6) {
                         playerArmor = 100;
-                        weapons[3].ammo += 24;
-                        weapons[4].ammo += 90;
+                        weapons[5].ammo += 24;
+                        weapons[6].ammo += 90;
                         grenadeCount += 2;
                         wantedStars = Math.min(6, wantedStars + 3);
                         updateHUD();
@@ -1100,9 +1600,10 @@ function initViceCityEngine() {
                         if (playerCash >= 50) {
                             playerCash -= 50;
                             playerHealth = Math.min(100, playerHealth + 65);
+                            playerStamina = 100;
                             playAmplifiedMoneyChime();
                             updateHUD();
-                            showGameToast('🍔 Comeu um Combo ArcadeZone Burger! +65 de Vida restaurada!');
+                            showGameToast('🍔 Comeu Combo ArcadeZone Burger! +65 Vida e Fôlego 100%! (-$50)');
                         } else {
                             showGameToast('⚠️ Precisa de $50 para pedir um Combo Burger!');
                         }
@@ -1186,7 +1687,7 @@ function initViceCityEngine() {
 
     mount.onmousedown = (e) => {
         if (isAnyOverlayOpen() || isPlayerDead) return;
-        if (e.button === 2 && !inVehicle && currentWeaponIdx > 0) {
+        if (e.button === 2 && !inVehicle && currentWeaponIdx >= 3) {
             isAiming = true;
             document.getElementById('vc-crosshair').classList.remove('hidden');
         }
@@ -1213,21 +1714,52 @@ function initViceCityEngine() {
         }
     };
 
+    // =========================================================================
+    // 11. COMBATE CORPO A CORPO (PUNHOS, FACA, BASTÃO), TIROS E REAÇÃO 60/40 DOS NPCs
+    // =========================================================================
+    function handlePedProvoked(pedObj) {
+        if (!pedObj || !pedObj.alive) return;
+        // 60% foge em pânico / 40% parte para cima para lutar!
+        if (pedObj.role === 'gang_purple' || pedObj.role === 'gang_green' || pedObj.role === 'thief' || Math.random() < 0.40) {
+            pedObj.aggroTarget = 'player';
+            pedObj.panic = false;
+        } else {
+            pedObj.panic = true;
+            pedObj.aggroTarget = null;
+        }
+    }
+
     function performAttack() {
         if (fireCooldown > 0 || isPlayerDead || inVehicle) return;
         const wpn = weapons[currentWeaponIdx];
         fireCooldown = wpn.rate;
 
-        if (wpn.type === 'melee') {
+        if (wpn.type === 'melee' || wpn.type === 'knife' || wpn.type === 'bat') {
             playerChar.punchTimer = 14;
+            const reach = wpn.type === 'bat' ? 3.4 : 2.8;
+
             peds.forEach(p => {
-                if (p.alive && playerChar.mesh.position.distanceTo(p.char.mesh.position) < 2.8) {
+                if (p.alive && playerChar.mesh.position.distanceTo(p.char.mesh.position) < reach) {
                     p.hp -= wpn.dmg;
+                    handlePedProvoked(p);
                     if (p.hp <= 0) {
                         p.alive = false;
                         p.char.state = 'dead';
                         dropNPCLoot(p.char.mesh.position.x, p.char.mesh.position.z, 85);
                         if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
+                    }
+                }
+            });
+
+            copOfficers.forEach(cop => {
+                if (cop.alive && playerChar.mesh.position.distanceTo(cop.char.mesh.position) < reach) {
+                    cop.hp -= wpn.dmg;
+                    if (cop.hp <= 0) {
+                        cop.alive = false;
+                        cop.char.state = 'dead';
+                        dropNPCLoot(cop.char.mesh.position.x, cop.char.mesh.position.z, 165);
+                        wantedStars = Math.min(6, wantedStars + 1);
+                        updateHUD();
                     }
                 }
             });
@@ -1273,7 +1805,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 11. ATROPELAMENTOS, CICLO DIA/NOITE/CHUVA E RADARES
+    // 12. ATROPELAMENTOS, CICLO DIA/NOITE/CHUVA E LOOP PRINCIPAL (COM BULLET-TIME)
     // =========================================================================
     function handleVehicleRunOver(carObj, speedAbs, isPlayerDriving) {
         if (speedAbs < 0.14 || carObj.destroyed || (carObj.altitude || 0) > 2.5) return;
@@ -1288,27 +1820,12 @@ function initViceCityEngine() {
                 dropNPCLoot(p.char.mesh.position.x, p.char.mesh.position.z, 85);
                 if (window.VCSoundFX) VCSoundFX.playScream(p.isFemale);
 
-                if (isPlayerDriving) {
+                if (isPlayerDriving && !ridingAsPassenger) {
                     carObj.speed *= 0.84;
                     if (Math.random() < 0.45) {
                         wantedStars = Math.min(6, wantedStars + 1);
                         updateHUD();
                     }
-                }
-            }
-        });
-
-        copOfficers.forEach(cop => {
-            if (!cop.alive) return;
-            if (Math.abs(cop.char.mesh.position.x - carPos.x) < 1.55 && Math.abs(cop.char.mesh.position.z - carPos.z) < 2.45) {
-                cop.alive = false;
-                cop.hp = 0;
-                cop.char.state = 'dead';
-                dropNPCLoot(cop.char.mesh.position.x, cop.char.mesh.position.z, 165);
-                if (isPlayerDriving) {
-                    carObj.speed *= 0.80;
-                    wantedStars = Math.min(6, wantedStars + 1);
-                    updateHUD();
                 }
             }
         });
@@ -1360,144 +1877,25 @@ function initViceCityEngine() {
         });
     }
 
-    const radarCanvas = document.getElementById('vc-radar');
-    const rCtx = radarCanvas ? radarCanvas.getContext('2d') : null;
-
-    function getPlayerWorldRefPos() {
-        if (activeInterior) return new THREE.Vector3(activeInterior.extX, 0, activeInterior.extZ);
-        if (inVehicle) return inVehicle.mesh.position;
-        return playerChar.mesh.position;
-    }
-
-    function drawRadar() {
-        if (!rCtx) return;
-        rCtx.clearRect(0, 0, 112, 112);
-        rCtx.fillStyle = '#0f172a';
-        rCtx.fillRect(0, 0, 112, 112);
-
-        const ref = getPlayerWorldRefPos();
-        const px = ref.x;
-        const pz = ref.z;
-
-        rCtx.fillStyle = '#0284c7';
-        rCtx.fillRect(56 - (px * 0.22) - 6, 0, 12, 112);
-
-        if (gpsWaypoint) {
-            const gx = 56 + (gpsWaypoint.x - px) * 0.22;
-            const gz = 56 + (gpsWaypoint.z - pz) * 0.22;
-            rCtx.strokeStyle = '#ec4899';
-            rCtx.lineWidth = 3;
-            rCtx.beginPath();
-            rCtx.moveTo(56, 56);
-            rCtx.lineTo(gx, gz);
-            rCtx.stroke();
-
-            rCtx.fillStyle = '#ec4899';
-            rCtx.beginPath();
-            rCtx.arc(Math.max(10, Math.min(102, gx)), Math.max(10, Math.min(102, gz)), 4.5, 0, Math.PI * 2);
-            rCtx.fill();
-
-            if (Math.hypot(gpsWaypoint.x - px, gpsWaypoint.z - pz) < 14) {
-                gpsWaypoint = null;
-                showGameToast('📍 Você chegou ao destino marcado!');
-            }
-        }
-
-        enterableDoors.forEach(d => {
-            if ((d.type === 'store' || d.type === 'bank') && d.robbed) return;
-            const colors = {
-                store: '#facc15',
-                bank: '#eab308',
-                diner: '#ec4899',
-                school: '#a855f7',
-                house: d.owned ? '#38bdf8' : '#10b981',
-                gunshop: '#f97316',
-                police: '#3b82f6'
-            };
-            rCtx.fillStyle = colors[d.type] || '#ffffff';
-            rCtx.fillRect(56 + (d.extX - px) * 0.22 - 2.5, 56 + (d.extZ - pz) * 0.22 - 2.5, 5, 5);
-        });
-
-        rCtx.fillStyle = '#ffffff';
-        rCtx.beginPath();
-        rCtx.arc(56, 56, 3.8, 0, Math.PI * 2);
-        rCtx.fill();
-    }
-
-    function drawBigMap() {
-        const bc = document.getElementById('vc-bigmap-canvas');
-        if (!bc) return;
-        const ctx = bc.getContext('2d');
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(0, 0, 420, 420);
-
-        ctx.fillStyle = '#0284c7'; ctx.fillRect(202, 0, 16, 420);
-        ctx.fillStyle = '#fde047'; ctx.fillRect(345, 0, 18, 420);
-        ctx.fillStyle = '#06b6d4'; ctx.fillRect(363, 0, 57, 420);
-
-        // Pista do Aeroporto a Oeste
-        ctx.fillStyle = '#09090b'; ctx.fillRect(72, 150, 14, 120);
-
-        const ref = getPlayerWorldRefPos();
-        const mapPx = 210 + (ref.x / 750) * 210;
-        const mapPz = 210 + (ref.z / 750) * 210;
-
-        if (gpsWaypoint) {
-            const gx = 210 + (gpsWaypoint.x / 750) * 210;
-            const gz = 210 + (gpsWaypoint.z / 750) * 210;
-            ctx.strokeStyle = '#ec4899';
-            ctx.lineWidth = 4;
-            ctx.setLineDash([8, 5]);
-            ctx.beginPath();
-            ctx.moveTo(mapPx, mapPz);
-            ctx.lineTo(gx, gz);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.fillStyle = '#ec4899';
-            ctx.beginPath();
-            ctx.arc(gx, gz, 7, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        enterableDoors.forEach(d => {
-            const colors = {
-                store: '#facc15',
-                bank: '#eab308',
-                diner: '#ec4899',
-                school: '#a855f7',
-                house: d.owned ? '#38bdf8' : '#10b981',
-                gunshop: '#f97316',
-                police: '#3b82f6'
-            };
-            ctx.fillStyle = colors[d.type] || '#ffffff';
-            ctx.fillRect(210 + (d.extX / 750) * 210 - 3.5, 210 + (d.extZ / 750) * 210 - 3.5, 7, 7);
-        });
-
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(mapPx, mapPz, 6, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
     updateRadioHUD();
     updateHUD();
 
-    // =========================================================================
-    // 12. LOOP PRINCIPAL DE SIMULAÇÃO (60 FPS)
-    // =========================================================================
     let tick = 0;
     const oceanGeoPos = ocean && ocean.geometry ? ocean.geometry.attributes.position : null;
 
     function gameLoop() {
         requestAnimationFrame(gameLoop);
         tick++;
-        const timeSec = tick * 0.016;
+
+        // Câmera Lenta (Bullet-Time estilo GTA V) quando a Roleta de Armas [TAB] está aberta!
+        const wheelOpen = !document.getElementById('vc-weapon-wheel').classList.contains('hidden');
+        const timeScale = wheelOpen ? 0.22 : 1.0;
+        const timeSec = tick * 0.016 * timeScale;
 
         if (invulnFrames > 0) invulnFrames--;
         if (fireCooldown > 0) fireCooldown--;
 
-        if (mouseLeftDown && !inVehicle && !isPlayerDead && (currentWeaponIdx === 2 || currentWeaponIdx === 4)) {
+        if (mouseLeftDown && !inVehicle && !isPlayerDead && (currentWeaponIdx === 4 || currentWeaponIdx === 6)) {
             performAttack();
         }
 
@@ -1509,7 +1907,113 @@ function initViceCityEngine() {
             return;
         }
 
-        // Ondas 3D Reais no Mar + Espuma da Praia + Chafariz da Praça
+        // =====================================================================
+        // PROCESSAMENTO DA LIGAÇÃO TELEFÔNICA (CELULAR NO OUVIDO + TOQUE + 20S CHEGADA)
+        // =====================================================================
+        if (activePhoneCall) {
+            activePhoneCall.timer--;
+            if (activePhoneCall.stage === 'ringing') {
+                if (activePhoneCall.timer <= 0) {
+                    activePhoneCall.ringsLeft--;
+                    if (activePhoneCall.ringsLeft > 0) {
+                        playPhoneRingTone();
+                        activePhoneCall.timer = 65;
+                    } else {
+                        // Central atende a chamada!
+                        activePhoneCall.stage = 'answered';
+                        activePhoneCall.timer = 130; // ~2.2 segundos falando antes de desligar
+                        const srv = activePhoneCall.service;
+                        const dest = playerChar.mesh.position.clone();
+                        spawnDispatchedVehicle(srv, dest);
+
+                        if (srv === 'taxi') {
+                            showGameToast('🗣️ Central ArcadeCab: "Táxi a caminho! Chega em ~20 segundos na sua rua."');
+                            if (window.speakVC) speakVC("ArcadeCab dispatch. A driver is on the way to your location.", "Central ArcadeCab. Um motorista está a caminho da sua localização.", 0.95, 1.0);
+                        } else if (srv === 'police') {
+                            showGameToast('🗣️ Central 190: "Viatura despachada! Chega em ~20 segundos."');
+                            if (window.speakVC) speakVC("911 Dispatch. Officers are en route.", "Central 190. Viaturas a caminho.", 0.95, 1.0);
+                        } else if (srv === 'mechanic') {
+                            showGameToast('🗣️ Mecânico VIP: "Estou levando seu carro esportivo, aguarde ~20 segundos!"');
+                        } else if (srv === 'gang') {
+                            showGameToast('🗣️ Parceiro de Gangue: "Estamos chegando de carro em ~20 segundos!"');
+                        }
+                    }
+                }
+            } else if (activePhoneCall.stage === 'answered') {
+                if (activePhoneCall.timer <= 0) {
+                    playPhoneHangupBeep();
+                    phoneProp3D.visible = false;
+                    activePhoneCall = null;
+                    selectVCWeapon(currentWeaponIdx);
+                }
+            }
+        }
+
+        // Movimentação Física dos Veículos Chamados pelo Celular (Sem Teleporte!)
+        for (let i = dispatchedServices.length - 1; i >= 0; i--) {
+            const srv = dispatchedServices[i];
+            const v = srv.vehicle;
+            if (!v || v.destroyed) {
+                dispatchedServices.splice(i, 1);
+                continue;
+            }
+
+            if (srv.type === 'taxi' && srv.tripActive && ridingAsPassenger && inVehicle === v) {
+                // Viagem autônoma do Táxi/Uber até o destino GPS do jogador
+                if (!gpsWaypoint) {
+                    v.speed = 0;
+                    ridingAsPassenger = false;
+                    playerChar.mesh.position.set(v.mesh.position.x - 2.5, 0, v.mesh.position.z);
+                    playerChar.mesh.visible = true;
+                    inVehicle = null;
+                    showGameToast('🚕 Táxi chegou ao seu destino GPS! Obrigado pela corrida.');
+                    dispatchedServices.splice(i, 1);
+                    continue;
+                }
+                const dx = gpsWaypoint.x - v.mesh.position.x;
+                const dz = gpsWaypoint.z - v.mesh.position.z;
+                const dist = Math.hypot(dx, dz);
+                if (dist < 10) {
+                    gpsWaypoint = null;
+                } else {
+                    const ang = Math.atan2(-dx, -dz);
+                    v.angle = ang;
+                    v.mesh.rotation.y = ang;
+                    v.speed = 0.56 * timeScale;
+                    moveEntityWithHitbox(v.mesh.position, -Math.sin(ang) * v.speed, -Math.cos(ang) * v.speed, 1.35, null, false);
+                    VCModels.updateCarAnimation(v, v.speed, 0, false);
+                }
+            } else if (!srv.arrived) {
+                // Dirigindo fisicamente pelas ruas até alcançar o ponto onde você ligou
+                const dx = srv.targetX - v.mesh.position.x;
+                const dz = srv.targetZ - v.mesh.position.z;
+                const dist = Math.hypot(dx, dz);
+                if (dist < 9.5) {
+                    srv.arrived = true;
+                    v.speed = 0;
+                    if (srv.type === 'taxi') {
+                        showGameToast('🚕 Seu Táxi/Uber chegou! Aperte [F] para entrar e ir ao GPS.');
+                    } else if (srv.type === 'police') {
+                        showGameToast('🚓 A Viatura da Polícia 190 chegou ao local!');
+                        deployCopsFromCar(v);
+                    } else if (srv.type === 'mechanic') {
+                        showGameToast('🏎️ O Mecânico estacionou seu carro novo! Aperte [F] para dirigir.');
+                    } else if (srv.type === 'gang') {
+                        showGameToast('🤝 Seus reforços de gangue chegaram!');
+                    }
+                } else {
+                    const ang = Math.atan2(-dx, -dz);
+                    v.angle = ang;
+                    v.mesh.rotation.y = ang;
+                    v.speed = 0.45 * timeScale; // ~20s para percorrer 135m
+                    v.mesh.position.x -= Math.sin(ang) * v.speed;
+                    v.mesh.position.z -= Math.cos(ang) * v.speed;
+                    VCModels.updateCarAnimation(v, v.speed, 0, false);
+                }
+            }
+        }
+
+        // Ondas 3D Reais no Mar + Espuma + Chafariz
         if (oceanGeoPos) {
             for (let i = 0; i < oceanGeoPos.count; i++) {
                 const vx = oceanGeoPos.getX(i);
@@ -1519,20 +2023,15 @@ function initViceCityEngine() {
             }
             oceanGeoPos.needsUpdate = true;
         }
-        if (surfFoam) {
-            surfFoam.position.x = 562 + Math.sin(timeSec * 3.2) * 2.2;
-        }
-        if (fountain && fountain.spout) {
-            fountain.spout.scale.setScalar(0.9 + Math.sin(timeSec * 8) * 0.22);
-        }
+        if (surfFoam) surfFoam.position.x = 562 + Math.sin(timeSec * 3.2) * 2.2;
+        if (fountain && fountain.spout) fountain.spout.scale.setScalar(0.9 + Math.sin(timeSec * 8) * 0.22);
 
-        // Nuvens flutuando lentamente no céu
         clouds.forEach(cl => {
-            cl.position.x += 0.03;
+            cl.position.x += 0.03 * timeScale;
             if (cl.position.x > 850) cl.position.x = -850;
         });
 
-        // Gotas de Chuva 3D caindo do céu ao redor do jogador
+        // Gotas de Chuva 3D
         const isRaining = weatherModes[currentWeatherIdx].rain && !activeInterior;
         rainGroup.visible = isRaining;
         if (isRaining) {
@@ -1540,46 +2039,40 @@ function initViceCityEngine() {
             rainGroup.position.set(refPos.x, refPos.y, refPos.z);
             for (let i = 0; i < rainDrops.length; i++) {
                 const d = rainDrops[i];
-                d.position.y -= 0.95;
-                if (d.position.y < -2) {
-                    d.position.y = 38 + Math.random() * 10;
-                }
+                d.position.y -= 0.95 * timeScale;
+                if (d.position.y < -2) d.position.y = 38 + Math.random() * 10;
             }
         }
 
-        // Movimento dos Animais (Cachorros, Gatos e Pássaros Voando)
+        // Animais Vivos
         animals.forEach(anim => {
-            anim.mesh.position.x -= Math.sin(anim.angle) * anim.speed;
-            anim.mesh.position.z -= Math.cos(anim.angle) * anim.speed;
+            anim.mesh.position.x -= Math.sin(anim.angle) * anim.speed * timeScale;
+            anim.mesh.position.z -= Math.cos(anim.angle) * anim.speed * timeScale;
             anim.mesh.rotation.y = anim.angle;
             if (anim.species === 'bird') {
-                anim.angle += 0.012;
+                anim.angle += 0.012 * timeScale;
                 anim.mesh.position.y = anim.baseY + Math.sin(timeSec * 3 + anim.phase) * 1.5;
             } else if (Math.random() < 0.015) {
                 anim.angle += (Math.random() - 0.5) * 1.8;
             }
-            VCModels.updateAnimalAnimation(anim, anim.speed);
+            VCModels.updateAnimalAnimation(anim, anim.speed * timeScale);
         });
 
-        // Relógio e Mudança Automática de Clima
+        // Relógio e Clima
         if (tick % 45 === 0) {
             gameMinutes = (gameMinutes + 1) % 1440;
             const clk = document.getElementById('vc-clock');
-            if (clk) {
-                clk.textContent = `${String(Math.floor(gameMinutes / 60)).padStart(2, '0')}:${String(gameMinutes % 60).padStart(2, '0')}`;
-            }
-            if (gameMinutes % 180 === 0) {
-                cycleWeather((currentWeatherIdx + 1) % weatherModes.length);
-            }
+            if (clk) clk.textContent = `${String(Math.floor(gameMinutes / 60)).padStart(2, '0')}:${String(gameMinutes % 60).padStart(2, '0')}`;
+            if (gameMinutes % 180 === 0) cycleWeather((currentWeatherIdx + 1) % weatherModes.length);
             updateDayNightCycle();
         }
 
-        // Partículas e Granadas
+        // Partículas, Granadas e Pickups Magnéticos
         for (let i = particles.length - 1; i >= 0; i--) {
             const pt = particles[i];
-            pt.mesh.position.x += pt.vx;
-            pt.mesh.position.y += pt.vy;
-            pt.mesh.position.z += pt.vz;
+            pt.mesh.position.x += pt.vx * timeScale;
+            pt.mesh.position.y += pt.vy * timeScale;
+            pt.mesh.position.z += pt.vz * timeScale;
             pt.mesh.scale.multiplyScalar(0.96);
             pt.life--;
             if (pt.life <= 0) { scene.remove(pt.mesh); particles.splice(i, 1); }
@@ -1587,10 +2080,10 @@ function initViceCityEngine() {
 
         for (let i = grenades.length - 1; i >= 0; i--) {
             const g = grenades[i];
-            g.mesh.position.x += g.vx;
-            g.mesh.position.y += g.vy;
-            g.mesh.position.z += g.vz;
-            g.vy -= 0.015;
+            g.mesh.position.x += g.vx * timeScale;
+            g.mesh.position.y += g.vy * timeScale;
+            g.mesh.position.z += g.vz * timeScale;
+            g.vy -= 0.015 * timeScale;
             if (g.mesh.position.y <= 0.18) { g.mesh.position.y = 0.18; g.vx *= 0.75; g.vz *= 0.75; g.vy = 0; }
             g.timer--;
             if (g.timer <= 0) {
@@ -1600,11 +2093,10 @@ function initViceCityEngine() {
             }
         }
 
-        // Coleta Magnética de Dinheiro e Itens
         for (let i = droppedPickups.length - 1; i >= 0; i--) {
             const pk = droppedPickups[i];
-            pk.bobPhase += 0.08;
-            pk.mesh.rotation.y += 0.06;
+            pk.bobPhase += 0.08 * timeScale;
+            pk.mesh.rotation.y += 0.06 * timeScale;
             pk.mesh.position.y = 0.30 + Math.sin(pk.bobPhase) * 0.08;
             pk.life--;
 
@@ -1624,51 +2116,76 @@ function initViceCityEngine() {
             if (pk.life <= 0) { scene.remove(pk.mesh); droppedPickups.splice(i, 1); }
         }
 
-        // Seguranças Armados dentro do Banco Central
-        if (activeInterior && activeInterior.type === 'bank' && interior.bankGuards) {
-            interior.bankGuards.forEach(guard => {
-                if (!guard.alive) {
-                    VCModels.updateHumanAnimation(guard.char, { speed: 0, isRunning: false, isAiming: false, hasGun: true });
-                    return;
+        // Animações Internas (Bancários, Seguranças, Professores, Alunos, Cozinheiro)
+        if (activeInterior) {
+            if (activeInterior.type === 'bank') {
+                if (interior.bankStaff) {
+                    interior.bankStaff.forEach(st => VCModels.updateHumanAnimation(st.char, { speed: 0, isTalking: true }));
                 }
-                const dx = playerChar.mesh.position.x - guard.char.mesh.position.x;
-                const dz = playerChar.mesh.position.z - guard.char.mesh.position.z;
-                const ang = Math.atan2(-dx, -dz);
-                guard.char.mesh.rotation.y = ang;
-                VCModels.updateHumanAnimation(guard.char, { speed: 0, isRunning: false, isAiming: isAiming || activeInterior.robbed, hasGun: true });
+                if (interior.bankGuards) {
+                    interior.bankGuards.forEach(guard => {
+                        if (!guard.alive) {
+                            VCModels.updateHumanAnimation(guard.char, { speed: 0 });
+                            return;
+                        }
+                        const dx = playerChar.mesh.position.x - guard.char.mesh.position.x;
+                        const dz = playerChar.mesh.position.z - guard.char.mesh.position.z;
+                        guard.char.mesh.rotation.y = Math.atan2(-dx, -dz);
+                        VCModels.updateHumanAnimation(guard.char, { speed: 0, isAiming: isAiming || activeInterior.robbed, hasGun: true });
 
-                if (isAiming || activeInterior.robbed || wantedStars > 0) {
-                    guard.shootCooldown--;
-                    if (guard.shootCooldown <= 0) {
-                        guard.shootCooldown = 38;
-                        if (window.VCSoundFX) VCSoundFX.playGunshot('uzi');
-                        applyDamageToPlayer(8, 'combat');
-                    }
+                        if (isAiming || activeInterior.robbed || wantedStars > 0) {
+                            guard.shootCooldown--;
+                            if (guard.shootCooldown <= 0) {
+                                guard.shootCooldown = 38;
+                                if (window.VCSoundFX) VCSoundFX.playGunshot('uzi');
+                                applyDamageToPlayer(8, 'combat');
+                            }
+                        }
+                    });
                 }
-            });
+            } else if (activeInterior.type === 'school') {
+                if (interior.teacherChar) VCModels.updateHumanAnimation(interior.teacherChar, { speed: 0, isTalking: true });
+                if (interior.schoolStudents) {
+                    interior.schoolStudents.forEach(stu => VCModels.updateHumanAnimation(stu.char, { speed: 0, isTalking: Math.random() < 0.05 }));
+                }
+            } else if (activeInterior.type === 'diner' && interior.dinerWorker) {
+                VCModels.updateHumanAnimation(interior.dinerWorker, { speed: 0, isTalking: true });
+            }
         }
 
         // =====================================================================
-        // MOVIMENTO DO JOGADOR: CARROS, BICICLETAS (GRAU), JET-SKIS, AVIÕES/JATOS E NATAÇÃO
+        // MOVIMENTO DO JOGADOR: VEÍCULOS OU SPRINT / NADO CRAWL RÁPIDO [SHIFT]
         // =====================================================================
-        if (inVehicle) {
+        if (inVehicle && !ridingAsPassenger) {
             const vType = inVehicle.vehicleType || 'car';
             const isAircraft = (vType === 'plane' || vType === 'jet');
             const isJetSki = (vType === 'jetski');
             const isBike = (vType === 'bike');
             const isWheelie = isBike && (keys['q'] || keys['control']);
 
+            if (isWheelie && Math.abs(inVehicle.speed) > 0.15) {
+                wheelieTicks++;
+                if (wheelieTicks === 240) {
+                    playerCash += 300;
+                    playAmplifiedMoneyChime();
+                    updateHUD();
+                    showGameToast('🏆 CONQUISTA: Rei do Grau! (+$300 de bônus!)');
+                }
+            } else {
+                wheelieTicks = 0;
+            }
+
             const isNitroActive = !!(inVehicle.hasNitro && keys['shift']);
-            const topSpeed = isNitroActive ? inVehicle.maxSpeed * 1.4 : inVehicle.maxSpeed;
-            const accel = isAircraft ? 0.022 : (isNitroActive ? 0.048 : 0.028);
+            const topSpeed = (isNitroActive ? inVehicle.maxSpeed * 1.4 : inVehicle.maxSpeed) * timeScale;
+            const accel = (isAircraft ? 0.022 : (isNitroActive ? 0.048 : 0.028)) * timeScale;
 
             if (keys['w'] || keys['arrowup']) inVehicle.speed = Math.min(topSpeed, inVehicle.speed + accel);
-            else if (keys['s'] || keys['arrowdown']) inVehicle.speed = Math.max(isAircraft ? 0 : -0.34, inVehicle.speed - 0.028);
+            else if (keys['s'] || keys['arrowdown']) inVehicle.speed = Math.max(isAircraft ? 0 : -0.34 * timeScale, inVehicle.speed - 0.028 * timeScale);
             else inVehicle.speed *= isAircraft ? 0.992 : 0.95;
 
             let steerInput = 0;
             if (Math.abs(inVehicle.speed) > 0.01) {
-                const turn = inVehicle.speed > 0 ? 0.042 : -0.042;
+                const turn = (inVehicle.speed > 0 ? 0.042 : -0.042) * timeScale;
                 if (keys['a'] || keys['arrowleft']) { inVehicle.angle += turn; steerInput = 1; }
                 if (keys['d'] || keys['arrowright']) { inVehicle.angle -= turn; steerInput = -1; }
             }
@@ -1677,18 +2194,14 @@ function initViceCityEngine() {
             const dz = -Math.cos(inVehicle.angle) * inVehicle.speed;
 
             if (isAircraft) {
-                // Voo 3D Realista (Decolagem, Altitude e Inclinação)
-                if (keys[' '] && inVehicle.speed > 0.45) {
-                    inVehicle.altitude = Math.min(180, (inVehicle.altitude || 0) + 0.45);
+                if (keys[' '] && inVehicle.speed > 0.40 * timeScale) {
+                    inVehicle.altitude = Math.min(180, (inVehicle.altitude || 0) + 0.45 * timeScale);
                     inVehicle.pitchAngle = THREE.MathUtils.lerp(inVehicle.pitchAngle || 0, 0.25, 0.1);
                 } else if ((keys['q'] || keys['control']) && (inVehicle.altitude || 0) > 0) {
-                    inVehicle.altitude = Math.max(0, (inVehicle.altitude || 0) - 0.45);
+                    inVehicle.altitude = Math.max(0, (inVehicle.altitude || 0) - 0.45 * timeScale);
                     inVehicle.pitchAngle = THREE.MathUtils.lerp(inVehicle.pitchAngle || 0, -0.22, 0.1);
                 } else {
                     inVehicle.pitchAngle = THREE.MathUtils.lerp(inVehicle.pitchAngle || 0, 0, 0.1);
-                    if ((inVehicle.altitude || 0) > 0 && inVehicle.speed < 0.35) {
-                        inVehicle.altitude = Math.max(0, inVehicle.altitude - 0.25);
-                    }
                 }
 
                 inVehicle.mesh.position.x = Math.max(-1100, Math.min(1100, inVehicle.mesh.position.x + dx));
@@ -1701,8 +2214,18 @@ function initViceCityEngine() {
                 const altBadge = document.getElementById('vc-alt-badge');
                 if (altBadge) altBadge.textContent = `ALT: ${Math.round(inVehicle.altitude || 0)}m`;
             } else {
-                const allowWater = isJetSki;
-                moveEntityWithHitbox(inVehicle.mesh.position, dx, dz, 1.35, null, allowWater);
+                const bumped = checkVehicleBump(inVehicle, inVehicle.mesh.position.x + dx, inVehicle.mesh.position.z + dz, vehicles, copUnits);
+                if (bumped) {
+                    const impact = Math.abs(inVehicle.speed);
+                    if (impact > 0.22 && VCModels.applyCarDent) {
+                        VCModels.applyCarDent(inVehicle, impact * 2.2, inVehicle.speed > 0);
+                        VCModels.applyCarDent(bumped, impact * 2.5, true);
+                        damageVehicle(inVehicle, Math.round(impact * 20));
+                    }
+                    inVehicle.speed *= -0.35;
+                } else {
+                    moveEntityWithHitbox(inVehicle.mesh.position, dx, dz, 1.35, null, isJetSki);
+                }
                 inVehicle.mesh.rotation.y = inVehicle.angle;
 
                 if (isJetSki) {
@@ -1715,11 +2238,12 @@ function initViceCityEngine() {
             VCModels.updateCarAnimation(inVehicle, inVehicle.speed, steerInput, isWheelie);
             handleVehicleRunOver(inVehicle, Math.abs(inVehicle.speed), true);
             playerChar.mesh.position.copy(inVehicle.mesh.position);
-        } else {
-            // Jogador a Pé ou Nadando no Mar/Rio
+        } else if (!inVehicle) {
+            // A Pé ou Nadando com Sprint / Nado Crawl Rápido [SHIFT]
             const inWater = !activeInterior && isPointInWater(playerChar.mesh.position.x, playerChar.mesh.position.z);
-            const isRunning = keys['shift'];
-            const moveSpeed = inWater ? 0.14 : (isRunning ? 0.30 : 0.16);
+            const wantsSprint = !!keys['shift'] && playerStamina > 2;
+            const moveSpeed = (inWater ? (wantsSprint ? 0.25 : 0.13) : (wantsSprint ? 0.34 : 0.16)) * timeScale;
+
             let moveF = 0, moveR = 0;
             if (keys['w'] || keys['arrowup']) moveF += 1;
             if (keys['s'] || keys['arrowdown']) moveF -= 1;
@@ -1728,6 +2252,13 @@ function initViceCityEngine() {
 
             let currentMoveSpeed = 0;
             if (moveF !== 0 || moveR !== 0) {
+                if (wantsSprint) {
+                    playerStamina = Math.max(0, playerStamina - 0.32 * timeScale);
+                    if (tick % 30 === 0) updateHUD();
+                } else if (playerStamina < 100) {
+                    playerStamina = Math.min(100, playerStamina + 0.18 * timeScale);
+                }
+
                 const forwardX = -Math.sin(camYaw);
                 const forwardZ = -Math.cos(camYaw);
                 const rightX = Math.cos(camYaw);
@@ -1748,23 +2279,46 @@ function initViceCityEngine() {
                 );
                 currentMoveSpeed = moveSpeed;
 
+                if (inWater && wantsSprint && tick % 4 === 0) {
+                    spawnParticle(playerChar.mesh.position.x, 0.25, playerChar.mesh.position.z, 0xe0f2fe, 0.25, 0.06, 16);
+                }
+
                 if (!isAiming) playerChar.mesh.rotation.y = Math.atan2(-dirX, -dirZ);
+            } else if (playerStamina < 100) {
+                playerStamina = Math.min(100, playerStamina + 0.28 * timeScale);
+                if (tick % 30 === 0) updateHUD();
             }
+
             if (isAiming) playerChar.mesh.rotation.y = camYaw;
 
+            // Animação 3D de Sprint Inclinado e Nado Crawl Acelerado
             VCModels.updateHumanAnimation(playerChar, {
                 speed: currentMoveSpeed,
-                isRunning,
+                isRunning: wantsSprint,
                 isAiming,
-                hasGun,
+                hasGun: currentWeaponIdx >= 3,
                 isSwimming: inWater
             });
+
+            if (wantsSprint && currentMoveSpeed > 0.2 && !inWater) {
+                playerChar.bodyContainer.rotation.x = THREE.MathUtils.lerp(playerChar.bodyContainer.rotation.x, -0.18, 0.2);
+            }
+
+            // Pose do braço segurando o celular no ouvido durante a ligação
+            if (activePhoneCall) {
+                playerChar.rightArm.rotation.x = -Math.PI * 0.78;
+                playerChar.rightArm.rotation.z = 0.25;
+            } else {
+                playerChar.rightArm.rotation.z = 0;
+            }
+        } else if (ridingAsPassenger && inVehicle) {
+            playerChar.mesh.position.copy(inVehicle.mesh.position);
         }
 
         // Tráfego Civil NPC
         vehicles.forEach(v => {
-            if (v !== inVehicle && !v.destroyed && v.aiDir !== 0) {
-                const aiSpd = 0.22 * v.aiDir;
+            if (v !== inVehicle && !v.destroyed && v.aiDir !== 0 && !v.isTaxi) {
+                const aiSpd = 0.22 * v.aiDir * timeScale;
                 v.mesh.position.z += aiSpd;
                 VCModels.updateCarAnimation(v, Math.abs(aiSpd), 0, false);
                 handleVehicleRunOver(v, Math.abs(aiSpd), false);
@@ -1773,29 +2327,95 @@ function initViceCityEngine() {
             }
         });
 
-        // Pedestres
-        peds.forEach(p => {
+        // Pedestres, Gangues, Ladrões e Conversas entre NPCs
+        peds.forEach((p, pIdx) => {
             if (!p.alive) {
-                VCModels.updateHumanAnimation(p.char, { speed: 0, isRunning: false, isAiming: false, hasGun: false });
+                VCModels.updateHumanAnimation(p.char, { speed: 0 });
                 return;
             }
-            const spd = p.panic ? 0.22 : 0.055;
+
+            // NPC Ladrão rouba pedestre próximo e aciona perseguição policial!
+            if (p.role === 'thief' && p.stealCooldown !== undefined) {
+                p.stealCooldown--;
+                if (p.stealCooldown <= 0) {
+                    p.stealCooldown = 420;
+                    const victim = peds.find(other => other !== p && other.alive && other.role === 'citizen' && other.char.mesh.position.distanceTo(p.char.mesh.position) < 12);
+                    if (victim) {
+                        victim.panic = true;
+                        p.panic = true;
+                        if (playerChar.mesh.position.distanceTo(p.char.mesh.position) < 65) {
+                            showGameToast('🏃‍♂️💨 Um ladrão assaltou um cidadão na rua! A polícia está atrás dele!');
+                            spawnCopCar(p.char.mesh.position);
+                        }
+                    }
+                }
+            }
+
+            // Se o NPC reagiu lutando (40% de chance ao ser atacado ou membro de gangue)
+            if (p.aggroTarget === 'player' && !activeInterior && !inVehicle) {
+                const dx = playerChar.mesh.position.x - p.char.mesh.position.x;
+                const dz = playerChar.mesh.position.z - p.char.mesh.position.z;
+                const dist = Math.hypot(dx, dz);
+                const ang = Math.atan2(-dx, -dz);
+                p.char.mesh.rotation.y = ang;
+
+                if (dist > 1.8 && dist < 45) {
+                    const spd = 0.17 * timeScale;
+                    moveEntityWithHitbox(p.char.mesh.position, -Math.sin(ang) * spd, -Math.cos(ang) * spd, 0.45, null, false);
+                    VCModels.updateHumanAnimation(p.char, { speed: spd, isRunning: true, hasGun: p.hasGun });
+                } else if (dist <= 1.8) {
+                    p.char.punchTimer = 10;
+                    VCModels.updateHumanAnimation(p.char, { speed: 0, hasGun: p.hasGun });
+                    if (tick % 35 === 0) applyDamageToPlayer(6, 'combat');
+                }
+                return;
+            }
+
+            // Conversa entre dois NPCs próximos na calçada
+            if (p.talkTimer > 0) {
+                p.talkTimer--;
+                VCModels.updateHumanAnimation(p.char, { speed: 0, isTalking: true });
+                return;
+            } else if (!p.panic && tick % 90 === pIdx % 90) {
+                const partner = peds.find(other => other !== p && other.alive && !other.panic && other.char.mesh.position.distanceTo(p.char.mesh.position) < 2.6);
+                if (partner) {
+                    p.talkTimer = 160;
+                    partner.talkTimer = 160;
+                    p.char.mesh.lookAt(partner.char.mesh.position.x, 0, partner.char.mesh.position.z);
+                    partner.char.mesh.lookAt(p.char.mesh.position.x, 0, p.char.mesh.position.z);
+                    return;
+                }
+            }
+
+            const spd = (p.panic ? 0.22 : 0.055) * timeScale;
             moveEntityWithHitbox(p.char.mesh.position, -Math.sin(p.angle) * spd, -Math.cos(p.angle) * spd, 0.45, null, false);
             p.char.mesh.rotation.y = p.angle;
-            VCModels.updateHumanAnimation(p.char, { speed: spd, isRunning: p.panic, isAiming: false, hasGun: false });
+            VCModels.updateHumanAnimation(p.char, { speed: spd, isRunning: p.panic, hasGun: p.hasGun });
             if (Math.random() < 0.008) p.angle += (Math.random() - 0.5) * 2.0;
         });
 
-        // Projéteis do Jogador
+        // Projéteis do Jogador (Acertam Postos de Gasolina, Paredes, NPCs e Policiais)
         for (let i = bullets.length - 1; i >= 0; i--) {
             const b = bullets[i];
-            b.mesh.position.x -= Math.sin(b.angle) * 1.85;
-            b.mesh.position.z -= Math.cos(b.angle) * 1.85;
+            b.mesh.position.x -= Math.sin(b.angle) * 1.85 * timeScale;
+            b.mesh.position.z -= Math.cos(b.angle) * 1.85 * timeScale;
             b.life--;
 
             const activeBoxes = activeInterior ? (interiorColliders[activeInterior.type] || []) : colliders;
             if (hitsColliderBox(b.mesh.position.x, b.mesh.position.z, 0.1, activeBoxes)) {
                 b.life = 0;
+            }
+
+            // Tiro nas bombas de Posto de Gasolina gera explosão em cadeia!
+            if (b.life > 0 && !activeInterior) {
+                gasStations.forEach(gs => {
+                    if (!gs.exploded && Math.hypot(b.mesh.position.x - gs.x, b.mesh.position.z - gs.z) < 4.5) {
+                        gs.exploded = true;
+                        b.life = 0;
+                        triggerExplosion(new THREE.Vector3(gs.x, 1, gs.z), 16, 140);
+                        showGameToast(`💥 EXPLOSÃO NO ${gs.name.toUpperCase()}!`);
+                    }
+                });
             }
 
             if (b.life > 0 && activeInterior && activeInterior.type === 'bank' && interior.bankGuards) {
@@ -1817,6 +2437,7 @@ function initViceCityEngine() {
                     if (p.alive && b.mesh.position.distanceTo(p.char.mesh.position) < 1.25) {
                         p.hp -= b.dmg;
                         b.life = 0;
+                        handlePedProvoked(p);
                         if (p.hp <= 0) {
                             p.alive = false; p.char.state = 'dead';
                             dropNPCLoot(p.char.mesh.position.x, p.char.mesh.position.z, 85);
@@ -1858,7 +2479,7 @@ function initViceCityEngine() {
                 if (cop.sB) cop.sB.visible = !flash;
 
                 if (dist > 14.5) {
-                    const cSpd = 0.30 + (wantedStars * 0.03);
+                    const cSpd = (0.30 + (wantedStars * 0.03)) * timeScale;
                     moveEntityWithHitbox(cop.mesh.position, -Math.sin(cAng) * cSpd, -Math.cos(cAng) * cSpd, 1.35, null, false);
                     VCModels.updateCarAnimation(cop, cSpd, 0, false);
                 } else {
@@ -1877,10 +2498,11 @@ function initViceCityEngine() {
             cop.char.mesh.rotation.y = angToPlayer;
 
             if (dist > 11 && dist < 55) {
-                moveEntityWithHitbox(cop.char.mesh.position, -Math.sin(angToPlayer) * 0.14, -Math.cos(angToPlayer) * 0.14, 0.45, null, false);
-                VCModels.updateHumanAnimation(cop.char, { speed: 0.14, isRunning: true, isAiming: true, hasGun: true });
+                const spd = 0.14 * timeScale;
+                moveEntityWithHitbox(cop.char.mesh.position, -Math.sin(angToPlayer) * spd, -Math.cos(angToPlayer) * spd, 0.45, null, false);
+                VCModels.updateHumanAnimation(cop.char, { speed: spd, isRunning: true, isAiming: true, hasGun: true });
             } else {
-                VCModels.updateHumanAnimation(cop.char, { speed: 0, isRunning: false, isAiming: true, hasGun: true });
+                VCModels.updateHumanAnimation(cop.char, { speed: 0, isAiming: true, hasGun: true });
             }
 
             cop.shootCooldown--;
@@ -1899,8 +2521,8 @@ function initViceCityEngine() {
         });
 
         copHelis.forEach((heli, idx) => {
-            heli.rotor.rotation.y += 0.48;
-            heli.orbitAngle += 0.015;
+            heli.rotor.rotation.y += 0.48 * timeScale;
+            heli.orbitAngle += 0.015 * timeScale;
             heli.mesh.position.x = THREE.MathUtils.lerp(heli.mesh.position.x, targetPos.x + Math.cos(heli.orbitAngle + idx * Math.PI) * 20, 0.04);
             heli.mesh.position.z = THREE.MathUtils.lerp(heli.mesh.position.z, targetPos.z + Math.sin(heli.orbitAngle + idx * Math.PI) * 20, 0.04);
             heli.mesh.position.y = Math.max(22, (targetPos.y || 0) + 20);
@@ -1910,8 +2532,8 @@ function initViceCityEngine() {
 
         for (let i = enemyBullets.length - 1; i >= 0; i--) {
             const eb = enemyBullets[i];
-            eb.mesh.position.x += eb.vx;
-            eb.mesh.position.z += eb.vz;
+            eb.mesh.position.x += eb.vx * timeScale;
+            eb.mesh.position.z += eb.vz * timeScale;
             eb.life--;
             if (!activeInterior && eb.mesh.position.distanceTo(targetPos) < 1.5) {
                 if (inVehicle) damageVehicle(inVehicle, eb.dmg * 0.7);
@@ -1928,7 +2550,13 @@ function initViceCityEngine() {
             if (inVehicle) {
                 for (let g of garages) {
                     if (inVehicle.mesh.position.distanceTo(g.marker.position) < 6.0) {
-                        msg = `Pressione [E] para Reparar, Pintar + NITRO na ${g.name} ($400)`;
+                        msg = `Pressione [E] para Desamassar, Pintar + NITRO na ${g.name} ($400)`;
+                        break;
+                    }
+                }
+                for (let gs of gasStations) {
+                    if (!gs.exploded && Math.hypot(inVehicle.mesh.position.x - gs.x, inVehicle.mesh.position.z - gs.z) < 7.0) {
+                        msg = `Pressione [E] para Abastecer e Recarregar Nitro no ${gs.name} ($80)`;
                         break;
                     }
                 }
@@ -1955,7 +2583,9 @@ function initViceCityEngine() {
                 const allDrivable = [...vehicles, ...copUnits];
                 for (let v of allDrivable) {
                     if (!v.destroyed && playerChar.mesh.position.distanceTo(v.mesh.position) < 5.5) {
-                        msg = `Pressione [F] para usar ${v.name}`;
+                        msg = v.isTaxi
+                            ? "Pressione [F] para ENTRAR NO TÁXI / UBER"
+                            : `Pressione [F] para usar ${v.name}`;
                         break;
                     }
                 }
