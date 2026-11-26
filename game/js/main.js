@@ -1,5 +1,5 @@
-// game/js/main.js - Motor Completo Metrópole Capital (4800x4800m) + Correção Definitiva do Mouse:
-// Trava de PointerLock + Fallback de Câmera Livre + Cursor Oculto em Jogo,
+// game/js/main.js - Motor Completo Metrópole Capital (4800x4800m) + Câmera 360° Garantida:
+// PointerLock + Fallback Livre sem Iframe Block + Setas de Câmera + Mira [Btn Dir / X] + Tiro [Btn Esq / Z],
 // Ligação Realista (Celular no Ouvido + Som Chamando + Chegada Física sem Teleporte),
 // Táxi/Uber Autônomo até o GPS, Sprint & Nado Crawl Rápido, Bullet-Time [TAB], Amassados e NPCs 60/40
 
@@ -33,7 +33,7 @@ window.startRockstarIntro = function() {
         } else {
             launchWorld();
         }
-    }, 1200);
+    }, 1000);
 };
 
 function initViceCityEngine() {
@@ -62,7 +62,6 @@ function initViceCityEngine() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Bloqueia menu de contexto do botão direito para mirar sem abrir menu do navegador
     window.addEventListener('contextmenu', (e) => e.preventDefault());
 
     const hemiLight = new THREE.HemisphereLight(0xfce7f3, 0x1e1b4b, 1.1);
@@ -204,18 +203,21 @@ function initViceCityEngine() {
     };
 
     // =========================================================================
-    // 3. CONTROLE DE CURSOR E POINTER LOCK (SEM BUG DE PONTEIRO APARECENDO)
+    // 3. CONTROLE DEFINITIVO DE CÂMERA E PONTEIRO DO MOUSE (IFRAME + TELA CHEIA)
     // =========================================================================
-    let isGameFocused = false;
+    let isGameFocused = true;
     let lastMouseX = null;
     let lastMouseY = null;
 
     function lockGameCursor() {
         if (isAnyOverlayOpen()) return;
         isGameFocused = true;
+        try { window.focus(); mount.focus(); } catch (e) {}
+
         document.body.style.cursor = 'none';
         mount.style.cursor = 'none';
         canvasEl.style.cursor = 'none';
+
         const hint = document.getElementById('vc-lock-hint');
         if (hint) hint.classList.add('hidden');
 
@@ -242,20 +244,17 @@ function initViceCityEngine() {
         } catch (e) {}
     }
 
-    mount.addEventListener('click', () => {
-        if (!isAnyOverlayOpen()) lockGameCursor();
-    });
+    // Ativa foco imediatamente ao iniciar o motor
+    setTimeout(() => lockGameCursor(), 100);
 
     document.addEventListener('pointerlockchange', () => {
         const locked = (document.pointerLockElement === canvasEl || document.pointerLockElement === mount);
         if (locked) {
             isGameFocused = true;
             document.body.style.cursor = 'none';
+            canvasEl.style.cursor = 'none';
             const hint = document.getElementById('vc-lock-hint');
             if (hint) hint.classList.add('hidden');
-        } else if (!isAnyOverlayOpen()) {
-            // Se o usuário apertou ESC para soltar o ponteiro, mostra o aviso; caso contrário mantém foco livre
-            document.body.style.cursor = isGameFocused ? 'none' : 'default';
         }
     });
 
@@ -1188,7 +1187,7 @@ function initViceCityEngine() {
     // =========================================================================
     // 10. MAPA DA METRÓPOLE CAPITAL (4800x4800m) COM SÍMBOLOS GTA
     // =========================================================================
-    const MAP_EXTENT = 1800; // Escala de raio do mapa para visualizar toda a Capital
+    const MAP_EXTENT = 1800;
 
     window.toggleFullMap = (forceState) => {
         const mapEl = document.getElementById('vc-full-map');
@@ -1326,12 +1325,10 @@ function initViceCityEngine() {
         ctx.fillStyle = '#1e293b';
         ctx.fillRect(0, 0, 420, 420);
 
-        // Rio Metropolitano no centro e Praia/Oceano a Leste
         ctx.fillStyle = '#0284c7'; ctx.fillRect(205, 0, 10, 420);
         ctx.fillStyle = '#fde047'; ctx.fillRect(338, 0, 14, 420);
         ctx.fillStyle = '#06b6d4'; ctx.fillRect(352, 0, 68, 420);
 
-        // Pista do Aeroporto Internacional a Oeste (X = -920)
         const airportPx = 210 + (-920 / MAP_EXTENT) * 210;
         ctx.fillStyle = '#09090b'; ctx.fillRect(airportPx - 6, 165, 12, 90);
 
@@ -1382,7 +1379,7 @@ function initViceCityEngine() {
     }
 
     // =========================================================================
-    // 11. CONTROLES DE TECLADO E MOUSE (COM FALLBACK SEM POINTER LOCK)
+    // 11. CONTROLES DE TECLADO E MOUSE (GIRAR CÂMERA, MIRAR [X/BTN DIR] E ATIRAR [Z/BTN ESQ])
     // =========================================================================
     const keys = {};
     let mouseLeftDown = false;
@@ -1397,7 +1394,7 @@ function initViceCityEngine() {
             return;
         }
 
-        if (k === 't' || (!inVehicle && e.key === 'ArrowUp')) {
+        if (k === 't') {
             e.preventDefault();
             togglePhoneModal();
             return;
@@ -1425,6 +1422,15 @@ function initViceCityEngine() {
         if (k === '5') selectVCWeapon(4);
         if (k === '6') selectVCWeapon(5);
         if (k === '7') selectVCWeapon(6);
+
+        // Atalhos de Teclado para Mirar [X] e Atirar/Atacar [Z] (além do Mouse!)
+        if (k === 'x' && !inVehicle && currentWeaponIdx >= 3) {
+            isAiming = !isAiming;
+            document.getElementById('vc-crosshair').classList.toggle('hidden', !isAiming);
+        }
+        if (k === 'z' && !inVehicle) {
+            performAttack();
+        }
 
         if (k === 'g') { e.preventDefault(); throwGrenade(); }
         if (k === 'c') cycleWeather();
@@ -1716,9 +1722,10 @@ function initViceCityEngine() {
         }
     };
 
-    mount.onmousedown = (e) => {
+    // Eventos de Mouse registrados tanto no mount quanto no window para nunca falhar no iframe
+    const handleMouseDown = (e) => {
         if (isAnyOverlayOpen() || isPlayerDead) return;
-        if (!isGameFocused) lockGameCursor();
+        lockGameCursor();
 
         if (e.button === 2 && !inVehicle && currentWeaponIdx >= 3) {
             isAiming = true;
@@ -1730,15 +1737,18 @@ function initViceCityEngine() {
         }
     };
 
-    window.onmouseup = (e) => {
+    mount.addEventListener('mousedown', handleMouseDown);
+    canvasEl.addEventListener('mousedown', handleMouseDown);
+
+    window.addEventListener('mouseup', (e) => {
         if (e.button === 0) mouseLeftDown = false;
         if (e.button === 2) {
             isAiming = false;
             document.getElementById('vc-crosshair').classList.add('hidden');
         }
-    };
+    });
 
-    window.onmousemove = (e) => {
+    window.addEventListener('mousemove', (e) => {
         if (isAnyOverlayOpen()) return;
         const locked = (document.pointerLockElement === canvasEl || document.pointerLockElement === mount);
 
@@ -1748,8 +1758,8 @@ function initViceCityEngine() {
         if (locked) {
             moveX = e.movementX || 0;
             moveY = e.movementY || 0;
-        } else if (isGameFocused) {
-            // Fallback: gira a câmera suavemente mesmo se o iframe bloquear Pointer Lock
+        } else {
+            // Funciona sempre que o mouse se move sobre a janela do jogo, mesmo sem Pointer Lock
             if (lastMouseX !== null && lastMouseY !== null) {
                 moveX = e.clientX - lastMouseX;
                 moveY = e.clientY - lastMouseY;
@@ -1761,10 +1771,10 @@ function initViceCityEngine() {
         if (moveX !== 0 || moveY !== 0) {
             const sens = gameSettings.sensitivity;
             const yDir = gameSettings.invertY ? -1 : 1;
-            camYaw -= moveX * 0.0042 * sens;
-            camPitch = Math.max(-0.65, Math.min(0.85, camPitch + moveY * 0.0038 * sens * yDir));
+            camYaw -= moveX * 0.0055 * sens;
+            camPitch = Math.max(-0.65, Math.min(0.85, camPitch + moveY * 0.0045 * sens * yDir));
         }
-    };
+    });
 
     // =========================================================================
     // 12. COMBATE CORPO A CORPO, TIROS E REAÇÃO 60/40 DOS NPCs
@@ -1945,7 +1955,16 @@ function initViceCityEngine() {
         if (invulnFrames > 0) invulnFrames--;
         if (fireCooldown > 0) fireCooldown--;
 
-        if (mouseLeftDown && !inVehicle && !isPlayerDead && (currentWeaponIdx === 4 || currentWeaponIdx === 6)) {
+        // Rotação de Câmera também pelas Setas do Teclado quando a pé (garante giro 360° sempre)
+        if (!inVehicle && !isAnyOverlayOpen()) {
+            const camKeySpeed = 0.035 * gameSettings.sensitivity;
+            if (keys['arrowleft']) camYaw += camKeySpeed;
+            if (keys['arrowright']) camYaw -= camKeySpeed;
+            if (keys['arrowup']) camPitch = Math.max(-0.65, camPitch - camKeySpeed * 0.7);
+            if (keys['arrowdown']) camPitch = Math.min(0.85, camPitch + camKeySpeed * 0.7);
+        }
+
+        if ((mouseLeftDown || keys['z']) && !inVehicle && !isPlayerDead && (currentWeaponIdx === 4 || currentWeaponIdx === 6)) {
             performAttack();
         }
 
@@ -2273,10 +2292,10 @@ function initViceCityEngine() {
             const moveSpeed = (inWater ? (wantsSprint ? 0.25 : 0.13) : (wantsSprint ? 0.34 : 0.16)) * timeScale;
 
             let moveF = 0, moveR = 0;
-            if (keys['w'] || keys['arrowup']) moveF += 1;
-            if (keys['s'] || keys['arrowdown']) moveF -= 1;
-            if (keys['a'] || keys['arrowleft']) moveR -= 1;
-            if (keys['d'] || keys['arrowright']) moveR += 1;
+            if (keys['w']) moveF += 1;
+            if (keys['s']) moveF -= 1;
+            if (keys['a']) moveR -= 1;
+            if (keys['d']) moveR += 1;
 
             let currentMoveSpeed = 0;
             if (moveF !== 0 || moveR !== 0) {
@@ -2341,7 +2360,6 @@ function initViceCityEngine() {
             playerChar.mesh.position.copy(inVehicle.mesh.position);
         }
 
-        // Tráfego Civil na Metrópole
         vehicles.forEach(v => {
             if (v !== inVehicle && !v.destroyed && v.aiDir !== 0 && !v.isTaxi) {
                 const aiSpd = 0.24 * v.aiDir * timeScale;
@@ -2353,7 +2371,6 @@ function initViceCityEngine() {
             }
         });
 
-        // Pedestres, Gangues, Ladrões e Conversas
         peds.forEach((p, pIdx) => {
             if (!p.alive) {
                 VCModels.updateHumanAnimation(p.char, { speed: 0 });
@@ -2417,7 +2434,6 @@ function initViceCityEngine() {
             if (Math.random() < 0.008) p.angle += (Math.random() - 0.5) * 2.0;
         });
 
-        // Projéteis do Jogador
         for (let i = bullets.length - 1; i >= 0; i--) {
             const b = bullets[i];
             b.mesh.position.x -= Math.sin(b.angle) * 1.85 * timeScale;
@@ -2486,7 +2502,6 @@ function initViceCityEngine() {
             if (b.life <= 0) { scene.remove(b.mesh); bullets.splice(i, 1); }
         }
 
-        // IA Policial
         const targetPos = inVehicle ? inVehicle.mesh.position : playerChar.mesh.position;
         copUnits.forEach(cop => {
             if (wantedStars > 0 && !activeInterior && cop !== inVehicle && !cop.destroyed) {
@@ -2565,7 +2580,6 @@ function initViceCityEngine() {
             if (eb.life <= 0) { scene.remove(eb.mesh); enemyBullets.splice(i, 1); }
         }
 
-        // Prompts Contextuais na Tela
         const promptEl = document.getElementById('vc-action-prompt');
         if (promptEl) {
             let msg = "";
