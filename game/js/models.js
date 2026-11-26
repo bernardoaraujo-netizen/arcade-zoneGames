@@ -1,5 +1,5 @@
-// game/js/models.js - Modelos 3D Completos: Humanos Articulados (+5k variações),
-// Bicicletas (Empinada/Grau), Ônibus, Aviões/Jatos, Jet-Skis, Animais (Cachorro, Gato, Pássaro) e Nuvens
+// game/js/models.js - Modelos 3D Completos: Humanos Articulados, Armas Brancas (Faca, Bastão) e de Fogo,
+// Deformação/Amassado de Lataria nos Carros, Árvores Urbanas, Animais, Bicicletas, Aeronaves e Nuvens
 
 window.VCModels = {
     CharacterGenes: {
@@ -45,66 +45,95 @@ window.VCModels = {
     },
 
     // =========================================================================
-    // 1. PERSONAGEM HUMANO ARTICULADO (ANDAR, CORRER, ATIRAR E NADAR)
+    // 1. PERSONAGEM HUMANO ARTICULADO (COM PAPÉIS: GANGUE, LADRÃO, ALUNO, PROFESSOR, BANCÁRIO)
     // =========================================================================
     createHuman3D(options = {}) {
-        const gene = options.customDna ? {
-            skinHex: options.customDna.skinHex || '#f1c27d',
-            hairColor: options.customDna.hairColor || 0x1c1917,
-            hairStyle: options.customDna.hairStyle || 'short',
-            shirtHex: options.customDna.shirtHex || '#06b6d4',
-            shirtStyle: options.customDna.shirtStyle || 'hawaiian',
-            pantsColor: options.customDna.pantsColor || 0x1e3a8a,
-            shoeColor: options.customDna.shoeColor || 0xf8fafc,
-            build: {
-                scaleX: options.customDna.buildScale || 1.0,
-                scaleZ: options.customDna.buildScale || 1.0,
-                height: options.customDna.buildScale || 1.0
-            },
-            hasBeard: !!options.customDna.hasBeard,
-            hasGlasses: options.customDna.accessory === 'glasses',
-            gaitFrequency: options.customDna.strideFreq || 1.0,
-            armSwingAmp: options.customDna.armSwingAmp || 0.75
-        } : (options.isPlayer ? {
-            skinHex: '#f1c27d',
-            hairColor: 0x1c1917,
-            hairStyle: 'short',
-            shirtHex: '#06b6d4',
-            shirtStyle: 'hawaiian',
-            pantsColor: 0x1e3a8a,
-            shoeColor: 0xf8fafc,
-            build: { scaleX: 1.02, scaleZ: 1.0, height: 1.02 },
-            hasBeard: false,
-            hasGlasses: false,
-            gaitFrequency: 1.0,
-            armSwingAmp: 0.68
-        } : (options.isGuard ? {
-            skinHex: '#c68642',
-            hairColor: 0x09090b,
-            hairStyle: 'short',
-            shirtHex: '#18181b',
-            shirtStyle: 'jacket',
-            pantsColor: 0x09090b,
-            shoeColor: 0x09090b,
-            build: { scaleX: 1.15, scaleZ: 1.12, height: 1.04 },
-            hasBeard: true,
-            hasGlasses: true,
-            gaitFrequency: 1.0,
-            armSwingAmp: 0.65
-        } : (options.isCop ? {
-            skinHex: options.skinHex || '#e0ac69',
-            hairColor: 0x09090b,
-            hairStyle: 'cop',
-            shirtHex: '#1e3a8a',
-            shirtStyle: 'cop',
-            pantsColor: 0x0f172a,
-            shoeColor: 0x09090b,
-            build: { scaleX: 1.06, scaleZ: 1.04, height: 1.02 },
-            hasBeard: Math.random() > 0.5,
-            hasGlasses: true,
-            gaitFrequency: 1.05,
-            armSwingAmp: 0.70
-        } : this.generateRandomNPCGene(options.seed))));
+        let gene;
+        if (options.customDna) {
+            gene = {
+                skinHex: options.customDna.skinHex || '#f1c27d',
+                hairColor: options.customDna.hairColor || 0x1c1917,
+                hairStyle: options.customDna.hairStyle || 'short',
+                shirtHex: options.customDna.shirtHex || '#06b6d4',
+                shirtStyle: options.customDna.shirtStyle || 'hawaiian',
+                pantsColor: options.customDna.pantsColor || 0x1e3a8a,
+                shoeColor: options.customDna.shoeColor || 0xf8fafc,
+                build: {
+                    scaleX: options.customDna.buildScale || 1.0,
+                    scaleZ: options.customDna.buildScale || 1.0,
+                    height: options.customDna.buildScale || 1.0
+                },
+                hasBeard: !!options.customDna.hasBeard,
+                hasGlasses: options.customDna.accessory === 'glasses',
+                gaitFrequency: options.customDna.strideFreq || 1.0,
+                armSwingAmp: options.customDna.armSwingAmp || 0.75
+            };
+        } else if (options.isPlayer) {
+            gene = {
+                skinHex: '#f1c27d', hairColor: 0x1c1917, hairStyle: 'short',
+                shirtHex: '#06b6d4', shirtStyle: 'hawaiian', pantsColor: 0x1e3a8a, shoeColor: 0xf8fafc,
+                build: { scaleX: 1.02, scaleZ: 1.0, height: 1.02 },
+                hasBeard: false, hasGlasses: false, gaitFrequency: 1.0, armSwingAmp: 0.68
+            };
+        } else if (options.role === 'banker') {
+            gene = {
+                skinHex: '#f1c27d', hairColor: 0x1c1917, hairStyle: 'fade',
+                shirtHex: '#f8fafc', shirtStyle: 'plain', pantsColor: 0x0f172a, shoeColor: 0x09090b,
+                build: { scaleX: 0.98, scaleZ: 0.98, height: 1.0 },
+                hasBeard: false, hasGlasses: true, gaitFrequency: 1.0, armSwingAmp: 0.6
+            };
+        } else if (options.role === 'teacher') {
+            gene = {
+                skinHex: '#e0ac69', hairColor: 0x78350f, hairStyle: 'ponytail',
+                shirtHex: '#3b82f6', shirtStyle: 'plain', pantsColor: 0x1e293b, shoeColor: 0x111827,
+                build: { scaleX: 0.96, scaleZ: 0.96, height: 1.01 },
+                hasBeard: false, hasGlasses: true, gaitFrequency: 1.0, armSwingAmp: 0.65
+            };
+        } else if (options.role === 'student') {
+            gene = {
+                skinHex: '#ffdbac', hairColor: 0x451a03, hairStyle: 'short',
+                shirtHex: '#a855f7', shirtStyle: 'stripes', pantsColor: 0x1e3a8a, shoeColor: 0xf8fafc,
+                build: { scaleX: 0.85, scaleZ: 0.85, height: 0.86 },
+                hasBeard: false, hasGlasses: false, gaitFrequency: 1.15, armSwingAmp: 0.75
+            };
+        } else if (options.role === 'gang_purple') {
+            gene = {
+                skinHex: '#c68642', hairColor: 0x09090b, hairStyle: 'fade',
+                shirtHex: '#9333ea', shirtStyle: 'tanktop', pantsColor: 0x18181b, shoeColor: 0xa855f7,
+                build: { scaleX: 1.12, scaleZ: 1.10, height: 1.03 },
+                hasBeard: true, hasGlasses: true, gaitFrequency: 1.05, armSwingAmp: 0.82
+            };
+        } else if (options.role === 'gang_green') {
+            gene = {
+                skinHex: '#8d5524', hairColor: 0x09090b, hairStyle: 'mohawk',
+                shirtHex: '#16a34a', shirtStyle: 'jacket', pantsColor: 0x0f172a, shoeColor: 0x22c55e,
+                build: { scaleX: 1.12, scaleZ: 1.10, height: 1.03 },
+                hasBeard: true, hasGlasses: false, gaitFrequency: 1.05, armSwingAmp: 0.82
+            };
+        } else if (options.role === 'thief') {
+            gene = {
+                skinHex: '#e0ac69', hairColor: 0x09090b, hairStyle: 'bald',
+                shirtHex: '#18181b', shirtStyle: 'stripes', pantsColor: 0x09090b, shoeColor: 0xdc2626,
+                build: { scaleX: 0.94, scaleZ: 0.94, height: 0.98 },
+                hasBeard: true, hasGlasses: true, gaitFrequency: 1.22, armSwingAmp: 0.85
+            };
+        } else if (options.isGuard) {
+            gene = {
+                skinHex: '#c68642', hairColor: 0x09090b, hairStyle: 'short',
+                shirtHex: '#18181b', shirtStyle: 'jacket', pantsColor: 0x09090b, shoeColor: 0x09090b,
+                build: { scaleX: 1.15, scaleZ: 1.12, height: 1.04 },
+                hasBeard: true, hasGlasses: true, gaitFrequency: 1.0, armSwingAmp: 0.65
+            };
+        } else if (options.isCop) {
+            gene = {
+                skinHex: options.skinHex || '#e0ac69', hairColor: 0x09090b, hairStyle: 'cop',
+                shirtHex: '#1e3a8a', shirtStyle: 'cop', pantsColor: 0x0f172a, shoeColor: 0x09090b,
+                build: { scaleX: 1.06, scaleZ: 1.04, height: 1.02 },
+                hasBeard: Math.random() > 0.5, hasGlasses: true, gaitFrequency: 1.05, armSwingAmp: 0.70
+            };
+        } else {
+            gene = this.generateRandomNPCGene(options.seed);
+        }
 
         const root = new THREE.Group();
         const bodyContainer = new THREE.Group();
@@ -159,6 +188,15 @@ window.VCModels = {
         }
         bodyContainer.add(headGroup);
 
+        // Indicador visual flutuante quando o NPC está conversando com outro
+        const chatBubble = new THREE.Mesh(
+            new THREE.BoxGeometry(0.34, 0.20, 0.08),
+            new THREE.MeshBasicMaterial({ color: 0xfef08a })
+        );
+        chatBubble.position.set(0, 2.22, 0);
+        chatBubble.visible = false;
+        bodyContainer.add(chatBubble);
+
         const leftArm = new THREE.Group();
         leftArm.position.set(-0.38, 1.42, 0);
         const lUpper = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.32, 0.16), shirtMat);
@@ -200,6 +238,7 @@ window.VCModels = {
             bodyContainer,
             torso,
             headGroup,
+            chatBubble,
             leftArm,
             rightArm,
             leftLeg,
@@ -217,7 +256,15 @@ window.VCModels = {
 
     updateHumanAnimation(charObj, params = {}) {
         if (!charObj || !charObj.mesh) return;
-        const { speed = 0, isRunning = false, isAiming = false, hasGun = false, isSwimming = false } = params;
+        const { speed = 0, isRunning = false, isAiming = false, hasGun = false, isSwimming = false, isTalking = false } = params;
+
+        if (charObj.chatBubble) {
+            charObj.chatBubble.visible = !!isTalking && charObj.state !== 'dead';
+            if (isTalking) {
+                charObj.chatBubble.rotation.y += 0.05;
+                charObj.chatBubble.position.y = 2.22 + Math.sin(charObj.animPhase * 2) * 0.05;
+            }
+        }
 
         if (charObj.state === 'dead') {
             charObj.bodyContainer.rotation.x = 0;
@@ -226,7 +273,6 @@ window.VCModels = {
             return;
         }
 
-        // Animação de Natação (Corpo horizontal na água + braçadas estilo crawl)
         if (isSwimming) {
             charObj.bodyContainer.rotation.x = THREE.MathUtils.lerp(charObj.bodyContainer.rotation.x, -Math.PI * 0.42, 0.18);
             charObj.mesh.position.y = -0.35 + Math.sin(charObj.animPhase * 0.5) * 0.06;
@@ -249,12 +295,22 @@ window.VCModels = {
                 charObj.vy = 0;
             }
             charObj.mesh.position.y = charObj.yPos;
-        } else {
+        } else if (charObj.mesh.position.y > -20) {
             charObj.mesh.position.y = THREE.MathUtils.lerp(charObj.mesh.position.y, 0, 0.25);
         }
 
         const freqMult = (charObj.gene && charObj.gene.gaitFrequency) || 1.0;
         const ampMult = (charObj.gene && charObj.gene.armSwingAmp) || 0.75;
+
+        if (isTalking && speed <= 0.005) {
+            charObj.animPhase += 0.12;
+            charObj.rightArm.rotation.x = -0.45 + Math.sin(charObj.animPhase * 1.8) * 0.35;
+            charObj.leftArm.rotation.x = -0.25 + Math.cos(charObj.animPhase * 1.5) * 0.25;
+            charObj.headGroup.rotation.y = Math.sin(charObj.animPhase) * 0.22;
+            return;
+        } else {
+            charObj.headGroup.rotation.y *= 0.8;
+        }
 
         if (speed > 0.005) {
             const freq = (isRunning ? 0.28 : 0.16) * freqMult;
@@ -285,10 +341,37 @@ window.VCModels = {
     },
 
     // =========================================================================
-    // 2. ARMAS 3D E VEÍCULOS (CARROS, ÔNIBUS, BICICLETAS, AVIÕES/JATOS, JET-SKIS)
+    // 2. ARMAS BRANCAS (FACA, BASTÃO) E ARMAS DE FOGO 3D
     // =========================================================================
     createWeapon3D(type = 'pistol') {
         const g = new THREE.Group();
+
+        if (type === 'knife') {
+            const handle = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.06, 0.16),
+                new THREE.MeshStandardMaterial({ color: 0x18181b })
+            );
+            const blade = new THREE.Mesh(
+                new THREE.BoxGeometry(0.02, 0.05, 0.28),
+                new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 })
+            );
+            blade.position.set(0, 0, -0.20);
+            g.add(handle, blade);
+            return g;
+        }
+
+        if (type === 'bat') {
+            const batGeo = new THREE.CylinderGeometry(0.045, 0.025, 0.82, 10);
+            batGeo.rotateX(Math.PI / 2);
+            const bat = new THREE.Mesh(
+                batGeo,
+                new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.5 })
+            );
+            bat.position.set(0, 0, -0.36);
+            g.add(bat);
+            return g;
+        }
+
         const metalMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.25 });
         const barrelLen = type === 'shotgun' ? 0.65 : (type === 'uzi' ? 0.34 : 0.26);
         const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, barrelLen), metalMat);
@@ -308,6 +391,9 @@ window.VCModels = {
         return g;
     },
 
+    // =========================================================================
+    // 3. VEÍCULOS + DEFORMAÇÃO REALISTA DE LATARIA (AMASSADOS AO BATER)
+    // =========================================================================
     createCar3D(colorHex = 0xec4899, isCopCar = false) {
         const car = new THREE.Group();
         const bodyMat = new THREE.MeshStandardMaterial({
@@ -321,9 +407,25 @@ window.VCModels = {
             roughness: 0.1
         });
 
-        const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.68, 4.4), bodyMat);
+        // Chassi subdividido (4x2x6) para permitir amassados reais nos vértices ao colidir
+        const chassisGeo = new THREE.BoxGeometry(2.1, 0.68, 4.4, 4, 2, 6);
+        const chassis = new THREE.Mesh(chassisGeo, bodyMat);
         chassis.position.y = 0.56;
         car.add(chassis);
+
+        // Para-choques dianteiro e traseiro que amassam e entortam nas batidas
+        const frontBumper = new THREE.Mesh(
+            new THREE.BoxGeometry(2.14, 0.26, 0.24),
+            new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7 })
+        );
+        frontBumper.position.set(0, 0.42, -2.22);
+
+        const rearBumper = new THREE.Mesh(
+            new THREE.BoxGeometry(2.14, 0.26, 0.24),
+            new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7 })
+        );
+        rearBumper.position.set(0, 0.42, 2.22);
+        car.add(frontBumper, rearBumper);
 
         const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.54, 2.2), glassMat);
         cabin.position.set(0, 1.12, 0.1);
@@ -362,10 +464,16 @@ window.VCModels = {
             wheels.push(w);
         });
 
+        // Salva posições originais dos vértices para poder restaurar na oficina Pay 'n' Spray
+        const origPos = chassisGeo.attributes.position.array.slice();
+
         return {
             mesh: car,
             vehicleType: 'car',
             chassis,
+            origChassisVerts: origPos,
+            frontBumper,
+            rearBumper,
             leftDoor,
             rightDoor,
             wheels,
@@ -377,7 +485,53 @@ window.VCModels = {
         };
     },
 
-    // ÔNIBUS URBANO ARTICULADO
+    // Aplica amassado físico na malha do carro no ponto da batida
+    applyCarDent(carObj, impactStrength = 0.5, isFront = true) {
+        if (!carObj || !carObj.chassis || !carObj.chassis.geometry) return;
+        const posAttr = carObj.chassis.geometry.attributes.position;
+        const amt = Math.min(0.45, impactStrength * 0.28);
+
+        for (let i = 0; i < posAttr.count; i++) {
+            const vx = posAttr.getX(i);
+            const vy = posAttr.getY(i);
+            const vz = posAttr.getZ(i);
+
+            if (isFront && vz < -1.2) {
+                posAttr.setZ(i, vz + amt * (0.6 + Math.random() * 0.5));
+                posAttr.setY(i, vy + (Math.random() - 0.4) * amt * 0.5);
+            } else if (!isFront && vz > 1.2) {
+                posAttr.setZ(i, vz - amt * (0.6 + Math.random() * 0.5));
+                posAttr.setY(i, vy + (Math.random() - 0.4) * amt * 0.5);
+            }
+        }
+        posAttr.needsUpdate = true;
+
+        if (carObj.frontBumper && isFront) {
+            carObj.frontBumper.position.z = Math.min(-1.95, carObj.frontBumper.position.z + amt * 0.7);
+            carObj.frontBumper.rotation.z = (Math.random() - 0.5) * 0.16;
+        }
+        if (carObj.rearBumper && !isFront) {
+            carObj.rearBumper.position.z = Math.max(1.95, carObj.rearBumper.position.z - amt * 0.7);
+            carObj.rearBumper.rotation.z = (Math.random() - 0.5) * 0.16;
+        }
+    },
+
+    // Restaura a lataria amassada na oficina Pay 'n' Spray
+    repairCarDent(carObj) {
+        if (!carObj || !carObj.chassis || !carObj.origChassisVerts) return;
+        const posAttr = carObj.chassis.geometry.attributes.position;
+        posAttr.array.set(carObj.origChassisVerts);
+        posAttr.needsUpdate = true;
+        if (carObj.frontBumper) {
+            carObj.frontBumper.position.set(0, 0.42, -2.22);
+            carObj.frontBumper.rotation.set(0, 0, 0);
+        }
+        if (carObj.rearBumper) {
+            carObj.rearBumper.position.set(0, 0.42, 2.22);
+            carObj.rearBumper.rotation.set(0, 0, 0);
+        }
+    },
+
     createBus3D(colorHex = 0xf59e0b) {
         const bus = new THREE.Group();
         const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.35, roughness: 0.45 });
@@ -405,11 +559,9 @@ window.VCModels = {
         return { mesh: bus, vehicleType: 'bus', chassis, wheels, hopY: 0, hopVy: 0, doorOpenTimer: 0 };
     },
 
-    // BICICLETA BMX / SPEED COM SUPORTE PARA DAR GRAU (EMPINAR)
     createBike3D(colorHex = 0x22d3ee) {
         const root = new THREE.Group();
         const pivotGroup = new THREE.Group();
-        // Pivô posicionado na roda traseira (z = +0.62, y = 0.36) para empinar realista
         pivotGroup.position.set(0, 0.36, 0.62);
         root.add(pivotGroup);
 
@@ -420,8 +572,6 @@ window.VCModels = {
         wheelGeo.rotateY(Math.PI / 2);
 
         const rearWheel = new THREE.Mesh(wheelGeo, tireMat);
-        rearWheel.position.set(0, 0, 0);
-
         const frontWheel = new THREE.Mesh(wheelGeo, tireMat);
         frontWheel.position.set(0, 0, -1.24);
 
@@ -452,7 +602,6 @@ window.VCModels = {
         };
     },
 
-    // JET-SKI AQUÁTICO DE ALTA VELOCIDADE
     createJetSki3D(colorHex = 0xec4899) {
         const js = new THREE.Group();
         const hullMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.6, roughness: 0.2 });
@@ -473,7 +622,6 @@ window.VCModels = {
         return { mesh: js, vehicleType: 'jetski', chassis: hull, wheels: [], hopY: 0, hopVy: 0, doorOpenTimer: 0 };
     },
 
-    // AVIÃO E JATO SUPERSÔNICO VOÁVEIS
     createAircraft3D(isJet = false) {
         const plane = new THREE.Group();
         const bodyMat = new THREE.MeshStandardMaterial({
@@ -523,14 +671,12 @@ window.VCModels = {
             carObj.wheels.forEach(w => { w.rotation.x -= speed * 0.45; });
         }
 
-        // Empinada ("Dar Grau") na Bicicleta
         if (carObj.vehicleType === 'bike' && carObj.pivotGroup) {
             const targetPitch = (isWheelie && Math.abs(speed) > 0.05) ? 0.62 : 0;
             carObj.wheelieAngle = THREE.MathUtils.lerp(carObj.wheelieAngle || 0, targetPitch, 0.15);
             carObj.pivotGroup.rotation.x = carObj.wheelieAngle;
         }
 
-        // Hélice de avião girando
         if (carObj.propeller && carObj.propeller.visible) {
             carObj.propeller.rotation.z += 0.45;
         }
@@ -553,8 +699,38 @@ window.VCModels = {
     },
 
     // =========================================================================
-    // 3. ANIMAIS (CACHORROS, GATOS E PÁSSAROS VOANDO), CHAFARIZ E NUVENS
+    // 4. ÁRVORES URBANAS VARIADAS, ANIMAIS, CHAFARIZ E NUVENS
     // =========================================================================
+    createTree3D(x, z, style = 0) {
+        const tree = new THREE.Group();
+        tree.position.set(x, 0, z);
+        const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.22, 0.36, 3.6, 8),
+            new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 })
+        );
+        trunk.position.y = 1.8;
+        tree.add(trunk);
+
+        const foliageColors = [0x16a34a, 0x15803d, 0x22c55e, 0xf472b6, 0xfacc15];
+        const fColor = foliageColors[style % foliageColors.length];
+        const leafMat = new THREE.MeshStandardMaterial({ color: fColor, roughness: 0.75 });
+
+        if (style % 3 === 1) {
+            // Pinheiro / Cipreste
+            const c1 = new THREE.Mesh(new THREE.ConeGeometry(1.7, 3.2, 10), leafMat);
+            c1.position.y = 4.2;
+            const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.5, 10), leafMat);
+            c2.position.y = 5.8;
+            tree.add(c1, c2);
+        } else {
+            // Copa frondosa / Ipê colorido
+            const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(2.1, 1), leafMat);
+            crown.position.y = 4.5;
+            tree.add(crown);
+        }
+        return tree;
+    },
+
     createAnimal3D(species = 'dog', colorHex = 0x92400e) {
         const root = new THREE.Group();
         const mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.75 });
