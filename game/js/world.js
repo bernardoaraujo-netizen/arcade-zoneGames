@@ -1,92 +1,114 @@
-// game/js/world.js - Mundo Aberto Denso Estilo GTA V/VI com Interiores Entráveis para Tudo:
-// Mercados 24/7, Casas/Coberturas de Luxo, Ammu-Nation, Delegacia VCPD e Garagens Pay 'n' Spray
+// game/js/world.js - Mapa Gigante Estruturado (2400x2400m) com Ondas Reais no Mar e Espuma na Praia
 
 window.VCWorld = {
     buildCity(scene) {
-        const colliders = [];         // Hitboxes da cidade externa
-        const interiorColliders = {}; // Hitboxes separadas por tipo de interior ('store', 'house', 'gunshop', 'police')
-        const enterableDoors = [];    // Todas as portas entráveis do mapa
-        const garages = [];           // Oficinas Pay 'n' Spray
-        const streetLamps = [];       // Postes ligados ao ciclo Dia/Noite
+        const colliders = [];
+        const interiorColliders = {};
+        const enterableDoors = [];
+        const garages = [];
+        const streetLamps = [];
         const vehicles = [];
         const peds = [];
+        const animals = [];
+        const clouds = [];
 
         // =====================================================================
-        // 1. TERRENO URBANO, RIO, PONTES, PRAIA E OCEANO
+        // 1. TERRENO GIGANTE (2400x2400m), RIO CENTRAL, PRAIA, OCEANO COM ONDAS E PONTES
         // =====================================================================
         const ground = new THREE.Mesh(
-            new THREE.PlaneGeometry(520, 520),
+            new THREE.PlaneGeometry(2400, 2400),
             new THREE.MeshStandardMaterial({ map: VCTextures.createRoadTexture(1), roughness: 0.85 })
         );
         ground.rotation.x = -Math.PI / 2;
         scene.add(ground);
 
-        const river = new THREE.Mesh(
-            new THREE.PlaneGeometry(36, 520),
-            new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.6 })
-        );
+        const waterMat = new THREE.MeshStandardMaterial({
+            color: 0x0284c7,
+            roughness: 0.18,
+            metalness: 0.65
+        });
+
+        const river = new THREE.Mesh(new THREE.PlaneGeometry(54, 2400, 8, 48), waterMat);
         river.rotation.x = -Math.PI / 2;
-        river.position.y = 0.04;
+        river.position.set(0, 0.08, 0);
         scene.add(river);
 
         const beach = new THREE.Mesh(
-            new THREE.PlaneGeometry(45, 520),
+            new THREE.PlaneGeometry(90, 2400),
             new THREE.MeshStandardMaterial({ color: 0xfde047, roughness: 0.9 })
         );
         beach.rotation.x = -Math.PI / 2;
-        beach.position.set(172, 0.03, 0);
+        beach.position.set(520, 0.03, 0);
         scene.add(beach);
 
-        const ocean = new THREE.Mesh(
-            new THREE.PlaneGeometry(80, 520),
-            new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.15, metalness: 0.7 })
-        );
+        // Oceano com malha subdividida (36x96 vértices) para ondas 3D reais em tempo real
+        const oceanGeo = new THREE.PlaneGeometry(650, 2400, 36, 96);
+        const oceanMat = new THREE.MeshStandardMaterial({
+            color: 0x06b6d4,
+            roughness: 0.14,
+            metalness: 0.78,
+            flatShading: false
+        });
+        const ocean = new THREE.Mesh(oceanGeo, oceanMat);
         ocean.rotation.x = -Math.PI / 2;
-        ocean.position.set(225, 0.04, 0);
+        ocean.position.set(885, 0.18, 0);
         scene.add(ocean);
 
+        // Faixa de espuma branca das ondas quebrando na areia da praia
+        const surfFoam = new THREE.Mesh(
+            new THREE.PlaneGeometry(14, 2400),
+            new THREE.MeshBasicMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.65 })
+        );
+        surfFoam.rotation.x = -Math.PI / 2;
+        surfFoam.position.set(562, 0.12, 0);
+        scene.add(surfFoam);
+
+        // 5 Pontes Conectando Ilha Leste (Ocean Beach) e Ilha Oeste (Downtown / Aeroporto)
         const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.7 });
-        [-140, 0, 140].forEach(bz => {
-            const bridge = new THREE.Mesh(new THREE.BoxGeometry(42, 0.6, 18), bridgeMat);
-            bridge.position.set(0, 0.25, bz);
+        const bridgeZs = [-600, -300, 0, 300, 600];
+        bridgeZs.forEach(bz => {
+            const bridge = new THREE.Mesh(new THREE.BoxGeometry(62, 0.65, 22), bridgeMat);
+            bridge.position.set(0, 0.35, bz);
             scene.add(bridge);
         });
 
         // =====================================================================
-        // 2. QUARTEIRÕES DENSOS COM PORTAS ENTRÁVEIS EM TODOS OS TIPOS DE PRÉDIO
+        // 2. BAIRROS ESTRUTURADOS: PRÉDIOS, LANCHONETES, ESCOLAS, MERCADOS E CASAS
         // =====================================================================
         const palettes = [
             ['#f472b6', '#22d3ee'], ['#38bdf8', '#facc15'], ['#a855f7', '#ec4899'],
             ['#fb923c', '#38bdf8'], ['#34d399', '#f472b6'], ['#f8fafc', '#06b6d4']
         ];
 
-        const xCoords = [-168, -134, -100, -64, 42, 76, 110, 142];
-        const zCoords = [-192, -158, -112, -76, -36, 36, 76, 112, 158, 192];
-
-        const storeNames = [
-            "Vice 24/7 Market", "Neon Liquor & Goods", "Ocean Beach Pharmacy",
-            "Downtown Pawn Shop", "Starlight Electronics", "Malibu Convenience"
-        ];
+        const xCoords = [-460, -400, -340, -280, -220, -160, -100, 70, 130, 190, 250, 310, 370, 430];
+        const zCoords = [-680, -610, -540, -470, -400, -330, -240, -170, -100, -40, 40, 100, 170, 240, 330, 400, 470, 540, 610, 680];
 
         let seedCounter = 1;
         let storeIdx = 0;
+        let dinerIdx = 0;
+        let schoolIdx = 0;
         let houseIdx = 0;
 
         xCoords.forEach(bx => {
             zCoords.forEach(bz => {
-                if (Math.abs(bz) < 22 || Math.abs(bz - 140) < 22 || Math.abs(bz + 140) < 22) return;
-                if (Math.abs(bx - 45) < 16 && Math.abs(bz + 15) < 16) return;
-                if (Math.abs(Math.abs(bx) - 58) < 14 && Math.abs(Math.abs(bz) - 18) < 14) return;
+                if (bridgeZs.some(brZ => Math.abs(bz - brZ) < 26)) return;
+                if (Math.abs(bx - 75) < 35 && Math.abs(bz + 15) < 35) return;
+                if (Math.abs(bx + 110) < 32 && Math.abs(bz - 50) < 32) return;
+                if (bx < -360 && Math.abs(bz) < 260) return;
 
-                const width = 19 + (seedCounter % 6);
-                const depth = 19 + ((seedCounter * 3) % 6);
+                const width = 24 + (seedCounter % 8);
+                const depth = 24 + ((seedCounter * 3) % 8);
                 const isDowntown = bx < 0;
-                const height = isDowntown ? (28 + (seedCounter % 34)) : (15 + (seedCounter % 18));
+                const height = isDowntown ? (32 + (seedCounter % 42)) : (16 + (seedCounter % 22));
 
                 const [c1, c2] = palettes[seedCounter % palettes.length];
-                const isShop = (seedCounter % 4 === 0 && storeIdx < storeNames.length);
-                const tex = VCTextures.createBuildingTexture(c1, c2, isShop, seedCounter);
+                const mod = seedCounter % 11;
+                const isDiner = (mod === 1 && dinerIdx < 6);
+                const isSchool = (mod === 2 && schoolIdx < 4);
+                const isShop = (mod === 3 && storeIdx < 8);
+                const isHouse = (mod === 4 && houseIdx < 12);
 
+                const tex = VCTextures.createBuildingTexture(c1, c2, isShop || isDiner, seedCounter);
                 const bMesh = new THREE.Mesh(
                     new THREE.BoxGeometry(width, height, depth),
                     new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 })
@@ -95,7 +117,7 @@ window.VCWorld = {
                 scene.add(bMesh);
 
                 const sw = new THREE.Mesh(
-                    new THREE.BoxGeometry(width + 4.4, 0.16, depth + 4.4),
+                    new THREE.BoxGeometry(width + 5, 0.16, depth + 5),
                     new THREE.MeshStandardMaterial({ map: VCTextures.createSidewalkTexture(seedCounter) })
                 );
                 sw.position.set(bx, 0.08, bz);
@@ -109,63 +131,79 @@ window.VCWorld = {
                     tag: 'building'
                 });
 
-                if (seedCounter % 2 === 0 && window.VCModels) {
-                    const post = VCModels.createStreetLight3D(bx + width / 2 + 1.8, bz + depth / 2 + 1.8);
+                if (seedCounter % 3 === 0 && window.VCModels) {
+                    const post = VCModels.createStreetLight3D(bx + width / 2 + 2.0, bz + depth / 2 + 2.0);
                     scene.add(post);
                     if (post.children[1]) streetLamps.push(post.children[1]);
                 }
 
-                const doorZ = bz + depth / 2 + 2.3;
+                const doorZ = bz + depth / 2 + 2.6;
 
-                if (isShop) {
-                    // Porta de Mercado / Loja Assaltável (Amarelo)
-                    const m = new THREE.Mesh(
-                        new THREE.CylinderGeometry(1.2, 1.2, 0.25, 20),
-                        new THREE.MeshBasicMaterial({ color: 0xfacc15 })
-                    );
+                if (isDiner) {
+                    dinerIdx++;
+                    const m = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.25, 20), new THREE.MeshBasicMaterial({ color: 0xec4899 }));
+                    m.position.set(bx, 0.2, doorZ);
+                    const sign = new THREE.Mesh(new THREE.BoxGeometry(8.5, 1.3, 0.45), new THREE.MeshBasicMaterial({ color: 0xec4899 }));
+                    sign.position.set(bx, 4.5, bz + depth / 2 + 0.3);
+                    scene.add(m, sign);
+
+                    enterableDoors.push({
+                        id: `diner_${dinerIdx}`,
+                        type: 'diner',
+                        name: `Lanchonete ArcadeZone Burger #${dinerIdx}`,
+                        extX: bx,
+                        extZ: doorZ + 2.0,
+                        marker: m
+                    });
+                } else if (isSchool) {
+                    schoolIdx++;
+                    const m = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.25, 20), new THREE.MeshBasicMaterial({ color: 0xa855f7 }));
+                    m.position.set(bx, 0.2, doorZ);
+                    const sign = new THREE.Mesh(new THREE.BoxGeometry(9.5, 1.3, 0.45), new THREE.MeshBasicMaterial({ color: 0xa855f7 }));
+                    sign.position.set(bx, 4.8, bz + depth / 2 + 0.3);
+                    scene.add(m, sign);
+
+                    enterableDoors.push({
+                        id: `school_${schoolIdx}`,
+                        type: 'school',
+                        name: `Escola Municipal ArcadeCity #${schoolIdx}`,
+                        extX: bx,
+                        extZ: doorZ + 2.0,
+                        marker: m
+                    });
+                } else if (isShop) {
+                    storeIdx++;
+                    const m = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.25, 20), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
                     m.position.set(bx, 0.2, doorZ);
                     scene.add(m);
-
-                    const sign = new THREE.Mesh(
-                        new THREE.BoxGeometry(6.8, 1.1, 0.4),
-                        new THREE.MeshBasicMaterial({ color: 0xfacc15 })
-                    );
-                    sign.position.set(bx, 4.2, bz + depth / 2 + 0.25);
-                    scene.add(sign);
 
                     enterableDoors.push({
                         id: `store_${storeIdx}`,
                         type: 'store',
-                        name: storeNames[storeIdx],
+                        name: `Mercado 24/7 #${storeIdx}`,
                         extX: bx,
-                        extZ: doorZ + 1.8,
+                        extZ: doorZ + 2.0,
                         marker: m,
-                        cash: 1800 + storeIdx * 550,
+                        cash: 2200 + storeIdx * 500,
                         robbed: false,
                         reported: false
                     });
-                    storeIdx++;
-                } else if (seedCounter % 3 === 0 && houseIdx < 10) {
-                    // Porta de Casa / Cobertura Entrável e Comprável (Verde Esmeralda)
+                } else if (isHouse) {
                     houseIdx++;
-                    const hm = new THREE.Mesh(
-                        new THREE.CylinderGeometry(1.2, 1.2, 0.25, 20),
-                        new THREE.MeshBasicMaterial({ color: 0x10b981 })
-                    );
+                    const hm = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.25, 20), new THREE.MeshBasicMaterial({ color: houseIdx === 1 ? 0x38bdf8 : 0x10b981 }));
                     hm.position.set(bx, 0.2, doorZ);
                     scene.add(hm);
 
                     enterableDoors.push({
                         id: `house_${houseIdx}`,
                         type: 'house',
-                        name: isDowntown ? `Cobertura Eclipse #${houseIdx}` : `Mansão Ocean View #${houseIdx}`,
+                        name: isDowntown ? `Cobertura Eclipse #${houseIdx}` : `Mansão Ocean Beach #${houseIdx}`,
                         extX: bx,
-                        extZ: doorZ + 1.8,
+                        extZ: doorZ + 2.0,
                         marker: hm,
                         price: isDowntown ? 5500 : 3200,
-                        owned: houseIdx === 1 // Casa #1 já começa como seu apartamento inicial!
+                        owned: houseIdx === 1
                     });
-                    if (houseIdx === 1) hm.material.color.setHex(0x38bdf8);
                 }
 
                 seedCounter++;
@@ -173,130 +211,128 @@ window.VCWorld = {
         });
 
         // =====================================================================
-        // 3. EDIFÍCIOS ESPECIAIS ENTRÁVEIS: AMMU-NATION, DELEGACIA VCPD E PAY 'N' SPRAY
+        // 3. LOCAIS ICÔNICOS ESTRUTURADOS
         // =====================================================================
-        // Lojas de Armas Ammu-Nation (Laranja)
+        const plazaFloor = new THREE.Mesh(
+            new THREE.CylinderGeometry(18, 18, 0.14, 32),
+            new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 })
+        );
+        plazaFloor.position.set(72, 0.07, -15);
+        scene.add(plazaFloor);
+        const fountain = VCModels.createFountain3D(72, -15);
+        scene.add(fountain.mesh);
+
+        // Banco Central de ArcadeCity
+        const bankX = -110, bankZ = 50;
+        const bankBuilding = new THREE.Mesh(
+            new THREE.BoxGeometry(24, 14, 20),
+            new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.3, roughness: 0.4 })
+        );
+        bankBuilding.position.set(bankX, 7, bankZ);
+        const bankSign = new THREE.Mesh(
+            new THREE.BoxGeometry(18, 1.8, 0.6),
+            new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+        );
+        bankSign.position.set(bankX, 12.2, bankZ + 10.2);
+        scene.add(bankBuilding, bankSign);
+        colliders.push({ minX: bankX - 12, maxX: bankX + 12, minZ: bankZ - 10, maxZ: bankZ + 10, tag: 'bank' });
+
+        const bankMarker = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.3, 24), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        bankMarker.position.set(bankX, 0.2, bankZ + 12.2);
+        scene.add(bankMarker);
+        enterableDoors.push({
+            id: 'central_bank',
+            type: 'bank',
+            name: 'Banco Central de ArcadeCity',
+            extX: bankX,
+            extZ: bankZ + 14.5,
+            marker: bankMarker,
+            robbed: false
+        });
+
+        // Ammu-Nation
         [
-            { name: "Ammu-Nation Ocean Beach", x: 58, z: 18 },
-            { name: "Ammu-Nation Downtown", x: -58, z: -18 }
+            { name: "Ammu-Nation Ocean Beach", x: 95, z: 45 },
+            { name: "Ammu-Nation Downtown", x: -110, z: -45 }
         ].forEach((aSpot, idx) => {
-            const bld = new THREE.Mesh(
-                new THREE.BoxGeometry(10, 5.4, 10),
-                new THREE.MeshStandardMaterial({ color: 0x450a0a, roughness: 0.45 })
-            );
-            bld.position.set(aSpot.x, 2.7, aSpot.z);
-            const sign = new THREE.Mesh(
-                new THREE.BoxGeometry(9.2, 1.1, 0.45),
-                new THREE.MeshBasicMaterial({ color: 0xf97316 })
-            );
-            sign.position.set(aSpot.x, 4.8, aSpot.z + 5.1);
+            const bld = new THREE.Mesh(new THREE.BoxGeometry(12, 6, 12), new THREE.MeshStandardMaterial({ color: 0x450a0a }));
+            bld.position.set(aSpot.x, 3, aSpot.z);
+            const sign = new THREE.Mesh(new THREE.BoxGeometry(10, 1.2, 0.5), new THREE.MeshBasicMaterial({ color: 0xf97316 }));
+            sign.position.set(aSpot.x, 5.2, aSpot.z + 6.1);
             scene.add(bld, sign);
+            colliders.push({ minX: aSpot.x - 6, maxX: aSpot.x + 6, minZ: aSpot.z - 6, maxZ: aSpot.z + 6, tag: 'gunshop' });
 
-            colliders.push({ minX: aSpot.x - 5, maxX: aSpot.x + 5, minZ: aSpot.z - 5, maxZ: aSpot.z + 5, tag: 'gunshop' });
-
-            const am = new THREE.Mesh(
-                new THREE.CylinderGeometry(1.3, 1.3, 0.25, 20),
-                new THREE.MeshBasicMaterial({ color: 0xf97316 })
-            );
-            am.position.set(aSpot.x, 0.2, aSpot.z + 6.8);
+            const am = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.25, 20), new THREE.MeshBasicMaterial({ color: 0xf97316 }));
+            am.position.set(aSpot.x, 0.2, aSpot.z + 7.8);
             scene.add(am);
-
             enterableDoors.push({
                 id: `gunshop_${idx}`,
                 type: 'gunshop',
                 name: aSpot.name,
                 extX: aSpot.x,
-                extZ: aSpot.z + 8.6,
+                extZ: aSpot.z + 9.8,
                 marker: am
             });
         });
 
-        // Delegacia Central VCPD (Azul Polícia - Entrável!)
-        const pdX = -58, pdZ = 56;
-        const pdBld = new THREE.Mesh(
-            new THREE.BoxGeometry(14, 7.5, 12),
-            new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 })
-        );
-        pdBld.position.set(pdX, 3.75, pdZ);
-        const pdSign = new THREE.Mesh(
-            new THREE.BoxGeometry(12, 1.2, 0.5),
-            new THREE.MeshBasicMaterial({ color: 0x3b82f6 })
-        );
-        pdSign.position.set(pdX, 6.6, pdZ + 6.1);
+        // Delegacia Central VCPD
+        const pdX = -110, pdZ = 110;
+        const pdBld = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 14), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+        pdBld.position.set(pdX, 4, pdZ);
+        const pdSign = new THREE.Mesh(new THREE.BoxGeometry(14, 1.3, 0.5), new THREE.MeshBasicMaterial({ color: 0x3b82f6 }));
+        pdSign.position.set(pdX, 7.0, pdZ + 7.1);
         scene.add(pdBld, pdSign);
-        colliders.push({ minX: pdX - 7, maxX: pdX + 7, minZ: pdZ - 6, maxZ: pdZ + 6, tag: 'police_hq' });
+        colliders.push({ minX: pdX - 8, maxX: pdX + 8, minZ: pdZ - 7, maxZ: pdZ + 7, tag: 'police_hq' });
 
-        const pdMarker = new THREE.Mesh(
-            new THREE.CylinderGeometry(1.3, 1.3, 0.25, 20),
-            new THREE.MeshBasicMaterial({ color: 0x3b82f6 })
-        );
-        pdMarker.position.set(pdX, 0.2, pdZ + 7.8);
+        const pdMarker = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.25, 20), new THREE.MeshBasicMaterial({ color: 0x3b82f6 }));
+        pdMarker.position.set(pdX, 0.2, pdZ + 9.0);
         scene.add(pdMarker);
         enterableDoors.push({
             id: 'police_hq_0',
             type: 'police',
             name: 'Delegacia Central VCPD',
             extX: pdX,
-            extZ: pdZ + 9.6,
+            extZ: pdZ + 11.0,
             marker: pdMarker
         });
 
-        // Garagens Pay 'n' Spray (Oficina de Reparo, Pintura Neon e Nitro)
+        // Garagens Pay 'n' Spray
         [
-            { name: "Pay 'n' Spray Ocean Beach", x: 58, z: -18 },
-            { name: "Pay 'n' Spray Downtown", x: -58, z: 18 }
+            { name: "Pay 'n' Spray Ocean Beach", x: 95, z: -45 },
+            { name: "Pay 'n' Spray Downtown", x: -160, z: 45 }
         ].forEach(gSpot => {
-            const bay = new THREE.Mesh(
-                new THREE.BoxGeometry(9.5, 4.8, 10),
-                new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5, roughness: 0.4 })
-            );
-            bay.position.set(gSpot.x, 2.4, gSpot.z);
-            const arch = new THREE.Mesh(
-                new THREE.BoxGeometry(9.8, 0.7, 0.6),
-                new THREE.MeshBasicMaterial({ color: 0x06b6d4 })
-            );
-            arch.position.set(gSpot.x, 4.9, gSpot.z + 5.1);
+            const bay = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 11), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+            bay.position.set(gSpot.x, 2.5, gSpot.z);
+            const arch = new THREE.Mesh(new THREE.BoxGeometry(10.4, 0.7, 0.6), new THREE.MeshBasicMaterial({ color: 0x06b6d4 }));
+            arch.position.set(gSpot.x, 5.1, gSpot.z + 5.6);
             scene.add(bay, arch);
+            colliders.push({ minX: gSpot.x - 5, maxX: gSpot.x + 5, minZ: gSpot.z - 5.5, maxZ: gSpot.z + 5.5, tag: 'garage' });
 
-            colliders.push({ minX: gSpot.x - 4.75, maxX: gSpot.x + 4.75, minZ: gSpot.z - 5, maxZ: gSpot.z + 5, tag: 'garage' });
-
-            const gm = new THREE.Mesh(
-                new THREE.CylinderGeometry(2.7, 2.7, 0.2, 24),
-                new THREE.MeshBasicMaterial({ color: 0x06b6d4 })
-            );
-            gm.position.set(gSpot.x, 0.16, gSpot.z + 7.4);
+            const gm = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 2.8, 0.2, 24), new THREE.MeshBasicMaterial({ color: 0x06b6d4 }));
+            gm.position.set(gSpot.x, 0.16, gSpot.z + 8.0);
             scene.add(gm);
-            garages.push({ name: gSpot.name, x: gSpot.x, z: gSpot.z + 7.4, marker: gm });
+            garages.push({ name: gSpot.name, x: gSpot.x, z: gSpot.z + 8.0, marker: gm });
         });
 
-        // Palmeiras na Orla
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f });
-        const leafMat = new THREE.MeshStandardMaterial({ color: 0x16a34a });
-        for (let pz = -210; pz <= 210; pz += 20) {
-            const palm = new THREE.Group();
-            palm.position.set(158, 0, pz);
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.35, 8.5, 7), trunkMat);
-            trunk.position.y = 4.25;
-            palm.add(trunk);
-            for (let a = 0; a < 5; a++) {
-                const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 3.2), leafMat);
-                leaf.position.set(Math.cos(a * 1.25) * 1.3, 8.4, Math.sin(a * 1.25) * 1.3);
-                leaf.rotation.y = a * 1.25;
-                leaf.rotation.x = 0.35;
-                palm.add(leaf);
-            }
-            scene.add(palm);
-        }
-
-        const missionMarker = new THREE.Mesh(
-            new THREE.CylinderGeometry(1.3, 1.3, 0.3, 20),
-            new THREE.MeshBasicMaterial({ color: 0xf43f5e })
+        // Aeroporto Internacional
+        const runway = new THREE.Mesh(
+            new THREE.PlaneGeometry(36, 440),
+            new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 })
         );
-        missionMarker.position.set(45, 0.15, -42);
-        scene.add(missionMarker);
+        runway.rotation.x = -Math.PI / 2;
+        runway.position.set(-460, 0.08, 0);
+        scene.add(runway);
+
+        const terminal = new THREE.Mesh(
+            new THREE.BoxGeometry(22, 10, 55),
+            new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.5 })
+        );
+        terminal.position.set(-495, 5, 0);
+        scene.add(terminal);
+        colliders.push({ minX: -506, maxX: -484, minZ: -27.5, maxZ: 27.5, tag: 'airport' });
 
         // =====================================================================
-        // 4. CONSTRUÇÃO DOS 4 INTERIORES COMPLETOS NO SUBSOLO (Y = -40)
+        // 4. INTERIORES COMPLETOS NO SUBSOLO (Y = -40)
         // =====================================================================
         function buildRoomShell(cx, cz, w, d, wallHex, floorHex) {
             const g = new THREE.Group();
@@ -315,11 +351,10 @@ window.VCWorld = {
             return g;
         }
 
-        // [A] INTERIOR 1: MERCADO / LOJA 24/7 (Centro: X = 0, Z = 0, Y = -40)
+        // [1] Mercado 24/7
         const storeShell = buildRoomShell(0, 0, 20, 20, 0x311042, 0x1e293b);
-        const shelfMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
         [-6.5, 6.5].forEach(sx => {
-            const sh = new THREE.Mesh(new THREE.BoxGeometry(1.4, 3.2, 8), shelfMat);
+            const sh = new THREE.Mesh(new THREE.BoxGeometry(1.4, 3.2, 8), new THREE.MeshStandardMaterial({ color: 0x475569 }));
             sh.position.set(sx, 1.6, 0.5);
             storeShell.add(sh);
         });
@@ -328,87 +363,132 @@ window.VCWorld = {
         const alarmLight = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), new THREE.MeshBasicMaterial({ color: 0x334155 }));
         alarmLight.position.set(0, 5.2, -9.5);
         storeShell.add(storeCounter, alarmLight);
-
         const clerkChar = VCModels.createHuman3D({ seed: 999 });
         clerkChar.mesh.position.set(0, -40, -5.2);
         scene.add(clerkChar.mesh);
-
         interiorColliders.store = [
             { minX: -4.4, maxX: 4.4, minZ: -4.4, maxZ: -2.6 },
             { minX: -7.4, maxX: -5.6, minZ: -3.6, maxZ: 4.6 },
             { minX: 5.6, maxX: 7.4, minZ: -3.6, maxZ: 4.6 }
         ];
 
-        // [B] INTERIOR 2: CASA / COBERTURA DE LUXO (Centro: X = 60, Z = 0, Y = -40)
+        // [2] Casa / Cobertura
         const houseShell = buildRoomShell(60, 0, 22, 22, 0x1e1b4b, 0x27272a);
         const sofa = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.1, 2.0), new THREE.MeshStandardMaterial({ color: 0xec4899 }));
         sofa.position.set(-4.5, 0.55, -2.5);
-        const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.2, 0.2), new THREE.MeshBasicMaterial({ color: 0x22d3ee }));
-        tvScreen.position.set(-4.5, 2.4, -10.5);
         const bed = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.9, 5.0), new THREE.MeshStandardMaterial({ color: 0xa855f7 }));
         bed.position.set(5.5, 0.45, -5.5);
         const savePad = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.15, 20), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
         savePad.position.set(5.5, 0.1, -1.5);
-        houseShell.add(sofa, tvScreen, bed, savePad);
-
+        houseShell.add(sofa, bed, savePad);
         interiorColliders.house = [
             { minX: 52.5, maxX: 58.5, minZ: -3.6, maxZ: -1.4 },
             { minX: 63.3, maxX: 67.7, minZ: -8.2, maxZ: -2.8 }
         ];
 
-        // [C] INTERIOR 3: AMMU-NATION LOJA DE ARMAS (Centro: X = 120, Z = 0, Y = -40)
+        // [3] Ammu-Nation
         const gunShell = buildRoomShell(120, 0, 20, 20, 0x450a0a, 0x18181b);
         const gunCounter = new THREE.Mesh(new THREE.BoxGeometry(9.5, 1.2, 1.6), new THREE.MeshStandardMaterial({ color: 0x09090b }));
         gunCounter.position.set(0, 0.6, -2.5);
-        const weaponWall = new THREE.Mesh(new THREE.BoxGeometry(11, 3.2, 0.3), new THREE.MeshBasicMaterial({ color: 0xf97316 }));
-        weaponWall.position.set(0, 3.0, -9.5);
         const buyPad = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.15, 20), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
         buyPad.position.set(0, 0.1, -0.5);
-        gunShell.add(gunCounter, weaponWall, buyPad);
-
+        gunShell.add(gunCounter, buyPad);
         const gunDealerChar = VCModels.createHuman3D({ seed: 888 });
         gunDealerChar.mesh.position.set(120, -40, -4.4);
         scene.add(gunDealerChar.mesh);
+        interiorColliders.gunshop = [{ minX: 115.0, maxX: 125.0, minZ: -3.5, maxZ: -1.5 }];
 
-        interiorColliders.gunshop = [
-            { minX: 115.0, maxX: 125.0, minZ: -3.5, maxZ: -1.5 }
-        ];
-
-        // [D] INTERIOR 4: DELEGACIA CENTRAL VCPD (Centro: X = 180, Z = 0, Y = -40)
+        // [4] Delegacia VCPD
         const pdShell = buildRoomShell(180, 0, 22, 22, 0x0f172a, 0x1e293b);
         const pdDesk = new THREE.Mesh(new THREE.BoxGeometry(8, 1.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x1d4ed8 }));
         pdDesk.position.set(0, 0.6, -3.5);
-        const jailBars = new THREE.Mesh(new THREE.BoxGeometry(8, 4.5, 0.3), new THREE.MeshStandardMaterial({ color: 0x94a3b8, wireframe: true }));
-        jailBars.position.set(-5.5, 2.25, -7.5);
         const copArmoryPad = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.15, 20), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
         copArmoryPad.position.set(5.5, 0.1, -6.5);
-        pdShell.add(pdDesk, jailBars, copArmoryPad);
-
+        pdShell.add(pdDesk, copArmoryPad);
         const deskCopChar = VCModels.createHuman3D({ isCop: true, seed: 777 });
         deskCopChar.mesh.position.set(180, -40, -5.2);
         scene.add(deskCopChar.mesh);
+        interiorColliders.police = [{ minX: 175.8, maxX: 184.2, minZ: -4.4, maxZ: -2.6 }];
 
-        interiorColliders.police = [
-            { minX: 175.8, maxX: 184.2, minZ: -4.4, maxZ: -2.6 }
-        ];
+        // [5] Banco Central com Seguranças e Cofre
+        const bankShell = buildRoomShell(240, 0, 26, 26, 0x1e293b, 0x0f172a);
+        const vaultDoor = new THREE.Mesh(
+            new THREE.CylinderGeometry(2.6, 2.6, 0.6, 24),
+            new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 })
+        );
+        vaultDoor.rotation.x = Math.PI / 2;
+        vaultDoor.position.set(0, 2.6, -12.4);
+        const vaultPad = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.2, 24), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        vaultPad.position.set(0, 0.1, -9.8);
+        bankShell.add(vaultDoor, vaultPad);
+
+        const bankGuards = [];
+        [[-6, -4], [6, -4], [0, -7.5]].forEach(([gx, gz], idx) => {
+            const gChar = VCModels.createHuman3D({ isGuard: true, seed: 500 + idx });
+            const gGun = VCModels.createWeapon3D('uzi');
+            gChar.handWeaponSocket.add(gGun);
+            gChar.mesh.position.set(240 + gx, -40, gz);
+            scene.add(gChar.mesh);
+            bankGuards.push({ char: gChar, alive: true, hp: 95, shootCooldown: 30 + idx * 10 });
+        });
+        interiorColliders.bank = [];
+
+        // [6] Lanchonete ArcadeZone Burger
+        const dinerShell = buildRoomShell(300, 0, 22, 22, 0x4c0519, 0x18181b);
+        const dinerCounter = new THREE.Mesh(new THREE.BoxGeometry(10, 1.15, 1.5), new THREE.MeshStandardMaterial({ color: 0xec4899 }));
+        dinerCounter.position.set(0, 0.58, -4.5);
+        const foodPad = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.2, 20), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+        foodPad.position.set(0, 0.1, -2.5);
+        dinerShell.add(dinerCounter, foodPad);
+
+        const tableMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
+        const chairMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4 });
+        [[-5.5, 1.5], [5.5, 1.5], [-5.5, 5.5], [5.5, 5.5]].forEach(([tx, tz]) => {
+            const tbl = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.9, 16), tableMat);
+            tbl.position.set(tx, 0.45, tz);
+            const ch1 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 0.7), chairMat);
+            ch1.position.set(tx - 1.4, 0.3, tz);
+            const ch2 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 0.7), chairMat);
+            ch2.position.set(tx + 1.4, 0.3, tz);
+            dinerShell.add(tbl, ch1, ch2);
+        });
+        interiorColliders.diner = [{ minX: 294.8, maxX: 305.2, minZ: -5.4, maxZ: -3.6 }];
+
+        // [7] Escola Municipal
+        const schoolShell = buildRoomShell(360, 0, 24, 24, 0x1e3a8a, 0x334155);
+        const blackboard = new THREE.Mesh(new THREE.BoxGeometry(9, 2.8, 0.25), new THREE.MeshStandardMaterial({ color: 0x064e3b }));
+        blackboard.position.set(0, 2.8, -11.6);
+        schoolShell.add(blackboard);
+        [-5, 0, 5].forEach(dx => {
+            [-4, 1, 6].forEach(dz => {
+                const desk = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.85, 1.2), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+                desk.position.set(dx, 0.42, dz);
+                schoolShell.add(desk);
+            });
+        });
+        interiorColliders.school = [];
 
         const interiorRooms = {
-            store:   { cx: 0,   cz: 0, spawnZ: 7.2, exitZ: 8.6, actionZ: -1.8 },
-            house:   { cx: 60,  cz: 0, spawnZ: 7.8, exitZ: 9.4, actionX: 65.5, actionZ: -1.5 },
-            gunshop: { cx: 120, cz: 0, spawnZ: 7.2, exitZ: 8.6, actionX: 120,  actionZ: -0.5 },
-            police:  { cx: 180, cz: 0, spawnZ: 7.8, exitZ: 9.4, actionX: 185.5, actionZ: -6.5 }
+            store:   { cx: 0,   cz: 0, spawnZ: 7.2,  exitZ: 8.6,  actionX: 0,     actionZ: -1.8 },
+            house:   { cx: 60,  cz: 0, spawnZ: 7.8,  exitZ: 9.4,  actionX: 65.5,  actionZ: -1.5 },
+            gunshop: { cx: 120, cz: 0, spawnZ: 7.2,  exitZ: 8.6,  actionX: 120,   actionZ: -0.5 },
+            police:  { cx: 180, cz: 0, spawnZ: 7.8,  exitZ: 9.4,  actionX: 185.5, actionZ: -6.5 },
+            bank:    { cx: 240, cz: 0, spawnZ: 9.5,  exitZ: 11.4, actionX: 240,   actionZ: -9.8 },
+            diner:   { cx: 300, cz: 0, spawnZ: 7.8,  exitZ: 9.4,  actionX: 300,   actionZ: -2.5 },
+            school:  { cx: 360, cz: 0, spawnZ: 8.5,  exitZ: 10.4, actionX: 360,   actionZ: -8.0 }
         };
 
         // =====================================================================
-        // 5. FROTA DE VEÍCULOS E POPULAÇÃO DE PEDESTRES
+        // 5. FROTA COMPLETA: CARROS, ÔNIBUS, BICICLETAS, JET-SKIS, AVIÕES E JATOS
         // =====================================================================
         const carColors = [0xec4899, 0x06b6d4, 0xfacc15, 0xa855f7, 0xf8fafc, 0xef4444];
-        const carNames = ['Infernus Neon', 'Cheetah V8', 'Banshee Turbo', 'Comet GT', 'Stinger Cabrio', 'VCPD Cruiser'];
-        for (let i = 0; i < 18; i++) {
-            const isCop = (i % 5 === 4);
+        const carNames = ['Infernus Neon', 'Cheetah V8', 'Banshee Turbo', 'Comet GT', 'Stinger Cabrio'];
+
+        for (let i = 0; i < 24; i++) {
+            const isCop = (i % 6 === 5);
             const built = VCModels.createCar3D(carColors[i % carColors.length], isCop);
-            const laneX = i % 2 === 0 ? 27 : -44;
-            const laneZ = -190 + i * 22;
+            const laneX = i % 2 === 0 ? 45 : -65;
+            const laneZ = -480 + i * 42;
             built.mesh.position.set(laneX, 0, laneZ);
             scene.add(built.mesh);
             vehicles.push({
@@ -416,7 +496,7 @@ window.VCWorld = {
                 name: isCop ? 'Viatura VCPD' : carNames[i % carNames.length],
                 isCopCar: isCop,
                 speed: 0,
-                maxSpeed: isCop ? 0.68 : 0.76,
+                maxSpeed: isCop ? 0.72 : 0.82,
                 angle: i % 2 === 0 ? 0 : Math.PI,
                 aiDir: i % 2 === 0 ? -1 : 1,
                 hp: 100,
@@ -426,10 +506,96 @@ window.VCWorld = {
             });
         }
 
-        for (let i = 0; i < 38; i++) {
+        for (let i = 0; i < 6; i++) {
+            const bus = VCModels.createBus3D(i % 2 === 0 ? 0xf59e0b : 0x0284c7);
+            const bx = i % 2 === 0 ? 115 : -135;
+            const bz = -360 + i * 140;
+            bus.mesh.position.set(bx, 0, bz);
+            scene.add(bus.mesh);
+            vehicles.push({
+                ...bus,
+                name: 'Ônibus Urbano ArcadeCity',
+                speed: 0,
+                maxSpeed: 0.56,
+                angle: 0,
+                aiDir: -1,
+                hp: 220,
+                hasNitro: false,
+                burningTimer: 0,
+                destroyed: false
+            });
+        }
+
+        [
+            [52, -12], [68, -22], [82, -10], [110, 35], [-85, 25], [-125, -35], [140, -120], [-200, 120]
+        ].forEach(([bx, bz], idx) => {
+            const bike = VCModels.createBike3D(idx % 2 === 0 ? 0x22d3ee : 0xfacc15);
+            bike.mesh.position.set(bx, 0, bz);
+            scene.add(bike.mesh);
+            vehicles.push({
+                ...bike,
+                name: 'Bicicleta BMX Pro (Segure [Q] ou [Ctrl] para Dar Grau)',
+                speed: 0,
+                maxSpeed: 0.48,
+                angle: Math.random() * 6.28,
+                aiDir: 0,
+                hp: 80,
+                hasNitro: false,
+                burningTimer: 0,
+                destroyed: false
+            });
+        });
+
+        [
+            [565, -80], [565, 0], [565, 80], [565, 180], [16, -40], [-16, 60]
+        ].forEach(([jx, jz], idx) => {
+            const js = VCModels.createJetSki3D(idx % 2 === 0 ? 0xec4899 : 0x06b6d4);
+            js.mesh.position.set(jx, 0.25, jz);
+            scene.add(js.mesh);
+            vehicles.push({
+                ...js,
+                name: 'Jet-Ski Turbo Wave',
+                speed: 0,
+                maxSpeed: 0.92,
+                angle: 0,
+                aiDir: 0,
+                hp: 110,
+                hasNitro: true,
+                burningTimer: 0,
+                destroyed: false
+            });
+        });
+
+        [
+            { isJet: false, x: -460, z: -120, name: 'Avião Bimotor Dodo' },
+            { isJet: false, x: -460, z: -30,  name: 'Avião Executivo Lux' },
+            { isJet: true,  x: -460, z: 70,   name: 'Caça Jato Hydra V-22' },
+            { isJet: true,  x: -460, z: 160,  name: 'Jato Supersônico ArcadeJet' }
+        ].forEach(ap => {
+            const plane = VCModels.createAircraft3D(ap.isJet);
+            plane.mesh.position.set(ap.x, 0, ap.z);
+            scene.add(plane.mesh);
+            vehicles.push({
+                ...plane,
+                name: ap.name,
+                speed: 0,
+                maxSpeed: ap.isJet ? 1.45 : 1.05,
+                angle: 0,
+                aiDir: 0,
+                hp: 250,
+                hasNitro: ap.isJet,
+                burningTimer: 0,
+                destroyed: false
+            });
+        });
+
+        // =====================================================================
+        // 6. POPULAÇÃO DE PEDESTRES, ANIMAIS E NUVENS
+        // =====================================================================
+        for (let i = 0; i < 48; i++) {
             const char = VCModels.createHuman3D({ seed: i * 37 + 11 });
-            const px = (i % 2 === 0 ? 34 : -50) + ((i % 5) - 2) * 3.5;
-            const pz = -180 + i * 9.5;
+            const px = (i % 2 === 0 ? 55 : -80) + ((i % 7) - 3) * 18;
+            const pz = -420 + i * 18;
             char.mesh.position.set(px, 0, pz);
             scene.add(char.mesh);
             peds.push({
@@ -442,6 +608,39 @@ window.VCWorld = {
             });
         }
 
+        const animalColors = [0x92400e, 0xf8fafc, 0x18181b, 0xd97706, 0x64748b];
+        for (let i = 0; i < 28; i++) {
+            const species = i < 10 ? 'dog' : (i < 18 ? 'cat' : 'bird');
+            const anim = VCModels.createAnimal3D(species, animalColors[i % animalColors.length]);
+            const ax = -250 + (i * 47) % 600;
+            const az = -350 + (i * 61) % 700;
+            const ay = species === 'bird' ? (16 + (i % 12)) : 0;
+            anim.mesh.position.set(ax, ay, az);
+            scene.add(anim.mesh);
+            animals.push({
+                ...anim,
+                angle: Math.random() * 6.28,
+                speed: species === 'bird' ? 0.18 : (species === 'dog' ? 0.065 : 0.045),
+                baseY: ay
+            });
+        }
+
+        for (let i = 0; i < 32; i++) {
+            const cx = -700 + (i * 193) % 1500;
+            const cz = -700 + (i * 251) % 1500;
+            const cy = 62 + (i % 4) * 10;
+            const cl = VCModels.createCloud3D(cx, cy, cz);
+            scene.add(cl);
+            clouds.push(cl);
+        }
+
+        const missionMarker = new THREE.Mesh(
+            new THREE.CylinderGeometry(1.4, 1.4, 0.3, 20),
+            new THREE.MeshBasicMaterial({ color: 0xf43f5e })
+        );
+        missionMarker.position.set(45, 0.15, -42);
+        scene.add(missionMarker);
+
         return {
             colliders,
             interiorColliders,
@@ -452,7 +651,13 @@ window.VCWorld = {
             missionMarker,
             vehicles,
             peds,
-            interior: { clerkChar, alarmLight, gunDealerChar, deskCopChar }
+            animals,
+            clouds,
+            fountain,
+            river,
+            ocean,
+            surfFoam,
+            interior: { clerkChar, alarmLight, gunDealerChar, deskCopChar, bankGuards }
         };
     }
 };
